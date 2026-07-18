@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/routes/router_name.dart';
+import 'package:medicompare/core/widget/spraytype.dart';
 import 'package:medicompare/login_files/login_bloc.dart';
 import 'package:medicompare/login_files/login_event.dart';
 import 'package:medicompare/login_files/login_state.dart';
@@ -59,53 +60,75 @@ class _LoginViewState extends State<_LoginView> {
           ),
           child: SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              // padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Stack(
                 children: [
-                  const SizedBox(height: 12),
-                  // IconButton(
-                  //   onPressed: () => Navigator.of(context).maybePop(),
-                  //   icon: const Icon(Icons.arrow_back, color: Colors.black87),
-                  // ),
-                  // const SizedBox(height: 4),
-                  Center(child: _buildLogo()),
-                  const SizedBox(height: 24),
-                  Center(child: _buildIllustration()),
-                  const SizedBox(height: 32),
-                  const Center(
-                    child: Text(
-                      'Log in',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w800,
-                        color: _darkTeal,
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: IgnorePointer(
+                      child: SizedBox(
+                        width: 160,
+                        height: 160,
+                        child: CustomPaint(
+                          painter: CornerGradientPainter(
+                            color: Color(0xFF601CA3),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  const Center(
-                    child: Text(
-                      'Please enter your phone number to Log in\nyour account',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        //color: Colors.black87,
-                        // height: 1.4,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: "Poppins",
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 12),
+                        // IconButton(
+                        //   onPressed: () => Navigator.of(context).maybePop(),
+                        //   icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                        // ),
+                        // const SizedBox(height: 4),
+                        Center(child: _buildLogo()),
+                        const SizedBox(height: 24),
+                        Center(child: _buildIllustration()),
+                        const SizedBox(height: 32),
+                        const Center(
+                          child: Text(
+                            'Log in',
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w800,
+                              color: _darkTeal,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Center(
+                          child: Text(
+                            'Please enter your phone number to Log in\nyour account',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              //color: Colors.black87,
+                              // height: 1.4,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: "Poppins",
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        _buildPhoneField(context),
+                        const SizedBox(height: 32),
+                        _buildContinueButton(context),
+                        const SizedBox(height: 20),
+                        _buildTermsText(),
+                        const SizedBox(height: 16),
+                        _buildRegisterRow(),
+                        const SizedBox(height: 24),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 32),
-                  _buildPhoneField(context),
-                  const SizedBox(height: 32),
-                  _buildContinueButton(context),
-                  const SizedBox(height: 20),
-                  _buildTermsText(),
-                  const SizedBox(height: 16),
-                  _buildRegisterRow(),
-                  const SizedBox(height: 24),
                 ],
               ),
             ),

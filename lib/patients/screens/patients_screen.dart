@@ -25,63 +25,71 @@ class PatientsScreen extends StatelessWidget {
                     onRefresh: () async => context.read<PatientsBloc>().add(
                       const PatientsLoadRequested(),
                     ),
-                    child: Expanded(
-                      child: Container(
-                        padding: EdgeInsets.only(top: 8),
-                        decoration: BoxDecoration(
-                          color: Color(0xFF9BC4ED),
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(32),
-                            topRight: Radius.circular(32),
-                            bottomLeft: Radius.circular(4),
-                            bottomRight: Radius.circular(4),
-                          ),
+                    child: Container(
+                      padding: EdgeInsets.only(top: 8),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFE0F0FF),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(32),
+                          topRight: Radius.circular(32),
+                          bottomLeft: Radius.circular(4),
+                          bottomRight: Radius.circular(4),
                         ),
-                        child: ListView(
-                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                          children: [
-                            _StatsRow(state: state),
-                            const SizedBox(height: 16),
-                            FilterTabBar(
-                              activeFilter: state.activeFilter,
-                              onChanged: (filter) => context
-                                  .read<PatientsBloc>()
-                                  .add(PatientsFilterChanged(filter)),
-                            ),
-                            const SizedBox(height: 16),
-                            if (state.status == PatientsStatus.loading)
-                              const Padding(
-                                padding: EdgeInsets.only(top: 40),
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              )
-                            else if (state.visiblePatients.isEmpty)
-                              const Padding(
-                                padding: EdgeInsets.only(top: 40),
-                                child: Center(child: Text('No patients found')),
-                              )
-                            else
-                              // ...state.visiblePatients.map(
-                              //   (p) => PatientCard(patient: p),
-                              // ),
-                              Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFBED0F3),
-                                  borderRadius: BorderRadius.circular(
-                                    12,
-                                  ), // optional
-                                ),
-                                padding: const EdgeInsets.all(8),
-                                child: Column(
-                                  children: state.visiblePatients
-                                      .map((p) => PatientCard(patient: p))
-                                      .toList(),
+                        border: Border.all(
+                          color: const Color(0xFF9BC4ED), // Your border color
+                          width: 2,
+                        ),
+                      ),
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                        children: [
+                          _StatsRow(state: state),
+                          const SizedBox(height: 16),
+                          FilterTabBar(
+                            activeFilter: state.activeFilter,
+                            onChanged: (filter) => context
+                                .read<PatientsBloc>()
+                                .add(PatientsFilterChanged(filter)),
+                          ),
+                          const SizedBox(height: 16),
+                          if (state.status == PatientsStatus.loading)
+                            const Padding(
+                              padding: EdgeInsets.only(top: 40),
+                              child: Center(child: CircularProgressIndicator()),
+                            )
+                          else if (state.visiblePatients.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.only(top: 40),
+                              child: Center(child: Text('No patients found')),
+                            )
+                          else
+                            // ...state.visiblePatients.map(
+                            //   (p) => PatientCard(patient: p),
+                            // ),
+                            Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: const Color(
+                                  0xFFEFF6FF,
+                                ), //Color(0xFFBED0F3),
+                                borderRadius: BorderRadius.circular(
+                                  12,
+                                ), // optional
+                                border: Border.all(
+                                  color: const Color(
+                                    0xFFBED0F3,
+                                  ), // Your border color
+                                  width: 1,
                                 ),
                               ),
-                          ],
-                        ),
+                              padding: const EdgeInsets.all(8),
+                              child: Column(
+                                children: state.visiblePatients
+                                    .map((p) => PatientCard(patient: p))
+                                    .toList(),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),

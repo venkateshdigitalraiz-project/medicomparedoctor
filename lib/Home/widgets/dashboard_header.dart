@@ -10,7 +10,7 @@ class DashboardHeader extends StatelessWidget {
     super.key,
     required this.avatarUrl,
     this.onCalendarTap,
-    this.onAvatarTap,
+    required this.onAvatarTap,
   });
   Widget _buildLogo() {
     return Image.asset(
@@ -52,7 +52,18 @@ class DashboardHeader extends StatelessWidget {
                   border: Border.all(color: const Color(0xFF601CA3), width: 2),
                 ),
                 child: ClipOval(
-                  child: Image.network(avatarUrl, fit: BoxFit.cover),
+                  child: Image.network(
+                    avatarUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      print(error);
+                      return const Icon(Icons.person, size: 40);
+                    },
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return const Center(child: CircularProgressIndicator());
+                    },
+                  ),
                 ),
               ),
               Positioned(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/routes/router_name.dart';
 import '../theme/app_theme.dart';
 
 class DashboardSearchBar extends StatelessWidget {
@@ -17,6 +18,9 @@ class DashboardSearchBar extends StatelessWidget {
       ),
       child: TextField(
         onChanged: onChanged,
+        onTap: () {
+          Navigator.pushNamed(context, RouteNames.searchid);
+        },
         style: AppTextStyles.body,
         decoration: const InputDecoration(
           border: InputBorder.none,

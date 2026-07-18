@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/common/common_add/appcolor.dart';
+import 'package:medicompare/core/routes/router_name.dart';
 import 'package:medicompare/schedule/bloc/schedule_bloc.dart';
 import 'package:medicompare/schedule/bloc/schedule_event.dart';
 import 'package:medicompare/schedule/bloc/schedule_state.dart';
@@ -64,10 +65,11 @@ class _ScheduleView extends StatelessWidget {
               children: [
                 // App bar
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 16, 28, 0),
                   child: Row(
                     children: [
                       //   const Icon(Icons.arrow_back, color: AppColors.textDark),
+                      SizedBox(width: 40),
                       const Expanded(
                         child: Center(
                           child: Text(
@@ -81,94 +83,118 @@ class _ScheduleView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      //    const Icon(Icons.search, color: AppColors.textDark),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            RouteNames.sechduleSetting,
+                          );
+                        },
+                        child: const Icon(
+                          Icons.settings,
+                          color: AppColors.textDark,
+                        ),
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                DateSelector(
-                  selectedDate: state.selectedDate,
-                  week: state.visibleWeek,
-                  onDateSelected: (d) => bloc.add(SelectDate(d)),
-                  onTodayTap: () => bloc.add(const JumpToToday()),
-                ),
-                const SizedBox(height: 18),
-
-                // Stat cards
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: StatCard(
-                          icon: Icons.groups_2_rounded,
-                          color: AppColors.blue,
-                          value: state.stats.total,
-                          label: 'Total Appts',
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: StatCard(
-                          icon: Icons.check_circle_rounded,
-                          color: AppColors.green,
-                          value: state.stats.confirmed,
-                          label: 'Confirmed',
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: StatCard(
-                          icon: Icons.hourglass_bottom_rounded,
-                          color: AppColors.orange,
-                          value: state.stats.waiting,
-                          label: 'Waiting',
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: StatCard(
-                          icon: Icons.close_rounded,
-                          color: AppColors.red,
-                          value: state.stats.cancelled,
-                          label: 'Cancelled',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 22),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Today's Schedule",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontFamily: "Poppins",
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textDark,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
                 Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                    itemCount: state.appointments.length,
-                    itemBuilder: (context, index) {
-                      final appt = state.appointments[index];
-                      return AppointmentCard(
-                        appointment: appt,
-                        accentColor: _accentFor(appt.status, index),
-                      );
-                    },
+                  child: Container(
+                    padding: EdgeInsets.only(top: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: const Color(0xFFEAEAF2)),
+                    ),
+                    child: Column(
+                      children: [
+                        DateSelector(
+                          selectedDate: state.selectedDate,
+                          week: state.visibleWeek,
+                          onDateSelected: (d) => bloc.add(SelectDate(d)),
+                          onTodayTap: () => bloc.add(const JumpToToday()),
+                        ),
+                        const SizedBox(height: 18),
+
+                        // Stat cards
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: StatCard(
+                                  icon: Icons.groups_2_rounded,
+                                  color: AppColors.blue,
+                                  value: state.stats.total,
+                                  label: 'Total Appts',
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: StatCard(
+                                  icon: Icons.check_circle_rounded,
+                                  color: AppColors.green,
+                                  value: state.stats.confirmed,
+                                  label: 'Confirmed',
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: StatCard(
+                                  icon: Icons.hourglass_bottom_rounded,
+                                  color: AppColors.orange,
+                                  value: state.stats.waiting,
+                                  label: 'Waiting',
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: StatCard(
+                                  icon: Icons.close_rounded,
+                                  color: AppColors.red,
+                                  value: state.stats.cancelled,
+                                  label: 'Cancelled',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 22),
+
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "Today's Schedule",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textDark,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        Expanded(
+                          child: ListView.builder(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                            itemCount: state.appointments.length,
+                            itemBuilder: (context, index) {
+                              final appt = state.appointments[index];
+                              return AppointmentCard(
+                                appointment: appt,
+                                accentColor: _accentFor(appt.status, index),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],

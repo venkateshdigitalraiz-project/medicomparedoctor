@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medicompare/core/routes/router_name.dart';
 
 import '../bloc/profile_bloc.dart';
 import '../theme/app_theme.dart';
@@ -31,22 +32,59 @@ class _ProfileView extends StatelessWidget {
           // Transient navigation side-effects (menu taps, header icons)
           // are surfaced through `navigationTarget` and handled here,
           // then cleared so they don't re-fire on rebuild.
+          // listener: (context, state) {
+          //   if (state.navigationTarget != null) {
+          //     final target = state.navigationTarget!;
+          //     ScaffoldMessenger.of(context)
+          //       ..hideCurrentSnackBar()
+          //       ..showSnackBar(
+          //         SnackBar(
+          //           content: Text('Tapped: $target'),
+          //           duration: const Duration(seconds: 1),
+          //           behavior: SnackBarBehavior.floating,
+          //         ),
+          //       );
+          //     context.read<ProfileBloc>().add(const ProfileNavigationHandled());
+          //   }
+          // },
           listener: (context, state) {
-            if (state.navigationTarget != null) {
-              final target = state.navigationTarget!;
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  SnackBar(
-                    content: Text('Tapped: $target'),
-                    duration: const Duration(seconds: 1),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              context
-                  .read<ProfileBloc>()
-                  .add(const ProfileNavigationHandled());
+            if (state.navigationTarget == null) return;
+
+            switch (state.navigationTarget!) {
+              case 'availability':
+                Navigator.pushNamed(context, RouteNames.addavailable);
+                break;
+
+              case 'clinic_info':
+                Navigator.pushNamed(context, RouteNames.clinicInfo);
+                break;
+
+              case 'consultation_history':
+                Navigator.pushNamed(context, RouteNames.consultationHistory);
+                break;
+
+              case 'holidays_leave':
+                Navigator.pushNamed(context, RouteNames.holidays);
+                break;
+
+              case 'documents':
+                Navigator.pushNamed(context, RouteNames.document);
+                break;
+
+              case 'reports_analytics':
+                Navigator.pushNamed(context, RouteNames.report);
+                break;
+
+              case 'settings':
+                Navigator.pushNamed(context, RouteNames.setting);
+                break;
+
+              case 'notifications':
+                Navigator.pushNamed(context, RouteNames.notification);
+                break;
             }
+
+            context.read<ProfileBloc>().add(const ProfileNavigationHandled());
           },
           builder: (context, state) {
             if (state.status == ProfileStatus.loading ||
@@ -70,10 +108,15 @@ class _ProfileView extends StatelessWidget {
                 ProfileHeaderCard(
                   profile: state.profile,
                   onBackTap: () => Navigator.of(context).maybePop(),
-                  onNotificationsTap: () =>
-                      bloc.add(const ProfileNotificationsTapped()),
-                  onSettingsTap: () =>
-                      bloc.add(const ProfileSettingsTapped()),
+                  onNotificationsTap: () {
+                    // bloc.add(const ProfileNotificationsTapped());
+                    Navigator.pushNamed(context, RouteNames.notification);
+                  },
+                  onSettingsTap: () {
+                    // bloc.add(const ProfileSettingsTapped());
+
+                    Navigator.pushNamed(context, RouteNames.setting);
+                  },
                 ),
                 const SizedBox(height: 12),
                 Container(
@@ -89,8 +132,7 @@ class _ProfileView extends StatelessWidget {
                       return MenuListTile(
                         item: item,
                         showDivider: !isLast,
-                        onTap: () =>
-                            bloc.add(ProfileMenuItemTapped(item.id)),
+                        onTap: () => bloc.add(ProfileMenuItemTapped(item.id)),
                       );
                     }),
                   ),

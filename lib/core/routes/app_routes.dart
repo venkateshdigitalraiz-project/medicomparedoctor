@@ -57,6 +57,8 @@ import 'package:medicompare/search/bloc/search_bloc.dart';
 import 'package:medicompare/search/screen/search_screen.dart';
 import 'package:medicompare/searchAppointment/bloc/appointment_today_search_bloc.dart';
 import 'package:medicompare/searchAppointment/model/appointment_today_search_screen.dart';
+import 'package:medicompare/searchId/search_bloc.dart';
+import 'package:medicompare/searchId/search_screen.dart';
 import 'package:medicompare/setting/bloc/settings_bloc.dart';
 import 'package:medicompare/setting/screen/settings_screen.dart';
 import 'package:medicompare/today_aptmnt/bloc/appointment_bloc.dart';
@@ -195,6 +197,15 @@ class AppRoutes {
             child: const SearchScreen(),
           ),
         );
+
+      case RouteNames.searchid:
+        return MaterialPageRoute(
+          builder: (_) => BlocProvider.value(
+            value: SearchIDBloc(repository: InMemorySearchRepository()),
+            child: const SearchIDScreen(),
+          ),
+        );
+
       case RouteNames.videocall:
         return MaterialPageRoute(
           builder: (_) => BlocProvider(

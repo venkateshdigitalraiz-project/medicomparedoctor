@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Roboto',
       ),
 
-      initialRoute: RouteNames.homeBottomNav,
+      initialRoute: RouteNames.login,
       onGenerateRoute: AppRoutes.generate,
     );
   }

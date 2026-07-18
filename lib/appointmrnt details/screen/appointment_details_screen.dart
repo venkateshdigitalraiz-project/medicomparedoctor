@@ -4,6 +4,7 @@ import 'package:medicompare/appointmrnt%20details/bloc/appointment_bloc.dart';
 import 'package:medicompare/appointmrnt%20details/bloc/appointment_event.dart';
 import 'package:medicompare/appointmrnt%20details/bloc/appointment_state.dart';
 import 'package:medicompare/appointmrnt%20details/screen/appointment_widgets.dart';
+import 'package:medicompare/core/routes/router_name.dart';
 
 class AppointmentDetailsScreen extends StatelessWidget {
   final String appointmentId;
@@ -108,8 +109,10 @@ class _AppointmentDetailsView extends StatelessWidget {
               icon: Icons.chat_bubble,
               label: 'Chat',
               color: const Color(0xFF7C3AED),
-              onTap: () =>
-                  bloc.add(const ContactActionPressed(ContactAction.chat)),
+              onTap: () {
+                Navigator.pushNamed(context, RouteNames.chartbox);
+                // bloc.add(const ContactActionPressed(ContactAction.chat));
+              },
             ),
           ],
         ),

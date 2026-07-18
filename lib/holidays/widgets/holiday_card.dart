@@ -29,24 +29,29 @@ class HolidayCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Color(0xFFEDEDED)),
-          // border: Border(
-          //   left: BorderSide(color: holiday.typeColor, width: 4),
-          //   top: const BorderSide(color: Color(0xFFEDEDED)),
-          //   right: const BorderSide(color: Color(0xFFEDEDED)),
-          //   bottom: const BorderSide(color: Color(0xFFEDEDED)),
-          // ),
         ),
         //  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Container(
+            //   width: 4,
+            //   decoration: BoxDecoration(
+            //     color: holiday.typeColor,
+            //     borderRadius: const BorderRadius.only(
+            //       topLeft: Radius.circular(20),
+            //       bottomLeft: Radius.circular(20),
+            //     ),
+            //   ),
+            // ),
             Container(
-              width: 4,
+              width: 8,
+              //  height: 72,
               decoration: BoxDecoration(
                 color: holiday.typeColor,
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  bottomLeft: Radius.circular(20),
+                  topLeft: Radius.circular(14),
+                  bottomLeft: Radius.circular(14),
                 ),
               ),
             ),

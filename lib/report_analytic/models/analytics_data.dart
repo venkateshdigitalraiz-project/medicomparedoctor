@@ -1,16 +1,16 @@
+import 'package:flutter/widgets.dart';
+
 /// A single top-row summary stat (e.g. Total Patients, Total appt...).
 class SummaryStat {
   final String value;
   final String label;
-  final int iconCodePoint;
-  final String iconFontFamily;
+  final IconData icon;
   final int colorValue;
 
   const SummaryStat({
     required this.value,
     required this.label,
-    required this.iconCodePoint,
-    required this.iconFontFamily,
+    required this.icon,
     required this.colorValue,
   });
 }
@@ -20,7 +20,7 @@ class PerformanceMetric {
   final String title;
   final String subtitle;
   final String value;
-  final int iconCodePoint;
+  final IconData icon;
   final int iconBackgroundColorValue;
   final int iconColorValue;
 
@@ -28,7 +28,7 @@ class PerformanceMetric {
     required this.title,
     required this.subtitle,
     required this.value,
-    required this.iconCodePoint,
+    required this.icon,
     required this.iconBackgroundColorValue,
     required this.iconColorValue,
   });

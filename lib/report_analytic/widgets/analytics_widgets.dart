@@ -17,12 +17,7 @@ class SummaryStatCard extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          child: Icon(
-            // ignore: non_const_argument_for_const_parameter
-            IconData(stat.iconCodePoint, fontFamily: stat.iconFontFamily),
-            color: Colors.white,
-            size: 20,
-          ),
+          child: Icon(stat.icon, color: Colors.white, size: 20),
         ),
         const SizedBox(height: 10),
         Text(
@@ -204,8 +199,7 @@ class PerformanceMetricTile extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              // ignore: non_const_argument_for_const_parameter
-              IconData(metric.iconCodePoint, fontFamily: 'MaterialIcons'),
+              metric.icon,
               color: Color(metric.iconColorValue),
               size: 20,
             ),

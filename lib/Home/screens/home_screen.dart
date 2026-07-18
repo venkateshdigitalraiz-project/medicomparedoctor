@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/routes/router_name.dart';
 
@@ -21,8 +22,138 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _HomeView extends StatelessWidget {
+/// NOTE: This widget is now Stateful purely to own the ScrollController
+/// and the section GlobalKeys. All app state (selectedTab, stats,
+/// appointments, etc.) still lives in HomeBloc exactly as before —
+/// nothing here bypasses or duplicates the Bloc's state.
+class _HomeView extends StatefulWidget {
   const _HomeView();
+
+  @override
+  State<_HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<_HomeView> {
+  // How far from the top of the viewport a section's top edge must be
+  // before we consider that section "active" while the user scrolls.
+  static const double _activationOffset = 140.0;
+
+  final ScrollController _scrollController = ScrollController();
+
+  final GlobalKey _overviewKey = GlobalKey(debugLabel: 'overviewSection');
+  final GlobalKey _appointmentsKey = GlobalKey(
+    debugLabel: 'appointmentsSection',
+  );
+  final GlobalKey _actionsKey = GlobalKey(debugLabel: 'actionsSection');
+
+  // Guards against the scroll listener fighting with a tab-tap-triggered
+  // programmatic scroll (ensureVisible also fires scroll notifications).
+  bool _isProgrammaticScroll = false;
+
+  // Avoids dispatching the same HomeTabChanged event repeatedly on every
+  // scroll frame once a section is already marked active.
+  HomeTab? _lastAutoDetectedTab;
+  void _scrollToSection(GlobalKey key) {
+    final context = key.currentContext;
+    if (context != null) {
+      Scrollable.ensureVisible(
+        context,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+        alignment: 0.0,
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  GlobalKey _keyForTab(HomeTab tab) {
+    switch (tab) {
+      case HomeTab.overview:
+        return _overviewKey;
+      case HomeTab.appointments:
+        return _appointmentsKey;
+      case HomeTab.actions:
+        return _actionsKey;
+    }
+  }
+
+  /// Called on every scroll notification while the user drags the list.
+  /// Determines which section is currently "in focus" and — only if it
+  /// differs from the last known tab — updates HomeBloc to keep the
+  /// TabSelector in sync with manual scrolling.
+  void _onScroll() {
+    if (_isProgrammaticScroll) return;
+    if (!mounted) return;
+
+    final Map<HomeTab, GlobalKey> sectionKeys = {
+      HomeTab.overview: _overviewKey,
+      HomeTab.appointments: _appointmentsKey,
+      HomeTab.actions: _actionsKey,
+    };
+
+    HomeTab? activeTab;
+    double bestTop = double.negativeInfinity;
+
+    for (final entry in sectionKeys.entries) {
+      final renderObject = entry.value.currentContext?.findRenderObject();
+      if (renderObject is! RenderBox || !renderObject.attached) continue;
+
+      final topOffset = renderObject.localToGlobal(Offset.zero).dy;
+
+      // A section becomes the "active" candidate once its top has
+      // scrolled up past the activation line. Among all sections that
+      // qualify, we want the one with the largest (closest-to-top) dy,
+      // i.e. the most recently passed section.
+      if (topOffset <= _activationOffset && topOffset > bestTop) {
+        bestTop = topOffset;
+        activeTab = entry.key;
+      }
+    }
+
+    // If nothing has passed the activation line yet (e.g. right at the
+    // very top of the list), default to the first section.
+    activeTab ??= HomeTab.overview;
+
+    if (activeTab != _lastAutoDetectedTab) {
+      _lastAutoDetectedTab = activeTab;
+      final bloc = context.read<HomeBloc>();
+      if (bloc.state.selectedTab != activeTab) {
+        bloc.add(HomeTabChanged(activeTab));
+      }
+    }
+  }
+
+  void _onTabTapped(BuildContext context, HomeTab tab) {
+    // Keep Bloc as the single source of truth for selectedTab, exactly
+    // as in the original implementation.
+    context.read<HomeBloc>().add(HomeTabChanged(tab));
+    switch (tab) {
+      case HomeTab.overview:
+        _scrollToSection(_overviewKey);
+        break;
+
+      case HomeTab.appointments:
+        _scrollToSection(_appointmentsKey);
+        break;
+
+      case HomeTab.actions:
+        _scrollToSection(_actionsKey);
+        break;
+    }
+    //  _scrollToTab(tab);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,10 +179,14 @@ class _HomeView extends StatelessWidget {
               onRefresh: () async =>
                   context.read<HomeBloc>().add(const HomeRefreshed()),
               child: ListView(
+                controller: _scrollController,
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                 children: [
                   DashboardHeader(
                     avatarUrl: 'https://i.pravatar.cc/150?img=47',
+                    onAvatarTap: () {
+                      Navigator.pushNamed(context, RouteNames.menubar);
+                    },
                   ),
                   const SizedBox(height: 16),
                   ClinicStatusCard(status: state.clinicStatus),
@@ -63,28 +198,35 @@ class _HomeView extends StatelessWidget {
                   const SizedBox(height: 14),
                   TabSelector(
                     selected: state.selectedTab,
-                    onTap: (tab) {
-                      context.read<HomeBloc>().add(HomeTabChanged(tab));
-                      print("Tap current screen ${HomeTab.appointments}");
-                      // if (tab == HomeTab.appointments) {
-                      //   Navigator.pushNamed(context, RouteNames.todayApartment);
-                      // }
-                    },
+                    onTap: (tab) => _onTabTapped(context, tab),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    "Today's Overview",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: "Poppins",
-                      color: Colors.black,
-                    ),
+
+                  // ---------------- Today's Overview ----------------
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        key: _overviewKey,
+                        child: const Text(
+                          "Today's Overview",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Poppins",
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      OverviewStatsGrid(stats: state.stats),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  OverviewStatsGrid(stats: state.stats),
                   const SizedBox(height: 20),
+
+                  // ---------------- Today's Appointments ----------------
                   Container(
+                    key: _appointmentsKey,
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
                       color: AppColors.infoBg.withOpacity(0.5),
@@ -153,40 +295,60 @@ class _HomeView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 22),
-                  const Text(
-                    'Quick Actions',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: "Poppins",
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
+
+                  // ---------------- Quick Actions ----------------
+                  Column(
+                    key: _actionsKey,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      QuickActionButton(
-                        icon: Icons.add_circle_outline_rounded,
-                        label: 'Add\nAvailability',
-                        color: AppColors.info,
-                        bgColor: AppColors.infoBg,
-                        onTap: () {},
+                      const Text(
+                        'Quick Actions',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: "Poppins",
+                          color: Colors.black,
+                        ),
                       ),
-                      const SizedBox(width: 10),
-                      QuickActionButton(
-                        icon: Icons.assignment_outlined,
-                        label: 'Consultation\nHistory',
-                        color: AppColors.success,
-                        bgColor: AppColors.successBg,
-                        onTap: () {},
-                      ),
-                      const SizedBox(width: 10),
-                      QuickActionButton(
-                        icon: Icons.event_note_rounded,
-                        label: 'Holidays',
-                        color: AppColors.primary,
-                        bgColor: AppColors.infoBg,
-                        onTap: () {},
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          QuickActionButton(
+                            icon: Icons.add_circle_outline_rounded,
+                            label: 'Add\nAvailability',
+                            color: AppColors.info,
+                            bgColor: AppColors.infoBg,
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                RouteNames.addavailable,
+                              );
+                            },
+                          ),
+                          const SizedBox(width: 10),
+                          QuickActionButton(
+                            icon: Icons.assignment_outlined,
+                            label: 'Consultation\nHistory',
+                            color: AppColors.success,
+                            bgColor: AppColors.successBg,
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                RouteNames.consultationHistory,
+                              );
+                            },
+                          ),
+                          const SizedBox(width: 10),
+                          QuickActionButton(
+                            icon: Icons.event_note_rounded,
+                            label: 'Holidays',
+                            color: AppColors.primary,
+                            bgColor: AppColors.infoBg,
+                            onTap: () {
+                              Navigator.pushNamed(context, RouteNames.holidays);
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),

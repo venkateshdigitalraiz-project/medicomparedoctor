@@ -14,10 +14,7 @@ class UserProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => UserProfileBloc()..add(const UserProfileStarted()),
-      child: const _UserProfileView(),
-    );
+    return _UserProfileView();
   }
 }
 
@@ -275,16 +272,38 @@ class _UserProfileView extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Center(
-            child: Text(
-              'Profile',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 20,
-                fontFamily: "Poppins",
-                fontWeight: FontWeight.w700,
-                color: Colors.black87,
-              ),
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(width: 40),
+                const Text(
+                  'Profile',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    Navigator.pushNamed(context, RouteNames.editProfile);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black26),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.edit,
+                      size: 18,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 

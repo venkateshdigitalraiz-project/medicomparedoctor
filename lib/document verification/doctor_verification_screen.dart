@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medicompare/core/widget/spraytype.dart';
 import 'package:medicompare/document%20verification/bloc/document_verification_bloc.dart';
 import 'package:medicompare/document%20verification/document_card.dart';
 import 'package:medicompare/document%20verification/bloc/document_verification_state.dart';
@@ -88,21 +89,15 @@ class _DoctorVerificationView extends StatelessWidget {
     return Stack(
       children: [
         Positioned(
-          top: -170,
-          right: -120,
-          child: Container(
-            width: 260,
-            height: 260,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFFB794F4).withOpacity(0.12),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFB794F4).withOpacity(0.22),
-                  blurRadius: 170,
-                  spreadRadius: 70,
-                ),
-              ],
+          top: 0,
+          right: 0,
+          child: IgnorePointer(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: CustomPaint(
+                painter: CornerGradientPainter(color: Color(0xFF601CA3)),
+              ),
             ),
           ),
         ),
@@ -115,7 +110,7 @@ class _DoctorVerificationView extends StatelessWidget {
         //     height: 120,
         //     decoration: BoxDecoration(
         //       shape: BoxShape.circle,
-        //       color: Colors.white.withOpacity(0.5),
+        //       color: Colors.white.withValues(0.5),
         //     ),
         //   ),
         // ),
@@ -150,7 +145,7 @@ class _DoctorVerificationView extends StatelessWidget {
                 //       gradient: LinearGradient(
                 //         begin: Alignment.topRight,
                 //         end: Alignment.center,
-                //         colors: [_purple.withOpacity(0.1), Color(0xFFFDFBFF)],
+                //         colors: [_purple.withValues(0.1), Color(0xFFFDFBFF)],
                 //       ),
                 //     ),
                 //   ),

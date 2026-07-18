@@ -31,5 +31,5 @@ class RouteNames {
   static const search = "/search";
   static const searchTodayAppointment = "/searchTodayAppointment";
   static const document = "/document";
-  //
+  static const searchid = "/searchid";
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medicompare/core/routes/router_name.dart';
 import 'package:medicompare/setting/bloc/settings_bloc.dart';
 import 'package:medicompare/setting/bloc/settings_event.dart';
 import 'package:medicompare/setting/bloc/settings_state.dart';
@@ -63,18 +64,27 @@ class _SettingsView extends StatelessWidget {
                           title: 'Privacy Policy',
                           subtitle:
                               'Manage your privacy preferences and\ndata protection settings',
-                          onTap: () => context.read<SettingsBloc>().add(
-                            const SettingsItemTapped('Privacy Policy'),
-                          ),
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              RouteNames.privacyPolicy,
+                            );
+                            // context.read<SettingsBloc>().add(
+                            // const SettingsItemTapped('Privacy Policy'),
+                            // );
+                          },
                         ),
                         SettingsTile(
                           icon: Icons.language,
                           title: 'Language',
                           subtitle:
                               'Choose your preferred language for the app',
-                          onTap: () => context.read<SettingsBloc>().add(
-                            const SettingsItemTapped('Language'),
-                          ),
+                          onTap: () {
+                            //   context.read<SettingsBloc>().add(
+                            //   const SettingsItemTapped('Language'),
+                            // );
+                            Navigator.pushNamed(context, RouteNames.language);
+                          },
                         ),
                         SettingsTile(
                           icon: Icons.headset_mic_outlined,
@@ -82,9 +92,15 @@ class _SettingsView extends StatelessWidget {
                           subtitle:
                               'Get assistance and answers to your questions',
                           showDivider: false,
-                          onTap: () => context.read<SettingsBloc>().add(
-                            const SettingsItemTapped('Help & Support'),
-                          ),
+                          onTap: () {
+                            //   context.read<SettingsBloc>().add(
+                            //   const SettingsItemTapped('Help & Support'),
+                            // );
+                            Navigator.pushNamed(
+                              context,
+                              RouteNames.helpSupport,
+                            );
+                          },
                         ),
                         const Spacer(),
                         SizedBox(

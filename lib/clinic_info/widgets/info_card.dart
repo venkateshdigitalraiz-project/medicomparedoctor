@@ -90,13 +90,17 @@ class ContactRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 34,
-            height: 34,
+            width: 46,
+            height: 46,
+            // decoration: BoxDecoration(
+            //   color: iconBackground,
+            //   shape: BoxShape.circle,
+            // ),
             decoration: BoxDecoration(
               color: iconBackground,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: iconColor, size: 17),
+            child: Icon(icon, color: iconColor, size: 22),
           ),
           const SizedBox(width: 12),
           Expanded(
