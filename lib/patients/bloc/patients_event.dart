@@ -1,0 +1,32 @@
+import 'package:equatable/equatable.dart';
+import '../models/patient_filter.dart';
+
+abstract class PatientsEvent extends Equatable {
+  const PatientsEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+/// Fired once when the screen loads to fetch the initial patient list.
+class PatientsLoadRequested extends PatientsEvent {
+  const PatientsLoadRequested();
+}
+
+/// Fired when the user taps a filter chip (All / Completed / Waiting / Cancel).
+class PatientsFilterChanged extends PatientsEvent {
+  final PatientFilter filter;
+  const PatientsFilterChanged(this.filter);
+
+  @override
+  List<Object?> get props => [filter];
+}
+
+/// Fired when the user types in the search bar.
+class PatientsSearchChanged extends PatientsEvent {
+  final String query;
+  const PatientsSearchChanged(this.query);
+
+  @override
+  List<Object?> get props => [query];
+}

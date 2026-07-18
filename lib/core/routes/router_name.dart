@@ -1,0 +1,35 @@
+class RouteNames {
+  static const splash = "/";
+  static const login = "/login";
+  static const otp = "/otp";
+  static const register = "/register";
+  static const home = "/home";
+  static const createpin = "/createpin";
+  static const menubar = "/menubar";
+  static const todayApartment = "/todayApartment";
+  static const todayApartmentdtls = "/todayApartmentdtls";
+  static const apartment = "/apartment";
+  static const schedule = "/schedule";
+  static const homeBottomNav = "/homeBottomNav";
+  static const patients = "/patients";
+  static const notification = "/notification";
+  static const document_verify = "/documenr_verify";
+  static const consultationHistory = "/consultationHistory";
+  static const calendar = "/calendar";
+  static const videocall = "/videocall";
+  static const chartbox = "/chartbox";
+  static const addavailable = "/addavailable";
+  static const report = "/report";
+  static const sechduleSetting = "/sechduleSetting";
+  static const holidays = "/holidays";
+  static const clinicInfo = "/clinicInfo";
+  static const editProfile = "/editProfile";
+  static const helpSupport = "/helpSupport";
+  static const privacyPolicy = "/privacyPolicy";
+  static const language = "/language";
+  static const setting = "/setting";
+  static const search = "/search";
+  static const searchTodayAppointment = "/searchTodayAppointment";
+  static const document = "/document";
+  //
+}
