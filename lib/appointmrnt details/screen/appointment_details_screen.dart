@@ -91,28 +91,34 @@ class _AppointmentDetailsView extends StatelessWidget {
         // ---- Call / Video / Chat buttons ----
         Row(
           children: [
-            ContactButton(
-              icon: Icons.call,
-              label: 'Call',
-              color: const Color(0xFF16A34A),
-              onTap: () =>
-                  bloc.add(const ContactActionPressed(ContactAction.call)),
+            Expanded(
+              child: ContactButton(
+                icon: Icons.call,
+                label: 'Call',
+                color: const Color(0xFF16A34A),
+                onTap: () =>
+                    bloc.add(const ContactActionPressed(ContactAction.call)),
+              ),
             ),
-            ContactButton(
-              icon: Icons.videocam,
-              label: 'Video',
-              color: const Color(0xFF2563EB),
-              onTap: () =>
-                  bloc.add(const ContactActionPressed(ContactAction.video)),
+            Expanded(
+              child: ContactButton(
+                icon: Icons.videocam,
+                label: 'Video',
+                color: const Color(0xFF2563EB),
+                onTap: () =>
+                    bloc.add(const ContactActionPressed(ContactAction.video)),
+              ),
             ),
-            ContactButton(
-              icon: Icons.chat_bubble,
-              label: 'Chat',
-              color: const Color(0xFF7C3AED),
-              onTap: () {
-                Navigator.pushNamed(context, RouteNames.chartbox);
-                // bloc.add(const ContactActionPressed(ContactAction.chat));
-              },
+            Expanded(
+              child: ContactButton(
+                icon: Icons.chat_bubble,
+                label: 'Chat',
+                color: const Color(0xFF7C3AED),
+                onTap: () {
+                  Navigator.pushNamed(context, RouteNames.chartbox);
+                  // bloc.add(const ContactActionPressed(ContactAction.chat));
+                },
+              ),
             ),
           ],
         ),

@@ -59,7 +59,7 @@ class _VerifyOtpViewState extends State<_VerifyOtpView> {
         child: BlocConsumer<OtpBloc, OtpState>(
           listener: (context, state) {
             if (state.status == OtpSubmissionStatus.success) {
-              log("Successfully Verify otp then go to Menubar");
+              log("Successfully Verify otp then go to dashBoard");
               Navigator.pushReplacementNamed(context, RouteNames.homeBottomNav);
               // ScaffoldMessenger.of(context).showSnackBar(
               //   const SnackBar(content: Text('Verified successfully!')),

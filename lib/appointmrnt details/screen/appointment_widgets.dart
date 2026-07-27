@@ -18,26 +18,28 @@ class ContactButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: ElevatedButton.icon(
-          onPressed: onTap,
-          icon: Icon(icon, size: 18, color: Colors.white),
-          label: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
+    // NOTE: Expanded is intentionally NOT here.
+    // The caller (appointment_details_screen) wraps each ContactButton
+    // in Expanded so that this widget stays reusable without binding
+    // itself to a specific parent layout (fixing ParentDataWidget error).
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: ElevatedButton.icon(
+        onPressed: onTap,
+        icon: Icon(icon, size: 18, color: Colors.white),
+        label: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
           ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: color,
-            elevation: 0,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
         ),
       ),

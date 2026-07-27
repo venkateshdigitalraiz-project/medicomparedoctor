@@ -11,14 +11,12 @@ class OverviewStatsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          child: _StatCard(
-            icon: Icons.people_alt_rounded,
-            iconColor: AppColors.info,
-            iconBg: AppColors.infoBg,
-            value: stats.totalAppointments.toString(),
-            label: 'Total\nAppointments',
-          ),
+        _StatCard(
+          icon: Icons.people_alt_rounded,
+          iconColor: AppColors.info,
+          iconBg: AppColors.infoBg,
+          value: stats.totalAppointments.toString(),
+          label: 'Total\nAppointments',
         ),
         const SizedBox(width: 10),
         Expanded(

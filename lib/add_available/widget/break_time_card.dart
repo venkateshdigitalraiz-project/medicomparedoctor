@@ -60,18 +60,22 @@ class BreakTimeCard extends StatelessWidget {
 
           Row(
             children: [
-              CustomTimePicker(
-                title: "Start Break",
-                time: startBreak,
-                onTap: onStartTap,
+              Expanded(
+                child: CustomTimePicker(
+                  title: "Start Break",
+                  time: startBreak,
+                  onTap: onStartTap,
+                ),
               ),
 
-              const SizedBox(width: 16),
+              const SizedBox(width: 8),
 
-              CustomTimePicker(
-                title: "End Break",
-                time: endBreak,
-                onTap: onEndTap,
+              Expanded(
+                child: CustomTimePicker(
+                  title: "End Break",
+                  time: endBreak,
+                  onTap: onEndTap,
+                ),
               ),
             ],
           ),

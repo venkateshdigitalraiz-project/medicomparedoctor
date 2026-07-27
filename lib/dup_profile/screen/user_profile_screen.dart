@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/routes/router_name.dart';
+import 'package:medicompare/core/widget/circle_login_button.dart';
 import 'package:medicompare/dup_profile/model/user_profile_model.dart';
 import 'package:medicompare/dup_profile/bloc/user_profile_state.dart';
 import 'package:medicompare/dup_profile/screen/user_section_tile.dart';
@@ -254,7 +255,7 @@ class _UserProfileView extends StatelessWidget {
   Widget _buildStatsRow(profile) {
     return Row(
       children: profile.stats
-          .map<Widget>((s) => UserStatCard(stat: s))
+          .map<Widget>((s) => Expanded(child: UserStatCard(stat: s)))
           .toList(),
     );
   }
@@ -273,7 +274,7 @@ class _UserProfileView extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.only(right: 20),
+            padding: const EdgeInsets.only(right: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -286,22 +287,34 @@ class _UserProfileView extends StatelessWidget {
                     color: Colors.black87,
                   ),
                 ),
-                InkWell(
-                  onTap: () {
-                    Navigator.pushNamed(context, RouteNames.editProfile);
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black26),
-                      borderRadius: BorderRadius.circular(8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(context, RouteNames.editProfile);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black26),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.edit,
+                          size: 18,
+                          color: Colors.black87,
+                        ),
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.edit,
-                      size: 18,
-                      color: Colors.black87,
+                    SizedBox(width: 8),
+                    CircleIconButton(
+                      icon: Icons.logout,
+                      onTap: () {
+                        Navigator.pushNamed(context, RouteNames.login);
+                      },
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),

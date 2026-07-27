@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/circle_login_button.dart';
 import '../theme/app_theme.dart';
 
 class DashboardHeader extends StatelessWidget {
   final String avatarUrl;
-  final VoidCallback? onCalendarTap;
+  final VoidCallback? login;
   final VoidCallback? onAvatarTap;
 
   const DashboardHeader({
     super.key,
     required this.avatarUrl,
-    this.onCalendarTap,
+    required this.login,
     required this.onAvatarTap,
   });
   Widget _buildLogo() {
@@ -27,11 +28,6 @@ class DashboardHeader extends StatelessWidget {
       children: [
         _buildLogo(),
         const Spacer(),
-        _CircleIconButton(
-          icon: Icons.calendar_today_outlined,
-          onTap: onCalendarTap,
-        ),
-        const SizedBox(width: 10),
         GestureDetector(
           onTap: onAvatarTap,
           child: Stack(
@@ -82,29 +78,9 @@ class DashboardHeader extends StatelessWidget {
             ],
           ),
         ),
+        const SizedBox(width: 10),
+        CircleIconButton(icon: Icons.logout, onTap: login),
       ],
-    );
-  }
-}
-
-class _CircleIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback? onTap;
-  const _CircleIconButton({required this.icon, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 42,
-        height: 42,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon, size: 18, color: AppColors.primary),
-      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/common/common_add/appcolor.dart';
 import 'package:medicompare/core/routes/router_name.dart';
+import 'package:medicompare/core/widget/circle_login_button.dart';
 import 'package:medicompare/schedule/bloc/schedule_bloc.dart';
 import 'package:medicompare/schedule/bloc/schedule_event.dart';
 import 'package:medicompare/schedule/bloc/schedule_state.dart';
@@ -95,6 +96,13 @@ class _ScheduleView extends StatelessWidget {
                           color: AppColors.textDark,
                         ),
                       ),
+                      SizedBox(width: 8),
+                      CircleIconButton(
+                        icon: Icons.logout,
+                        onTap: () {
+                          Navigator.pushNamed(context, RouteNames.login);
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -122,23 +130,20 @@ class _ScheduleView extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Row(
                             children: [
-                              Expanded(
-                                child: StatCard(
-                                  icon: Icons.groups_2_rounded,
-                                  color: AppColors.blue,
-                                  value: state.stats.total,
-                                  label: 'Total Appts',
-                                ),
+                              StatCard(
+                                icon: Icons.groups_2_rounded,
+                                color: AppColors.blue,
+                                value: state.stats.total,
+                                label: 'Total Appts',
                               ),
                               const SizedBox(width: 10),
-                              Expanded(
-                                child: StatCard(
-                                  icon: Icons.check_circle_rounded,
-                                  color: AppColors.green,
-                                  value: state.stats.confirmed,
-                                  label: 'Confirmed',
-                                ),
+                              StatCard(
+                                icon: Icons.check_circle_rounded,
+                                color: AppColors.green,
+                                value: state.stats.confirmed,
+                                label: 'Confirmed',
                               ),
+                              const SizedBox(width: 10),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: StatCard(
@@ -148,14 +153,11 @@ class _ScheduleView extends StatelessWidget {
                                   label: 'Waiting',
                                 ),
                               ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: StatCard(
-                                  icon: Icons.close_rounded,
-                                  color: AppColors.red,
-                                  value: state.stats.cancelled,
-                                  label: 'Cancelled',
-                                ),
+                              StatCard(
+                                icon: Icons.close_rounded,
+                                color: AppColors.red,
+                                value: state.stats.cancelled,
+                                label: 'Cancelled',
                               ),
                             ],
                           ),

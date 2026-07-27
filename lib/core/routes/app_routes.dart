@@ -24,6 +24,8 @@ import 'package:medicompare/create_pin/bloc/pin_bloc.dart';
 import 'package:medicompare/create_pin/screens/create_pin_screen.dart';
 import 'package:medicompare/document%20verification/doctor_verification_screen.dart';
 import 'package:medicompare/document%20verification/bloc/document_verification_bloc.dart';
+import 'package:medicompare/dup_profile/bloc/user_profile_bloc.dart';
+import 'package:medicompare/dup_profile/screen/user_profile_screen.dart';
 import 'package:medicompare/edit_profile/bloc/edit_profile_bloc.dart';
 import 'package:medicompare/edit_profile/edit_profile_screen.dart';
 import 'package:medicompare/help_support/bloc/faq_cubit.dart';
@@ -40,9 +42,6 @@ import 'package:medicompare/notification/bloc/notification_bloc.dart';
 import 'package:medicompare/notification/notifications_screen.dart';
 import 'package:medicompare/otp_verify/bloc/otp_bloc.dart';
 import 'package:medicompare/otp_verify/screens/verify_otp_screen.dart';
-import 'package:medicompare/patients/bloc/patients_bloc.dart';
-import 'package:medicompare/patients/bloc/patients_repository.dart';
-import 'package:medicompare/patients/screens/patients_screen.dart';
 import 'package:medicompare/privacy_policy/cubit/privacy_policy_cubit.dart';
 import 'package:medicompare/privacy_policy/screens/privacy_policy_screen.dart';
 import 'package:medicompare/register_files/doctor_registration_bloc.dart';
@@ -311,11 +310,10 @@ class AppRoutes {
         );
 
       case RouteNames.patients:
-        final repository = settings.arguments as PatientsRepository;
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (_) => PatientsBloc(repository: repository),
-            child: const PatientsScreen(),
+            create: (_) => UserProfileBloc(),
+            child: const UserProfileScreen(),
           ),
         );
 

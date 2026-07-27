@@ -42,18 +42,22 @@ class ConsultationHoursCard extends StatelessWidget {
 
           Row(
             children: [
-              CustomTimePicker(
-                title: "Start Time",
-                time: startTime,
-                onTap: onStartTap,
+              Expanded(
+                child: CustomTimePicker(
+                  title: "Start Time",
+                  time: startTime,
+                  onTap: onStartTap,
+                ),
               ),
 
               const SizedBox(width: 16),
 
-              CustomTimePicker(
-                title: "End Time",
-                time: endTime,
-                onTap: onEndTap,
+              Expanded(
+                child: CustomTimePicker(
+                  title: "End Time",
+                  time: endTime,
+                  onTap: onEndTap,
+                ),
               ),
             ],
           ),

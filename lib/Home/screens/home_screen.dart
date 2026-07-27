@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/routes/router_name.dart';
 
@@ -186,6 +185,9 @@ class _HomeViewState extends State<_HomeView> {
                     avatarUrl: 'https://i.pravatar.cc/150?img=47',
                     onAvatarTap: () {
                       Navigator.pushNamed(context, RouteNames.menubar);
+                    },
+                    login: () {
+                      Navigator.pushNamed(context, RouteNames.login);
                     },
                   ),
                   const SizedBox(height: 16),

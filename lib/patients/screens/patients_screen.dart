@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medicompare/core/routes/router_name.dart';
+import 'package:medicompare/core/widget/circle_login_button.dart';
 import 'package:medicompare/patients/bloc/patients_bloc.dart';
 import 'package:medicompare/patients/bloc/patients_event.dart';
 import 'package:medicompare/patients/bloc/patients_state.dart';
@@ -111,7 +113,7 @@ class _Header extends StatelessWidget {
       child: Row(
         children: [
           ///  const Icon(Icons.arrow_back, size: 22),
-          const SizedBox(width: 12),
+          const SizedBox(width: 20),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,7 +134,13 @@ class _Header extends StatelessWidget {
               ],
             ),
           ),
-          //    const Icon(Icons.search, size: 22),
+          SizedBox(width: 8),
+          CircleIconButton(
+            icon: Icons.logout,
+            onTap: () {
+              Navigator.pushNamed(context, RouteNames.login);
+            },
+          ),
         ],
       ),
     );

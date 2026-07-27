@@ -23,57 +23,55 @@ class CustomTimePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              fontFamily: "Poppins",
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            fontFamily: "Poppins",
           ),
+        ),
 
-          const SizedBox(height: 10),
+        const SizedBox(height: 10),
 
-          InkWell(
-            borderRadius: BorderRadius.circular(14),
-            onTap: onTap,
-            child: Container(
-              height: 54,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xffE5E7EB)),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      _formatTime(context),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontFamily: "Poppins",
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xff1F2937),
-                      ),
+        InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: Container(
+            height: 54,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xffE5E7EB)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _formatTime(context),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontFamily: "Poppins",
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xff1F2937),
                     ),
                   ),
+                ),
 
-                  const Icon(
-                    Icons.access_time_outlined,
-                    color: Color(0xffD1D5DB),
-                    size: 20,
-                  ),
-                ],
-              ),
+                const Icon(
+                  Icons.access_time_outlined,
+                  color: Color(0xffD1D5DB),
+                  size: 20,
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -44,11 +44,21 @@ class _NotificationsView extends StatelessWidget {
                     return const Center(child: Text('No notifications'));
                   }
                   return RefreshIndicator(
-                    onRefresh: () async {
-                      context.read<NotificationBloc>().add(
-                        const RefreshNotifications(),
+                    // onRefresh: () async {
+                    //   context.read<NotificationBloc>().add(
+                    //     const RefreshNotifications(),
+                    //   );
+                    //   // await Future.delayed(const Duration(milliseconds: 600));
+                    // },
+                    onRefresh: () {
+                      final bloc = context.read<NotificationBloc>();
+                      bloc.add(const RefreshNotifications());
+
+                      return bloc.stream.firstWhere(
+                        (state) =>
+                            state is NotificationLoaded ||
+                            state is NotificationError,
                       );
-                      await Future.delayed(const Duration(milliseconds: 600));
                     },
                     child: ListView.separated(
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
