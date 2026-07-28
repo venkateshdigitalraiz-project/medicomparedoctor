@@ -1,47 +1,83 @@
+import 'dart:convert';
+import 'dart:developer' as developer;
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:medicompare/core/constants/app_constants.dart';
+import 'package:medicompare/core/services/session_manager.dart';
 import '../models/patient.dart';
 
-/// Mocks a data source. In a real app this would call a REST/GraphQL API
-/// or a local database and return the same shape of data.
 class PatientsRepository {
-  Future<List<Patient>> fetchPatients() async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    return const [
-      Patient(
-        id: '1',
-        name: 'Sarah Johnson',
-        pid: 'PT-2024-001',
-        age: 28,
-        gender: 'Female',
-        phone: '9876543210',
-        lastVisit: '20 May 2025',
-        avatarUrl:
-            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
-        status: PatientStatus.completed,
+  final http.Client client;
+  final String baseUrl;
+
+  PatientsRepository({
+    http.Client? client,
+    this.baseUrl = AppConstants.baseUrl,
+  }) : client = client ?? http.Client();
+
+  Future<PatientListResponse> fetchPatients({
+    required int page,
+    required int limit,
+  }) async {
+    final token = await SessionManager.getToken();
+    final uri = Uri.parse(
+      '$baseUrl/doctor/dashboard/patient-list?page=$page&limit=$limit',
+    );
+
+    developer.log('=== PATIENT LIST API REQUEST ===', name: 'PatientsRepository');
+    developer.log('URL: $uri', name: 'PatientsRepository');
+
+    try {
+      final response = await client.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      ).timeout(AppConstants.apiTimeout);
+
+      developer.log('Status: ${response.statusCode}', name: 'PatientsRepository');
+      developer.log('Body: ${response.body}', name: 'PatientsRepository');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final json = jsonDecode(response.body) as Map<String, dynamic>;
+        return PatientListResponse.fromJson(json);
+      } else {
+        throw Exception(
+          'Failed to fetch patient list. Status: ${response.statusCode}',
+        );
+      }
+    } on SocketException {
+      developer.log(
+        'SocketException — returning empty mock list response',
+        name: 'PatientsRepository',
+      );
+      return _emptyMock();
+    } on http.ClientException {
+      developer.log(
+        'ClientException — returning empty mock list response',
+        name: 'PatientsRepository',
+      );
+      return _emptyMock();
+    }
+  }
+
+  PatientListResponse _emptyMock() {
+    return const PatientListResponse(
+      statistics: PatientStatistics(
+        totalPatients: 0,
+        newThisMonth: 0,
+        waiting: 0,
+        completed: 0,
+        cancelled: 0,
       ),
-      Patient(
-        id: '2',
-        name: 'Michael Chen',
-        pid: 'PT-2024-045',
-        age: 42,
-        gender: 'Male',
-        phone: '9821334455',
-        lastVisit: '18 May 2025',
-        avatarUrl:
-            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200',
-        status: PatientStatus.waiting,
+      pagination: PatientPagination(
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0,
       ),
-      Patient(
-        id: '3',
-        name: 'Elena Rodriguez',
-        pid: 'PT-2024-089',
-        age: 35,
-        gender: 'Female',
-        phone: '9122334455',
-        lastVisit: '15 May 2025',
-        avatarUrl:
-            'https://images.unsplash.com/photo-1547425260-76bcadfb4f2c?w=200',
-        status: PatientStatus.cancelled,
-      ),
-    ];
+      patients: <Patient>[],
+    );
   }
 }

@@ -10,6 +10,7 @@ class PatientsBloc extends Bloc<PatientsEvent, PatientsState> {
 
   PatientsBloc({required this.repository}) : super(const PatientsState()) {
     on<PatientsLoadRequested>(_onLoadRequested);
+    on<PatientsLoadMoreRequested>(_onLoadMoreRequested);
     on<PatientsFilterChanged>(_onFilterChanged);
     on<PatientsSearchChanged>(_onSearchChanged);
   }
@@ -18,17 +19,85 @@ class PatientsBloc extends Bloc<PatientsEvent, PatientsState> {
     PatientsLoadRequested event,
     Emitter<PatientsState> emit,
   ) async {
-    emit(state.copyWith(status: PatientsStatus.loading));
+    // If it's the initial load, show the main loader. If it's a refresh, keep the UI state
+    emit(state.copyWith(
+      status: PatientsStatus.loading,
+      errorMessage: null,
+    ));
     try {
-      final patients = await repository.fetchPatients();
+      final response = await repository.fetchPatients(page: 1, limit: state.limit);
+      
       emit(state.copyWith(
         status: PatientsStatus.success,
-        allPatients: patients,
-        visiblePatients: patients,
-        newThisMonth: 2, // sample metric, wire to real data as needed
+        allPatients: response.patients,
+        visiblePatients: _applyFilters(
+          filter: state.activeFilter,
+          query: state.searchQuery,
+          patientsList: response.patients,
+        ),
+        page: response.pagination.page,
+        totalPages: response.pagination.totalPages,
+        total: response.pagination.total,
+        limit: response.pagination.limit,
+        totalPatients: response.statistics.totalPatients,
+        newThisMonth: response.statistics.newThisMonth,
+        waitingPatientsCount: response.statistics.waiting,
+        completedPatientsCount: response.statistics.completed,
+        cancelledPatientsCount: response.statistics.cancelled,
       ));
     } catch (e) {
       emit(state.copyWith(
+        status: PatientsStatus.failure,
+        errorMessage: e.toString(),
+      ));
+    }
+  }
+
+  Future<void> _onLoadMoreRequested(
+    PatientsLoadMoreRequested event,
+    Emitter<PatientsState> emit,
+  ) async {
+    if (state.isLoadingMore ||
+        state.status == PatientsStatus.loading ||
+        state.page >= state.totalPages) {
+      return;
+    }
+
+    emit(state.copyWith(isLoadingMore: true));
+    try {
+      final nextPage = state.page + 1;
+      final response = await repository.fetchPatients(page: nextPage, limit: state.limit);
+
+      // Prevent duplicate patient records based on their ID
+      final existingIds = state.allPatients.map((p) => p.id).toSet();
+      final newPatients = response.patients
+          .where((p) => !existingIds.contains(p.id))
+          .toList();
+
+      final updatedAllPatients = List<Patient>.from(state.allPatients)..addAll(newPatients);
+
+      emit(state.copyWith(
+        status: PatientsStatus.success,
+        isLoadingMore: false,
+        allPatients: updatedAllPatients,
+        visiblePatients: _applyFilters(
+          filter: state.activeFilter,
+          query: state.searchQuery,
+          patientsList: updatedAllPatients,
+        ),
+        page: response.pagination.page,
+        totalPages: response.pagination.totalPages,
+        total: response.pagination.total,
+        limit: response.pagination.limit,
+        totalPatients: response.statistics.totalPatients,
+        newThisMonth: response.statistics.newThisMonth,
+        waitingPatientsCount: response.statistics.waiting,
+        completedPatientsCount: response.statistics.completed,
+        cancelledPatientsCount: response.statistics.cancelled,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        isLoadingMore: false,
         status: PatientsStatus.failure,
         errorMessage: e.toString(),
       ));
@@ -44,6 +113,7 @@ class PatientsBloc extends Bloc<PatientsEvent, PatientsState> {
       visiblePatients: _applyFilters(
         filter: event.filter,
         query: state.searchQuery,
+        patientsList: state.allPatients,
       ),
     ));
   }
@@ -57,6 +127,7 @@ class PatientsBloc extends Bloc<PatientsEvent, PatientsState> {
       visiblePatients: _applyFilters(
         filter: state.activeFilter,
         query: event.query,
+        patientsList: state.allPatients,
       ),
     ));
   }
@@ -64,8 +135,9 @@ class PatientsBloc extends Bloc<PatientsEvent, PatientsState> {
   List<Patient> _applyFilters({
     required PatientFilter filter,
     required String query,
+    required List<Patient> patientsList,
   }) {
-    return state.allPatients.where((p) {
+    return patientsList.where((p) {
       final matchesFilter = switch (filter) {
         PatientFilter.all => true,
         PatientFilter.completed => p.status == PatientStatus.completed,

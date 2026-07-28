@@ -236,7 +236,7 @@ class _Header extends StatelessWidget {
                         ],
                       );
 
-                      if (selected != null) {
+                      if (selected != null && context.mounted) {
                         context.read<AppointmentBloc>().add(
                           FilterByDate(selected),
                         );

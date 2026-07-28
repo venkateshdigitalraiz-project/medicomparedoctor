@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/patient.dart';
 
 class PatientCard extends StatelessWidget {
@@ -6,6 +7,11 @@ class PatientCard extends StatelessWidget {
   final VoidCallback? onMoreTap;
 
   const PatientCard({super.key, required this.patient, this.onMoreTap});
+  String formatDate(String dateTime) {
+    final DateTime parsedDate = DateTime.parse(dateTime);
+
+    return DateFormat('dd MMMM yyyy').format(parsedDate);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +76,7 @@ class PatientCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Last Visit : ${patient.lastVisit}',
+                          'Last Visit : ${formatDate(patient.lastVisit)}',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w400,

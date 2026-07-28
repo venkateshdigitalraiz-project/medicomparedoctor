@@ -10,8 +10,21 @@ class PatientsState extends Equatable {
   final List<Patient> visiblePatients;
   final PatientFilter activeFilter;
   final String searchQuery;
-  final int newThisMonth;
   final String? errorMessage;
+
+  // Pagination parameters
+  final int page;
+  final int totalPages;
+  final int limit;
+  final int total;
+  final bool isLoadingMore;
+
+  // Statistics counters (synced with the API)
+  final int totalPatients;
+  final int newThisMonth;
+  final int waitingPatientsCount;
+  final int completedPatientsCount;
+  final int cancelledPatientsCount;
 
   const PatientsState({
     this.status = PatientsStatus.initial,
@@ -19,16 +32,23 @@ class PatientsState extends Equatable {
     this.visiblePatients = const [],
     this.activeFilter = PatientFilter.all,
     this.searchQuery = '',
-    this.newThisMonth = 0,
     this.errorMessage,
+    this.page = 1,
+    this.totalPages = 1,
+    this.limit = 10,
+    this.total = 0,
+    this.isLoadingMore = false,
+    this.totalPatients = 0,
+    this.newThisMonth = 0,
+    this.waitingPatientsCount = 0,
+    this.completedPatientsCount = 0,
+    this.cancelledPatientsCount = 0,
   });
 
-  // ---- Derived counters used by the stat cards at the top of the screen ----
-  int get totalCount => allPatients.length;
-  int get waitingCount =>
-      allPatients.where((p) => p.status == PatientStatus.waiting).length;
-  int get cancelledCount =>
-      allPatients.where((p) => p.status == PatientStatus.cancelled).length;
+  // Keep these getters for compatibility with existing widgets
+  int get totalCount => totalPatients;
+  int get waitingCount => waitingPatientsCount;
+  int get cancelledCount => cancelledPatientsCount;
 
   PatientsState copyWith({
     PatientsStatus? status,
@@ -36,8 +56,17 @@ class PatientsState extends Equatable {
     List<Patient>? visiblePatients,
     PatientFilter? activeFilter,
     String? searchQuery,
-    int? newThisMonth,
     String? errorMessage,
+    int? page,
+    int? totalPages,
+    int? limit,
+    int? total,
+    bool? isLoadingMore,
+    int? totalPatients,
+    int? newThisMonth,
+    int? waitingPatientsCount,
+    int? completedPatientsCount,
+    int? cancelledPatientsCount,
   }) {
     return PatientsState(
       status: status ?? this.status,
@@ -45,8 +74,17 @@ class PatientsState extends Equatable {
       visiblePatients: visiblePatients ?? this.visiblePatients,
       activeFilter: activeFilter ?? this.activeFilter,
       searchQuery: searchQuery ?? this.searchQuery,
-      newThisMonth: newThisMonth ?? this.newThisMonth,
       errorMessage: errorMessage,
+      page: page ?? this.page,
+      totalPages: totalPages ?? this.totalPages,
+      limit: limit ?? this.limit,
+      total: total ?? this.total,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      totalPatients: totalPatients ?? this.totalPatients,
+      newThisMonth: newThisMonth ?? this.newThisMonth,
+      waitingPatientsCount: waitingPatientsCount ?? this.waitingPatientsCount,
+      completedPatientsCount: completedPatientsCount ?? this.completedPatientsCount,
+      cancelledPatientsCount: cancelledPatientsCount ?? this.cancelledPatientsCount,
     );
   }
 
@@ -57,7 +95,16 @@ class PatientsState extends Equatable {
         visiblePatients,
         activeFilter,
         searchQuery,
-        newThisMonth,
         errorMessage,
+        page,
+        totalPages,
+        limit,
+        total,
+        isLoadingMore,
+        totalPatients,
+        newThisMonth,
+        waitingPatientsCount,
+        completedPatientsCount,
+        cancelledPatientsCount,
       ];
 }

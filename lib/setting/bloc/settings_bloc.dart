@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medicompare/core/services/session_manager.dart';
 import 'settings_event.dart';
 import 'settings_state.dart';
 
@@ -16,6 +17,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     emit(state.copyWith(status: SettingsStatus.loggingOut));
     // Simulate a network/log-out call.
     await Future.delayed(const Duration(milliseconds: 600));
+    await SessionManager.clearSession();
     emit(state.copyWith(status: SettingsStatus.loggedOut));
   }
 

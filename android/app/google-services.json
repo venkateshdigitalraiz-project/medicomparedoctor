@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "1048864032783",
+    "project_id": "medicompare-76c17",
+    "storage_bucket": "medicompare-76c17.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1048864032783:android:f92d7571204339cdd2fb7a",
+        "android_client_info": {
+          "package_name": "com.example.medicomparedelivery"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApYEFaaYLuuUVrrdMjV7ntOVWvdVin28Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1048864032783:android:44a388d8999f36ead2fb7a",
+        "android_client_info": {
+          "package_name": "com.medicompares.doctorapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApYEFaaYLuuUVrrdMjV7ntOVWvdVin28Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1048864032783:android:9ea54dd9bd2319e7d2fb7a",
+        "android_client_info": {
+          "package_name": "com.medicomparetest.delivery"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApYEFaaYLuuUVrrdMjV7ntOVWvdVin28Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

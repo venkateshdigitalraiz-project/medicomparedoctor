@@ -43,6 +43,11 @@ class _SettingsView extends StatelessWidget {
                 duration: Duration(seconds: 1),
               ),
             );
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              RouteNames.login,
+              (route) => false,
+            );
           }
         },
         builder: (context, state) {

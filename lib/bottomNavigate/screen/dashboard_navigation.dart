@@ -65,22 +65,22 @@
 // }
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:medicompare/Home/bloc/home_bloc.dart';
-import 'package:medicompare/Home/screens/home_screen.dart';
+import 'package:medicompare/features/home/presentation/bloc/home_bloc.dart';
+import 'package:medicompare/features/home/presentation/screens/home_screen.dart';
 import 'package:medicompare/bottomNavigate/bloc/bottom_nav_bloc.dart';
 import 'package:medicompare/bottomNavigate/bloc/bottom_nav_event.dart';
 import 'package:medicompare/bottomNavigate/bloc/bottom_nav_state.dart';
 import 'package:medicompare/bottomNavigate/screen/BottomNav.dart';
-import 'package:medicompare/dup_profile/bloc/user_profile_bloc.dart';
-import 'package:medicompare/dup_profile/bloc/user_profile_event.dart';
-import 'package:medicompare/dup_profile/screen/user_profile_screen.dart';
+import 'package:medicompare/profile/bloc/user_profile_bloc.dart';
+import 'package:medicompare/profile/bloc/user_profile_event.dart';
+import 'package:medicompare/profile/screen/user_profile_screen.dart';
 import 'package:medicompare/patients/bloc/patients_bloc.dart';
 import 'package:medicompare/patients/bloc/patients_event.dart';
 import 'package:medicompare/patients/bloc/patients_repository.dart';
 import 'package:medicompare/patients/screens/patients_screen.dart';
-import 'package:medicompare/schedule/bloc/schedule_bloc.dart';
-import 'package:medicompare/schedule/bloc/schedule_event.dart';
-import 'package:medicompare/schedule/screens/schedule_screen.dart';
+import 'package:medicompare/features/schedule/presentation/bloc/schedule_bloc.dart';
+import 'package:medicompare/features/schedule/presentation/bloc/schedule_event.dart';
+import 'package:medicompare/features/schedule/presentation/screens/schedule_screen.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});

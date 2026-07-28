@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:medicompare/Home/bloc/home_bloc.dart';
+import 'package:medicompare/features/home/presentation/bloc/home_bloc.dart';
 import '../theme/app_theme.dart';
 
 class TabSelector extends StatelessWidget {

@@ -8,9 +8,14 @@ abstract class PatientsEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Fired once when the screen loads to fetch the initial patient list.
+/// Fired once when the screen loads or pull-to-refresh is executed to fetch the initial patient list.
 class PatientsLoadRequested extends PatientsEvent {
   const PatientsLoadRequested();
+}
+
+/// Fired when the user scrolls to the bottom of the screen to load the next page of patients.
+class PatientsLoadMoreRequested extends PatientsEvent {
+  const PatientsLoadMoreRequested();
 }
 
 /// Fired when the user taps a filter chip (All / Completed / Waiting / Cancel).

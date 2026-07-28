@@ -1,13 +1,32 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:medicompare/core/routes/app_routes.dart';
 import 'package:medicompare/core/routes/router_name.dart';
+import 'package:medicompare/core/services/firebase_service.dart';
+import 'package:medicompare/core/services/session_manager.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final bool loggedIn = await SessionManager.isLoggedIn();
+  await Firebase.initializeApp();
+  await FirebaseTokenService.init();
+  runApp(
+    MyApp(initialRoute: loggedIn ? RouteNames.homeBottomNav : RouteNames.login),
+  );
+}
+
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+
+  print("Background message: ${message.messageId}");
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String initialRoute;
+
+  const MyApp({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +38,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Roboto',
       ),
 
-      initialRoute: RouteNames.login,
+      initialRoute: initialRoute,
       onGenerateRoute: AppRoutes.generate,
     );
   }
