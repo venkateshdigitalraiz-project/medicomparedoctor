@@ -65,7 +65,16 @@ class ProfileHeaderCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: ClipOval(
-              child: Image.network(profile.avatarUrl, fit: BoxFit.cover),
+              child:
+                  (profile.avatarUrl.startsWith('http://') ||
+                      profile.avatarUrl.startsWith('https://'))
+                  ? Image.network(
+                      profile.avatarUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          const Icon(Icons.person, size: 50),
+                    )
+                  : const Icon(Icons.person, size: 50),
             ),
           ),
           const SizedBox(height: 12),

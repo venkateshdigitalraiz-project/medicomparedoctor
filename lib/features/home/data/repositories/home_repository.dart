@@ -7,6 +7,7 @@ import 'package:medicompare/core/services/session_manager.dart';
 import '../models/appointment.dart';
 import '../models/clinic_status.dart';
 import '../models/dashboard_response.dart';
+import 'package:medicompare/core/network/global_client.dart';
 
 // ---------------------------------------------------------------------------
 // Abstract interface
@@ -25,10 +26,8 @@ class HomeRepositoryImpl implements HomeRepository {
   final http.Client client;
   final String baseUrl;
 
-  HomeRepositoryImpl({
-    http.Client? client,
-    this.baseUrl = AppConstants.baseUrl,
-  }) : client = client ?? http.Client();
+  HomeRepositoryImpl({http.Client? client, this.baseUrl = AppConstants.baseUrl})
+    : client = client ?? AppHttpClient.client;
 
   @override
   Future<DashboardResponse> fetchDashboard({
@@ -44,13 +43,15 @@ class HomeRepositoryImpl implements HomeRepository {
     developer.log('URL: $uri', name: 'HomeRepository');
 
     try {
-      final response = await client.get(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token',
-        },
-      ).timeout(AppConstants.apiTimeout);
+      final response = await client
+          .get(
+            uri,
+            headers: {
+              'Content-Type': 'application/json',
+              if (token != null) 'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(AppConstants.apiTimeout);
 
       developer.log('Status: ${response.statusCode}', name: 'HomeRepository');
       developer.log('Body: ${response.body}', name: 'HomeRepository');

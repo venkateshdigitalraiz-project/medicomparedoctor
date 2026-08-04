@@ -11,6 +11,8 @@ import '../../domain/repositories/login_repository.dart';
 import 'login_event.dart';
 import 'login_state.dart';
 
+import 'package:medicompare/core/network/global_client.dart';
+
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final LoginRepository repository;
 
@@ -18,7 +20,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     : repository =
           repository ??
           LoginRepositoryImpl(
-            remoteDataSource: LoginRemoteDataSourceImpl(client: http.Client()),
+            remoteDataSource: LoginRemoteDataSourceImpl(client: AppHttpClient.client),
           ),
       super(const LoginState()) {
     on<PhoneNumberChanged>((event, emit) {

@@ -48,18 +48,23 @@ class DashboardHeader extends StatelessWidget {
                   border: Border.all(color: const Color(0xFF601CA3), width: 2),
                 ),
                 child: ClipOval(
-                  child: Image.network(
-                    avatarUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      print(error);
-                      return const Icon(Icons.person, size: 40);
-                    },
-                    loadingBuilder: (context, child, progress) {
-                      if (progress == null) return child;
-                      return const Center(child: CircularProgressIndicator());
-                    },
-                  ),
+                  child: (avatarUrl.startsWith('http://') ||
+                          avatarUrl.startsWith('https://'))
+                      ? Image.network(
+                          avatarUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            print(error);
+                            return const Icon(Icons.person, size: 40);
+                          },
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                        )
+                      : const Icon(Icons.person, size: 40),
                 ),
               ),
               Positioned(
@@ -79,7 +84,23 @@ class DashboardHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
-        CircleIconButton(icon: Icons.logout, onTap: login),
+        // CircleIconButton(icon: Icons.logout, onTap: login),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleIconButton(icon: Icons.logout, onTap: login),
+            const SizedBox(height: 4),
+            const Text(
+              'Logout',
+              style: TextStyle(
+                fontSize: 10,
+                fontFamily: "Poppins",
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }

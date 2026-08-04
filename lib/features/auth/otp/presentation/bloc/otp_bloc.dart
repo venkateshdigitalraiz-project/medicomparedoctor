@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
 import 'package:medicompare/features/auth/otp/domain/repositories/otp_repository.dart';
 import 'package:medicompare/features/auth/otp/data/repositories/otp_repository_impl.dart';
 import 'package:medicompare/features/auth/otp/data/datasources/otp_remote_data_source.dart';
+import 'package:medicompare/core/network/global_client.dart';
 
 import 'package:medicompare/core/services/session_manager.dart';
 
@@ -21,7 +21,9 @@ class OtpBloc extends Bloc<OtpEvent, OtpState> {
     : repository =
           repository ??
           OtpRepositoryImpl(
-            remoteDataSource: OtpRemoteDataSourceImpl(client: http.Client()),
+            remoteDataSource: OtpRemoteDataSourceImpl(
+              client: AppHttpClient.client,
+            ),
           ),
       super(OtpState.initial()) {
     on<OtpStarted>(_onStarted);
@@ -117,9 +119,11 @@ class OtpBloc extends Bloc<OtpEvent, OtpState> {
 
       if (response.success) {
         final token = response.data?.token ?? 'mock_token';
-        final userData = response.data?.employeePerson?.toJson() ?? <String, dynamic>{'phone': state.phoneNumber};
+        final userData =
+            response.data?.employeePerson?.toJson() ??
+            <String, dynamic>{'phone': state.phoneNumber};
         await SessionManager.saveSession(token: token, userData: userData);
-        
+
         emit(
           state.copyWith(
             status: OtpSubmissionStatus.success,

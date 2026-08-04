@@ -11,6 +11,8 @@ import '../../data/datasources/auth_remote_data_source.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
 
+import 'package:medicompare/core/network/global_client.dart';
+
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final AuthRepository repository;
 
@@ -18,7 +20,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     : repository =
           repository ??
           AuthRepositoryImpl(
-            remoteDataSource: AuthRemoteDataSourceImpl(client: http.Client()),
+            remoteDataSource: AuthRemoteDataSourceImpl(client: AppHttpClient.client),
           ),
       super(const LoginState()) {
     on<PhoneNumberChanged>((event, emit) {

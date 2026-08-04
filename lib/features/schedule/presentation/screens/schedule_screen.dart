@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:medicompare/common/common_add/appcolor.dart';
 import 'package:medicompare/core/routes/router_name.dart';
 import 'package:medicompare/core/widget/circle_login_button.dart';
+import 'package:medicompare/features/auth/logout/presentation/utils/logout_handler.dart';
 import 'package:medicompare/features/schedule/presentation/bloc/schedule_bloc.dart';
 import 'package:medicompare/features/schedule/presentation/bloc/schedule_event.dart';
 import 'package:medicompare/features/schedule/presentation/bloc/schedule_state.dart';
@@ -144,11 +145,26 @@ class _ScheduleViewState extends State<_ScheduleView> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      CircleIconButton(
-                        icon: Icons.logout,
-                        onTap: () {
-                          Navigator.pushNamed(context, RouteNames.login);
-                        },
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircleIconButton(
+                            icon: Icons.logout,
+                            onTap: () {
+                              LogoutHandler.logout(context);
+                            },
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Logout',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontFamily: "Poppins",
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -309,13 +325,18 @@ class _ScheduleViewState extends State<_ScheduleView> {
 
                               Future<void> handleRefresh() async {
                                 final sBloc = context.read<ScheduleBloc>();
-                                if (sBloc.state.status == ScheduleStatus.refreshing ||
-                                    sBloc.state.status == ScheduleStatus.initialLoading) {
+                                if (sBloc.state.status ==
+                                        ScheduleStatus.refreshing ||
+                                    sBloc.state.status ==
+                                        ScheduleStatus.initialLoading) {
                                   return;
                                 }
-                                final future = sBloc.stream.firstWhere((st) =>
-                                    st.status != ScheduleStatus.refreshing &&
-                                    st.status != ScheduleStatus.initialLoading);
+                                final future = sBloc.stream.firstWhere(
+                                  (st) =>
+                                      st.status != ScheduleStatus.refreshing &&
+                                      st.status !=
+                                          ScheduleStatus.initialLoading,
+                                );
                                 sBloc.add(const RefreshSchedule());
                                 await future;
                               }
@@ -324,9 +345,12 @@ class _ScheduleViewState extends State<_ScheduleView> {
                                 return RefreshIndicator(
                                   onRefresh: handleRefresh,
                                   child: SingleChildScrollView(
-                                    physics: const AlwaysScrollableScrollPhysics(),
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
                                     child: SizedBox(
-                                      height: MediaQuery.of(context).size.height * 0.4,
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                          0.4,
                                       child: const Center(
                                         child: Text(
                                           "No Appointments Found",
@@ -347,7 +371,8 @@ class _ScheduleViewState extends State<_ScheduleView> {
                                 onRefresh: handleRefresh,
                                 child: ListView.builder(
                                   controller: _scrollController,
-                                  physics: const AlwaysScrollableScrollPhysics(),
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
                                   padding: const EdgeInsets.fromLTRB(
                                     20,
                                     0,
@@ -373,7 +398,10 @@ class _ScheduleViewState extends State<_ScheduleView> {
                                     final appt = activeList[index];
                                     return AppointmentCard(
                                       appointment: appt,
-                                      accentColor: _accentFor(appt.status, index),
+                                      accentColor: _accentFor(
+                                        appt.status,
+                                        index,
+                                      ),
                                     );
                                   },
                                 ),

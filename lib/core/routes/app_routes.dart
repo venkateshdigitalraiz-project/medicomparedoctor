@@ -8,7 +8,7 @@ import 'package:medicompare/add_available/add_availability_screen.dart';
 import 'package:medicompare/add_available/bloc/availability_bloc.dart';
 import 'package:medicompare/features/appointment_details/presentation/screens/appointment_details_screen.dart';
 
-import 'package:medicompare/bottomNavigate/screen/dashboard_navigation.dart';
+import 'package:medicompare/features/dashboard/presentation/screens/dashboard_navigation.dart';
 import 'package:medicompare/calendar/bloc/calendar_bloc.dart';
 import 'package:medicompare/calendar/screens/calendar_screen.dart';
 import 'package:medicompare/chartbox/bolc/chat_bloc.dart';
@@ -24,10 +24,13 @@ import 'package:medicompare/features/auth/pin/presentation/bloc/pin_bloc.dart';
 import 'package:medicompare/features/auth/pin/presentation/pages/create_pin_screen.dart';
 import 'package:medicompare/features/auth/document_verification/presentation/pages/doctor_verification_screen.dart';
 import 'package:medicompare/features/auth/document_verification/presentation/bloc/document_verification_bloc.dart';
-import 'package:medicompare/profile/bloc/user_profile_bloc.dart';
-import 'package:medicompare/profile/screen/user_profile_screen.dart';
+import 'package:medicompare/features/onboarding/presentation/bloc/onboarding_bloc.dart';
+import 'package:medicompare/features/onboarding/presentation/bloc/onboarding_event.dart';
+import 'package:medicompare/features/profile/presentation/bloc/user_profile_bloc.dart';
+import 'package:medicompare/features/profile/presentation/screens/user_profile_screen.dart';
 import 'package:medicompare/edit_profile/bloc/edit_profile_bloc.dart';
 import 'package:medicompare/edit_profile/edit_profile_screen.dart';
+import 'package:medicompare/features/splash/presentation/pages/splash_screen.dart';
 import 'package:medicompare/help_support/bloc/faq_cubit.dart';
 import 'package:medicompare/help_support/screens/help_support_screen.dart';
 import 'package:medicompare/holidays/bloc/holiday_bloc.dart';
@@ -41,6 +44,9 @@ import 'package:medicompare/menubar/screens/profile_screen.dart';
 import 'package:medicompare/notification/bloc/notification_bloc.dart';
 import 'package:medicompare/notification/notifications_screen.dart';
 import 'package:medicompare/features/auth/otp/presentation/pages/verify_otp_screen.dart';
+import 'package:medicompare/onboard/intro1screen.dart';
+import 'package:medicompare/onboard/intro2screen.dart';
+import 'package:medicompare/onboard/intro3screen.dart';
 import 'package:medicompare/privacy_policy/cubit/privacy_policy_cubit.dart';
 import 'package:medicompare/privacy_policy/screens/privacy_policy_screen.dart';
 import 'package:medicompare/features/auth/register/presentation/bloc/doctor_registration_bloc.dart';
@@ -309,6 +315,58 @@ class AppRoutes {
             child: const UserProfileScreen(),
           ),
         );
+      case RouteNames.splash:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => SplashScreen(
+            onFinished: () {
+              context.read<OnboardingBloc>().add(const CheckOnboardingStatus());
+            },
+          ),
+        );
+
+      // ----------------------------------------------------------------
+      // Intro 1
+      // ----------------------------------------------------------------
+      case RouteNames.intro1:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => Intro1Screen(
+            onNext: () => Navigator.of(context).pushNamed(RouteNames.intro2),
+            onSkip: () => _completeOnboarding(context),
+            onBack: () {},
+          ),
+        );
+
+      // ----------------------------------------------------------------
+      // Intro 2
+      // ----------------------------------------------------------------
+      case RouteNames.intro2:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => Intro2Screen(
+            onNext: () => Navigator.of(context).pushNamed(RouteNames.intro3),
+            onSkip: () => _completeOnboarding(context),
+            onBack: () => Navigator.of(context).pop(),
+          ),
+        );
+
+      // ----------------------------------------------------------------
+      // Intro 3 — finish action is the same as skip: save + go to calendar.
+      // ----------------------------------------------------------------
+      case RouteNames.intro3:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (context) => Intro3Screen(
+            onFinish: () => _completeOnboarding(context),
+            onSkip: () => _completeOnboarding(context),
+            onBack: () => Navigator.of(context).pop(),
+          ),
+        );
+
+      // ----------------------------------------------------------------
+      // Calendar (Home)
+      // ----------------------------------------------------------------
 
       default:
         return MaterialPageRoute(
@@ -316,5 +374,9 @@ class AppRoutes {
               const Scaffold(body: Center(child: Text("Route Not Found"))),
         );
     }
+  }
+
+  static void _completeOnboarding(BuildContext context) {
+    context.read<OnboardingBloc>().add(const CompleteOnboarding());
   }
 }

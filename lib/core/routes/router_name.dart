@@ -1,5 +1,4 @@
 class RouteNames {
-  static const splash = "/";
   static const login = "/login";
   static const otp = "/otp";
   static const register = "/register";
@@ -32,4 +31,8 @@ class RouteNames {
   static const searchTodayAppointment = "/searchTodayAppointment";
   static const document = "/document";
   static const searchid = "/searchid";
+  static const splash = '/splash';
+  static const intro1 = '/intro1';
+  static const intro2 = '/intro2';
+  static const intro3 = '/intro3';
 }

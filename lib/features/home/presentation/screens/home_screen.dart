@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/routes/router_name.dart';
+import 'package:medicompare/features/auth/logout/presentation/utils/logout_handler.dart';
 
 import 'package:medicompare/core/theme/app_theme.dart';
 import '../bloc/home_bloc.dart';
@@ -108,35 +109,42 @@ class _HomeViewState extends State<_HomeView> {
         }
       }
     }
-    // ── End pagination ────────────────────────────────────────────────────────
 
-    final Map<HomeTab, GlobalKey> sectionKeys = {
-      HomeTab.overview: _overviewKey,
-      HomeTab.appointments: _appointmentsKey,
-      HomeTab.actions: _actionsKey,
-    };
-
+    // ── Active Tab Detection ─────────────────────────────────────────────────
     HomeTab? activeTab;
-    double bestTop = double.negativeInfinity;
-
-    for (final entry in sectionKeys.entries) {
-      final renderObject = entry.value.currentContext?.findRenderObject();
-      if (renderObject is! RenderBox || !renderObject.attached) continue;
-
-      final topOffset = renderObject.localToGlobal(Offset.zero).dy;
-
-      // A section becomes the "active" candidate once its top has
-      // scrolled up past the activation line. Among all sections that
-      // qualify, we want the one with the largest (closest-to-top) dy,
-      // i.e. the most recently passed section.
-      if (topOffset <= _activationOffset && topOffset > bestTop) {
-        bestTop = topOffset;
-        activeTab = entry.key;
+    final overviewCtx = _overviewKey.currentContext;
+    if (overviewCtx != null) {
+      final box = overviewCtx.findRenderObject() as RenderBox?;
+      if (box != null) {
+        final offset = box.localToGlobal(Offset.zero);
+        if (offset.dy <= _activationOffset) {
+          activeTab = HomeTab.overview;
+        }
       }
     }
 
-    // If nothing has passed the activation line yet (e.g. right at the
-    // very top of the list), default to the first section.
+    final apptsCtx = _appointmentsKey.currentContext;
+    if (apptsCtx != null) {
+      final box = apptsCtx.findRenderObject() as RenderBox?;
+      if (box != null) {
+        final offset = box.localToGlobal(Offset.zero);
+        if (offset.dy <= _activationOffset) {
+          activeTab = HomeTab.appointments;
+        }
+      }
+    }
+
+    final actionsCtx = _actionsKey.currentContext;
+    if (actionsCtx != null) {
+      final box = actionsCtx.findRenderObject() as RenderBox?;
+      if (box != null) {
+        final offset = box.localToGlobal(Offset.zero);
+        if (offset.dy <= _activationOffset) {
+          activeTab = HomeTab.actions;
+        }
+      }
+    }
+
     activeTab ??= HomeTab.overview;
 
     if (activeTab != _lastAutoDetectedTab) {
@@ -201,7 +209,7 @@ class _HomeViewState extends State<_HomeView> {
                       Navigator.pushNamed(context, RouteNames.menubar);
                     },
                     login: () {
-                      Navigator.pushNamed(context, RouteNames.login);
+                      LogoutHandler.logout(context);
                     },
                   ),
                   const SizedBox(height: 16),
