@@ -54,8 +54,8 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // Global navigator key to allow navigation from BlocListener before Navigator is built
-  static final GlobalKey<NavigatorState> _navigatorKey =
+  // Global navigator key to allow navigation from BlocListener/API interceptor
+  static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
 
   @override
@@ -63,7 +63,7 @@ class MyApp extends StatelessWidget {
     return BlocProvider<OnboardingBloc>(
       create: (_) => OnboardingBloc(),
       child: MaterialApp(
-        navigatorKey: _navigatorKey,
+        navigatorKey: navigatorKey,
         debugShowCheckedModeBanner: false,
         title: 'MediCompares',
         theme: ThemeData(
@@ -76,7 +76,7 @@ class MyApp extends StatelessWidget {
         builder: (context, child) {
           return BlocListener<OnboardingBloc, OnboardingState>(
             listener: (context, state) {
-              final navigator = MyApp._navigatorKey.currentState;
+              final navigator = MyApp.navigatorKey.currentState;
               WidgetsBinding.instance.addPostFrameCallback((_) async {
                 final bool loggedIn = await SessionManager.isLoggedIn();
                 if (state is OnboardingChecked) {
