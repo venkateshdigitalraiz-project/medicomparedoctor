@@ -74,20 +74,20 @@ class Intro2Screen extends StatelessWidget {
                           color: Colors.white,
                           fontFamily: "Poppins",
                           fontWeight: FontWeight.w600,
-                          fontSize: 26,
+                          fontSize: 22,
                         ),
                       ),
 
                       SizedBox(height: size.height * .015),
 
                       Text(
-                        "Customize availability, block holidays and\norganize consultations with an intelligent\ncalendar.",
+                        "Customize availability, block holidays and organize consultations with an intelligent calendar.",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white70,
                           fontFamily: "Poppins",
-                          fontWeight: FontWeight.w500,
-                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
                         ),
                       ),
 

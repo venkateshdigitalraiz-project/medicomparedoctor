@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/routes/router_name.dart';
 import 'package:medicompare/features/auth/logout/presentation/utils/logout_handler.dart';
 
 import 'package:medicompare/core/theme/app_theme.dart';
+import 'package:medicompare/core/widget/common_state_widgets.dart';
 import '../bloc/home_bloc.dart';
 import '../widgets/appointment_tile.dart';
 import '../widgets/clinic_status_card.dart';
@@ -185,11 +187,11 @@ class _HomeViewState extends State<_HomeView> {
           builder: (context, state) {
             if (state.status == HomeStatus.loading ||
                 state.status == HomeStatus.initial) {
-              return const Center(child: CircularProgressIndicator());
+              return const CommonLoadingWidget();
             }
 
             if (state.status == HomeStatus.failure) {
-              return _ErrorView(
+              return CommonErrorWidget(
                 message: state.errorMessage ?? 'Something went wrong',
                 onRetry: () =>
                     context.read<HomeBloc>().add(const HomeStarted()),
@@ -297,19 +299,8 @@ class _HomeViewState extends State<_HomeView> {
                         ),
                         const SizedBox(height: 10),
                         if (state.filteredAppointments.isEmpty)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 20),
-                            child: Center(
-                              child: Text(
-                                'No appointments found',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  fontFamily: "Poppins",
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
+                          const CommonEmptyWidget(
+                            message: 'No appointments found',
                           )
                         else
                           ...state.filteredAppointments.map(
@@ -317,10 +308,14 @@ class _HomeViewState extends State<_HomeView> {
                           ),
                         // ── Pagination loading indicator ──────────────────
                         if (state.isLoadingNextPage)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 12),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                             child: Center(
-                              child: CircularProgressIndicator(strokeWidth: 2.5),
+                              child:
+                                  AppLoader(
+                                    color: AppColors.primary,
+                                    size: 30,
+                                  ),
                             ),
                           ),
                       ],
@@ -389,29 +384,6 @@ class _HomeViewState extends State<_HomeView> {
             );
           },
         ),
-      ),
-    );
-  }
-}
-
-class _ErrorView extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const _ErrorView({required this.message, required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.error_outline, size: 40, color: AppColors.danger),
-          const SizedBox(height: 10),
-          Text(message, style: AppTextStyles.body),
-          const SizedBox(height: 14),
-          ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
-        ],
       ),
     );
   }

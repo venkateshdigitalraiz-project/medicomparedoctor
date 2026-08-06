@@ -17,7 +17,7 @@ class ToastHelper {
     messengerKey.currentState?.showSnackBar(
       SnackBar(
         content: const Text(
-          "No Internet Connection. Please check your network and try again.",
+          "No Internet Connection. Please check your network.",
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.white,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/widget/spraytype.dart';
 import 'package:medicompare/features/auth/document_verification/presentation/bloc/document_verification_bloc.dart';
@@ -61,8 +62,12 @@ class _DoctorVerificationView extends StatelessWidget {
                     >(
                       builder: (context, state) {
                         if (state.documents.isEmpty) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
+                          return Center(
+                            child:
+                                AppLoader(
+                                  color: const Color(0xFF6D28D9),
+                                  size: 40,
+                                ),
                           );
                         }
                         return ListView(
@@ -224,12 +229,12 @@ class _DoctorVerificationView extends StatelessWidget {
                 elevation: 6,
               ),
               child: isSubmitting
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 22,
                       height: 22,
-                      child: CircularProgressIndicator(
+                      child: AppLoader(
                         color: Colors.white,
-                        strokeWidth: 2.5,
+                        size: 22,
                       ),
                     )
                   : const Row(

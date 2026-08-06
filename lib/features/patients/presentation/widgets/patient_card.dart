@@ -30,7 +30,14 @@ class PatientCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 26,
-                backgroundImage: NetworkImage(patient.avatarUrl),
+                backgroundImage: (patient.avatarUrl.startsWith('http://') ||
+                        patient.avatarUrl.startsWith('https://'))
+                    ? NetworkImage(patient.avatarUrl)
+                    : null,
+                child: !(patient.avatarUrl.startsWith('http://') ||
+                        patient.avatarUrl.startsWith('https://'))
+                    ? const Icon(Icons.person, size: 26)
+                    : null,
               ),
               const SizedBox(width: 12),
               Expanded(

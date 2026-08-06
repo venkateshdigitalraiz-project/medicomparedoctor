@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/widget/circle_login_button.dart';
+import 'package:medicompare/core/widget/common_state_widgets.dart';
 import 'package:medicompare/features/auth/logout/presentation/utils/logout_handler.dart';
 import 'package:medicompare/features/patients/presentation/bloc/patients_bloc.dart';
 import 'package:medicompare/features/patients/presentation/bloc/patients_event.dart';
@@ -69,6 +71,24 @@ class _PatientsScreenState extends State<PatientsScreen> {
                   current.cancelledPatientsCount ||
               previous.errorMessage != current.errorMessage,
           builder: (context, state) {
+            if (state.status == PatientsStatus.initial ||
+                (state.status == PatientsStatus.loading &&
+                    state.allPatients.isEmpty)) {
+              return const CommonLoadingWidget();
+            }
+
+            if (state.status == PatientsStatus.failure &&
+                state.allPatients.isEmpty) {
+              return CommonErrorWidget(
+                message: state.errorMessage ?? 'Something went wrong',
+                onRetry: () {
+                  context.read<PatientsBloc>().add(
+                    const PatientsLoadRequested(),
+                  );
+                },
+              );
+            }
+
             return Column(
               children: [
                 _Header(),
@@ -108,27 +128,9 @@ class _PatientsScreenState extends State<PatientsScreen> {
                                 .add(PatientsFilterChanged(filter)),
                           ),
                           const SizedBox(height: 16),
-                          if (state.status == PatientsStatus.loading &&
-                              state.allPatients.isEmpty)
-                            const Padding(
-                              padding: EdgeInsets.only(top: 40),
-                              child: Center(child: CircularProgressIndicator()),
-                            )
-                          else if (state.status == PatientsStatus.failure &&
-                              state.allPatients.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 40),
-                              child: Center(
-                                child: Text(
-                                  state.errorMessage ?? 'Something went wrong',
-                                  style: const TextStyle(color: Colors.red),
-                                ),
-                              ),
-                            )
-                          else if (state.visiblePatients.isEmpty)
-                            const Padding(
-                              padding: EdgeInsets.only(top: 40),
-                              child: Center(child: Text('No patients found')),
+                          if (state.visiblePatients.isEmpty)
+                            const CommonEmptyWidget(
+                              message: 'No patients found',
                             )
                           else
                             Container(
@@ -148,11 +150,16 @@ class _PatientsScreenState extends State<PatientsScreen> {
                                     .toList(),
                               ),
                             ),
-                          if (state.isLoadingMore)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              child: Center(child: CircularProgressIndicator()),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Center(
+                              child:
+                                  AppLoader(
+                                    color: const Color(0xFF6D28D9),
+                                    size: 30,
+                                  ),
                             ),
+                          ),
                         ],
                       ),
                     ),
@@ -230,35 +237,45 @@ class _StatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        StatCard(
-          icon: Icons.groups_rounded,
-          iconColor: const Color(0xFF6C4CF1),
-          iconBg: const Color(0xFFEDE7FE),
-          value: '${state.totalCount}'.padLeft(2, '0'),
-          label: 'Total Patients',
+        Expanded(
+          child: StatCard(
+            icon: Icons.groups_rounded,
+            iconColor: const Color(0xFF6C4CF1),
+            iconBg: const Color(0xFFEDE7FE),
+            value: '${state.totalCount}'.padLeft(2, '0'),
+            label: 'Total Patients',
+          ),
         ),
-        StatCard(
-          icon: Icons.person_add_alt_1_rounded,
-          iconColor: Colors.white,
-          iconBg: const Color(0xFF34C759),
-          value: '${state.newThisMonth}'.padLeft(2, '0'),
-          label: 'New This\nMonth',
+        const SizedBox(width: 8),
+        Expanded(
+          child: StatCard(
+            icon: Icons.person_add_alt_1_rounded,
+            iconColor: Colors.white,
+            iconBg: const Color(0xFF34C759),
+            value: '${state.newThisMonth}'.padLeft(2, '0'),
+            label: 'New This\nMonth',
+          ),
         ),
-        StatCard(
-          icon: Icons.replay_rounded,
-          iconColor: const Color(0xFF2F80ED),
-          iconBg: const Color(0xFFE7F0FF),
-          value: '${state.waitingCount}'.padLeft(2, '0'),
-          label: 'Waiting',
+        const SizedBox(width: 8),
+        Expanded(
+          child: StatCard(
+            icon: Icons.replay_rounded,
+            iconColor: const Color(0xFF2F80ED),
+            iconBg: const Color(0xFFE7F0FF),
+            value: '${state.waitingCount}'.padLeft(2, '0'),
+            label: 'Waiting',
+          ),
         ),
-        StatCard(
-          icon: Icons.close_rounded,
-          iconColor: Colors.white,
-          iconBg: const Color(0xFFEF4444),
-          value: '${state.cancelledCount}'.padLeft(2, '0'),
-          label: 'Cancelled',
+        const SizedBox(width: 8),
+        Expanded(
+          child: StatCard(
+            icon: Icons.close_rounded,
+            iconColor: Colors.white,
+            iconBg: const Color(0xFFEF4444),
+            value: '${state.cancelledCount}'.padLeft(2, '0'),
+            label: 'Cancelled',
+          ),
         ),
       ],
     );

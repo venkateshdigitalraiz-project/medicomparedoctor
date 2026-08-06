@@ -73,7 +73,7 @@ class Intro1Screen extends StatelessWidget {
                           color: Colors.white,
                           fontFamily: "Poppins",
                           fontWeight: FontWeight.w600,
-                          fontSize: 26,
+                          fontSize: 22,
                         ),
                       ),
 
@@ -86,8 +86,8 @@ class Intro1Screen extends StatelessWidget {
                         style: TextStyle(
                           color: Colors.white70,
                           fontFamily: "Poppins",
-                          fontWeight: FontWeight.w500,
-                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
                         ),
                       ),
 

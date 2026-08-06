@@ -1,10 +1,12 @@
 import 'dart:developer' as developer;
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:medicompare/common/common_add/appcolor.dart';
 import 'package:medicompare/core/routes/router_name.dart';
 import 'package:medicompare/core/widget/circle_login_button.dart';
+import 'package:medicompare/core/widget/common_state_widgets.dart';
 import 'package:medicompare/features/auth/logout/presentation/utils/logout_handler.dart';
 import 'package:medicompare/features/schedule/presentation/bloc/schedule_bloc.dart';
 import 'package:medicompare/features/schedule/presentation/bloc/schedule_event.dart';
@@ -87,27 +89,14 @@ class _ScheduleViewState extends State<_ScheduleView> {
             // Initial loading state (full-screen loader)
             if (state.status == ScheduleStatus.initialLoading ||
                 state.status == ScheduleStatus.initial) {
-              return const Center(child: CircularProgressIndicator());
+              return const CommonLoadingWidget();
             }
             if (state.status == ScheduleStatus.failure) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      state.errorMessage ?? 'Error loading schedule',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red, fontSize: 16),
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<ScheduleBloc>().add(const LoadSchedule());
-                      },
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
+              return CommonErrorWidget(
+                message: state.errorMessage ?? 'Error loading schedule',
+                onRetry: () {
+                  context.read<ScheduleBloc>().add(const LoadSchedule());
+                },
               );
             }
 
@@ -318,9 +307,7 @@ class _ScheduleViewState extends State<_ScheduleView> {
                               );
 
                               if (state.isAppointmentsLoading) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
+                                return const CommonLoadingWidget();
                               }
 
                               Future<void> handleRefresh() async {
@@ -351,16 +338,8 @@ class _ScheduleViewState extends State<_ScheduleView> {
                                       height:
                                           MediaQuery.of(context).size.height *
                                           0.4,
-                                      child: const Center(
-                                        child: Text(
-                                          "No Appointments Found",
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                            fontFamily: "Poppins",
-                                            color: AppColors.textGrey,
-                                          ),
-                                        ),
+                                      child: const CommonEmptyWidget(
+                                        message: "No Appointments Found",
                                       ),
                                     ),
                                   ),
@@ -384,14 +363,16 @@ class _ScheduleViewState extends State<_ScheduleView> {
                                       (state.isLoadingNextPage ? 1 : 0),
                                   itemBuilder: (context, index) {
                                     if (index == activeList.length) {
-                                      return const Padding(
-                                        padding: EdgeInsets.symmetric(
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
                                           vertical: 12,
                                         ),
                                         child: Center(
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2.5,
-                                          ),
+                                          child:
+                                              AppLoader(
+                                                color: const Color(0xFF6D28D9),
+                                                size: 30,
+                                              ),
                                         ),
                                       );
                                     }

@@ -5,25 +5,31 @@ class ErrorMapper {
       case 400:
         return 'Invalid request. Please try again.';
       case 401:
-        return 'Your session has expired. Please log in again.';
+        return 'Unauthorized access. Please log in again.';
       case 403:
         return "You don't have permission to perform this action.";
       case 404:
-        return 'Server is busy. Please try again later.';
+        return 'Your session has expired. Please log in again.';
       case 408:
         return 'Request timed out. Please try again.';
-      case 429:
-        return 'Too many requests. Please try again later.';
       case 500:
       case 502:
       case 503:
         return 'Server is busy. Please try again later.';
       default:
-        return 'Server is busy. Please try again later.';
+        return 'Something went wrong. Please try again.';
     }
   }
 
   static String mapNoInternet() {
     return 'No Internet Connection. Please check your network.';
+  }
+
+  static String mapTimeout() {
+    return 'Request timed out. Please try again.';
+  }
+
+  static String mapUnknown() {
+    return 'Something went wrong. Please try again.';
   }
 }

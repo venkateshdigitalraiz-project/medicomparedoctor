@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:medicompare/core/widget/app_loader.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -235,7 +236,8 @@ class _VerifyOtpViewState extends State<_VerifyOtpView> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: _primaryPurple,
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16)),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                               elevation: 0,
                             ),
                             onPressed: isSubmitting
@@ -257,13 +259,14 @@ class _VerifyOtpViewState extends State<_VerifyOtpView> {
                                     }
                                   },
                             child: isSubmitting
-                                ? const SizedBox(
+                                ? SizedBox(
                                     width: 22,
                                     height: 22,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2.5,
-                                    ),
+                                    child:
+                                        AppLoader(
+                                          color: Colors.white,
+                                          size: 22,
+                                        ),
                                   )
                                 : const Row(
                                     mainAxisAlignment: MainAxisAlignment.center,

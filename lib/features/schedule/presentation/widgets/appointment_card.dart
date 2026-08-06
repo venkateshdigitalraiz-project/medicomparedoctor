@@ -114,7 +114,14 @@ class AppointmentCard extends StatelessWidget {
                         CircleAvatar(
                           radius: 25,
                           backgroundColor: AppColors.chipBorder,
-                          backgroundImage: NetworkImage(appointment.avatarUrl),
+                          backgroundImage: (appointment.avatarUrl.startsWith('http://') ||
+                                  appointment.avatarUrl.startsWith('https://'))
+                              ? NetworkImage(appointment.avatarUrl)
+                              : null,
+                          child: !(appointment.avatarUrl.startsWith('http://') ||
+                                  appointment.avatarUrl.startsWith('https://'))
+                              ? const Icon(Icons.person, size: 25)
+                              : null,
                         ),
                         const SizedBox(width: 10),
                         Expanded(

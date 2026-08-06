@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/routes/router_name.dart';
 import 'package:medicompare/core/widget/circle_login_button.dart';
+import 'package:medicompare/core/widget/common_state_widgets.dart';
 import 'package:medicompare/features/auth/logout/presentation/utils/logout_handler.dart';
 import 'package:medicompare/features/profile/data/models/user_profile_model.dart';
 import '../bloc/user_profile_state.dart';
@@ -31,12 +32,17 @@ class _UserProfileView extends StatelessWidget {
       backgroundColor: Colors.white,
       body: BlocBuilder<UserProfileBloc, UserProfileState>(
         builder: (context, state) {
-          if (state is UserProfileLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is UserProfileError) {
-            return Center(child: Text(state.message));
-          }
+            if (state is UserProfileLoading) {
+              return const CommonLoadingWidget();
+            }
+            if (state is UserProfileError) {
+              return CommonErrorWidget(
+                message: state.message,
+                onRetry: () {
+                  context.read<UserProfileBloc>().add(const UserProfileStarted());
+                },
+              );
+            }
 
           final loaded = state as UserProfileLoaded;
           final profile = loaded.profile;

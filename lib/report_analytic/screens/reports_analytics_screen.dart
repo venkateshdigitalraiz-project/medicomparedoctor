@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/analytics_cubit.dart';
 import '../cubit/analytics_state.dart';
@@ -26,7 +27,12 @@ class _ReportsAnalyticsView extends StatelessWidget {
         child: BlocBuilder<AnalyticsCubit, AnalyticsState>(
           builder: (context, state) {
             if (state is AnalyticsLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(
+                child: AppLoader(
+                  color: const Color(0xFF6D28D9),
+                  size: 40,
+                ),
+              );
             }
             if (state is AnalyticsError) {
               return Center(

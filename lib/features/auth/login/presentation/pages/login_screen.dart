@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/constants/app_strings.dart';
@@ -286,9 +287,7 @@ class _LoginViewState extends State<_LoginView> {
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text(
-                              AppStrings.enterValid10DigitPhone,
-                            ),
+                            content: Text(AppStrings.enterValid10DigitPhone),
                           ),
                         );
                       }
@@ -301,12 +300,12 @@ class _LoginViewState extends State<_LoginView> {
                 ),
               ),
               child: state.status == LoginStatus.submitting
-                  ? const SizedBox(
-                      height: 22,
+                  ? SizedBox(
                       width: 22,
-                      child: CircularProgressIndicator(
+                      height: 22,
+                      child: AppLoader(
                         color: Colors.white,
-                        strokeWidth: 2.5,
+                        size: 22,
                       ),
                     )
                   : const Row(

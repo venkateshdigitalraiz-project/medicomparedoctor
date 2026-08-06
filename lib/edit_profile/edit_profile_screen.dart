@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/edit_profile/bloc/edit_profile_bloc.dart';
 
@@ -147,13 +148,14 @@ class _EditProfileView extends StatelessWidget {
                                 const ApplyPressed(),
                               ),
                         child: isSubmitting
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 22,
                                 height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.2,
-                                  color: Colors.white,
-                                ),
+                                child:
+                                    AppLoader(
+                                      color: Colors.white,
+                                      size: 22,
+                                    ),
                               )
                             : const Text(
                                 'Apply',

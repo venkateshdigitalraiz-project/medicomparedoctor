@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/searchAppointment/bloc/appointment_today_search_bloc.dart';
 import 'package:medicompare/searchAppointment/model/appointment_model.dart';
@@ -154,7 +155,12 @@ class _AppointmentTodaySearchScreenState
       builder: (context, state) {
         if (state.status == AppointmentTodaySearchStatus.loading ||
             state.status == AppointmentTodaySearchStatus.initial) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(
+            child: AppLoader(
+              color: const Color(0xFF6D28D9),
+              size: 40,
+            ),
+          );
         }
 
         if (state.status == AppointmentTodaySearchStatus.failure) {

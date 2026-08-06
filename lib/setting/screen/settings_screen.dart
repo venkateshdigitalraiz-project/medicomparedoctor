@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/routes/router_name.dart';
 import 'package:medicompare/setting/bloc/settings_bloc.dart';
@@ -130,13 +131,14 @@ class _SettingsView extends StatelessWidget {
                                     const LogoutRequested(),
                                   ),
                             child: isLoggingOut
-                                ? const SizedBox(
+                                ? SizedBox(
                                     width: 22,
                                     height: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.4,
-                                      color: Colors.white,
-                                    ),
+                                    child:
+                                        AppLoader(
+                                          color: Colors.white,
+                                          size: 22,
+                                        ),
                                   )
                                 : const Text(
                                     'Log Out',

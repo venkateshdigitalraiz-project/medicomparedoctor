@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/holidays/bloc/holiday_bloc.dart';
 import 'package:medicompare/holidays/widgets/calendar_widget.dart';
@@ -118,12 +119,12 @@ class HolidaysScreen extends StatelessWidget {
                   ),
                 ),
                 child: state.isSaving
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 22,
                         height: 22,
-                        child: CircularProgressIndicator(
+                        child: AppLoader(
                           color: Colors.white,
-                          strokeWidth: 2.5,
+                          size: 22,
                         ),
                       )
                     : const Text(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:medicompare/core/widget/circle_login_button.dart';
 import 'package:medicompare/core/theme/app_theme.dart';
 
@@ -48,7 +49,8 @@ class DashboardHeader extends StatelessWidget {
                   border: Border.all(color: const Color(0xFF601CA3), width: 2),
                 ),
                 child: ClipOval(
-                  child: (avatarUrl.startsWith('http://') ||
+                  child:
+                      (avatarUrl.startsWith('http://') ||
                           avatarUrl.startsWith('https://'))
                       ? Image.network(
                           avatarUrl,
@@ -59,8 +61,12 @@ class DashboardHeader extends StatelessWidget {
                           },
                           loadingBuilder: (context, child, progress) {
                             if (progress == null) return child;
-                            return const Center(
-                              child: CircularProgressIndicator(),
+                            return Center(
+                              child:
+                                  AppLoader(
+                                    color: AppColors.primary,
+                                    size: 20,
+                                  ),
                             );
                           },
                         )

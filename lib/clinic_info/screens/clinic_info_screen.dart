@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/clinic_info/cubit/clinic_cubit.dart';
 import 'package:medicompare/clinic_info/models/clinic_model.dart';
@@ -31,7 +32,12 @@ class _ClinicInfoView extends StatelessWidget {
               child: BlocBuilder<ClinicCubit, ClinicState>(
                 builder: (context, state) {
                   if (state is ClinicLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Center(
+                      child: AppLoader(
+                        color: const Color(0xFF6D28D9),
+                        size: 40,
+                      ),
+                    );
                   }
 
                   if (state is ClinicError) {

@@ -20,8 +20,7 @@ class DialogHelper {
         return AlertDialog(
           title: const Text('Session Expired'),
           content: const Text(
-            'Your session has expired or the requested resource is no longer available.\n'
-            'Please log in again.',
+            'Your session has expired. Please log in again.',
           ),
           actions: [
             TextButton(

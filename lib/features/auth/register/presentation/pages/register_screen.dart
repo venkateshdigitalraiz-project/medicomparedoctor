@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/widget/custom_dropdown_field.dart';
 import 'package:medicompare/core/widget/custom_textfield.dart';
@@ -243,12 +244,12 @@ class _RegisterViewState extends State<_RegisterView> {
           ),
         ),
         child: state.status == DoctorRegistrationStatus.submitting
-            ? const SizedBox(
-                height: 22,
+            ? SizedBox(
                 width: 22,
-                child: CircularProgressIndicator(
+                height: 22,
+                child: AppLoader(
                   color: Colors.white,
-                  strokeWidth: 2.5,
+                  size: 22,
                 ),
               )
             : const Text(
@@ -274,11 +275,7 @@ class _RegisterViewState extends State<_RegisterView> {
             children: [
               TextSpan(
                 text: 'Already have an account? ',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: _darkTeal,
-                  height: 1.4,
-                ),
+                style: TextStyle(fontSize: 14, color: _darkTeal, height: 1.4),
               ),
               TextSpan(
                 text: 'Log in',

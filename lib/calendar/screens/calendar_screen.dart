@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/calendar/bloc/calendar_bloc.dart';
 import 'package:medicompare/calendar/bloc/calendar_event.dart';
@@ -45,7 +46,12 @@ class _CalendarView extends StatelessWidget {
         child: BlocBuilder<CalendarBloc, CalendarState>(
           builder: (context, state) {
             if (state.isLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(
+                child: AppLoader(
+                  color: const Color(0xFF6D28D9),
+                  size: 40,
+                ),
+              );
             }
             return CustomScrollView(
               slivers: [

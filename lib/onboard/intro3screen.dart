@@ -75,20 +75,20 @@ class Intro3Screen extends StatelessWidget {
                           color: Colors.white,
                           fontFamily: "Poppins",
                           fontWeight: FontWeight.w600,
-                          fontSize: 26,
+                          fontSize: 22,
                         ),
                       ),
 
                       SizedBox(height: size.height * .015),
 
                       Text(
-                        "Access real time insights on \nappointments,patients engagement \n and clinic performance anytime",
+                        "Access real time insights on appointments,patients engagement  and clinic performance anytime",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white70,
                           fontFamily: "Poppins",
                           fontWeight: FontWeight.w500,
-                          fontSize: 18,
+                          fontSize: 14,
                         ),
                       ),
 

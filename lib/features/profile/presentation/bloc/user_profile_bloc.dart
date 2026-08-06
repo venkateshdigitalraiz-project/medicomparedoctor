@@ -40,7 +40,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
         ),
       );
     } catch (e) {
-      emit(UserProfileError('Failed to load profile: $e'));
+      emit(UserProfileError(e.toString()));
     }
   }
 

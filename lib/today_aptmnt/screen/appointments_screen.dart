@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/routes/router_name.dart';
 import 'package:medicompare/today_aptmnt/bloc/appointment_bloc.dart';
@@ -34,7 +35,12 @@ class _AppointmentsView extends StatelessWidget {
                 builder: (context, state) {
                   if (state.status == AppointmentStatusFlag.loading ||
                       state.status == AppointmentStatusFlag.initial) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Center(
+                      child: AppLoader(
+                        color: const Color(0xFF6D28D9),
+                        size: 40,
+                      ),
+                    );
                   }
 
                   if (state.status == AppointmentStatusFlag.failure) {

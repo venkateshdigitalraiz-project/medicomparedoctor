@@ -68,7 +68,14 @@ class AppointmentTile extends StatelessWidget {
                     CircleAvatar(
                       radius: 20,
                       backgroundColor: AppColors.cardBorder,
-                      backgroundImage: NetworkImage(appointment.avatarUrl),
+                      backgroundImage: (appointment.avatarUrl.startsWith('http://') ||
+                              appointment.avatarUrl.startsWith('https://'))
+                          ? NetworkImage(appointment.avatarUrl)
+                          : null,
+                      child: !(appointment.avatarUrl.startsWith('http://') ||
+                              appointment.avatarUrl.startsWith('https://'))
+                          ? const Icon(Icons.person, size: 20)
+                          : null,
                     ),
                     const SizedBox(width: 10),
                     Expanded(

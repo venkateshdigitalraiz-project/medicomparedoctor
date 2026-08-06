@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/searchId/search_bloc.dart';
 
@@ -125,10 +126,13 @@ class _SearchViewState extends State<_SearchView> {
                       return const SizedBox.shrink();
 
                     case SearchStatus.loading:
-                      return const Center(
+                      return Center(
                         child: Padding(
-                          padding: EdgeInsets.only(top: 40),
-                          child: CircularProgressIndicator(),
+                          padding: const EdgeInsets.only(top: 40),
+                          child: AppLoader(
+                            color: const Color(0xFF6D28D9),
+                            size: 40,
+                          ),
                         ),
                       );
 

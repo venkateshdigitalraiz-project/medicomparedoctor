@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/Document/documents_bloc.dart';
 
@@ -28,8 +29,13 @@ class _DocumentsView extends StatelessWidget {
       backgroundColor: Colors.white,
       body: BlocBuilder<DocumentsBloc, DocumentsState>(
         builder: (context, state) {
-          if (state.isLoading && state.documents.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+          if (state.isLoading || state.documents.isEmpty) {
+            return Center(
+              child: AppLoader(
+                color: const Color(0xFF6D28D9),
+                size: 40,
+              ),
+            );
           }
           return RefreshIndicator(
             onRefresh: () async {
@@ -166,11 +172,9 @@ class _StatusCard extends StatelessWidget {
                     SizedBox(
                       width: 46,
                       height: 46,
-                      child: CircularProgressIndicator(
-                        value: state.verificationPercent,
-                        strokeWidth: 3,
-                        backgroundColor: _greenLight,
-                        valueColor: const AlwaysStoppedAnimation(_green),
+                      child: AppLoader(
+                        color: _green,
+                        size: 46,
                       ),
                     ),
                     Text(

@@ -19,8 +19,6 @@ class StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 82,
-      height: 120,
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -45,6 +43,8 @@ class StatCard extends StatelessWidget {
               fontFamily: "Poppins",
               color: Color(0xFF3B2FD6),
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 2),
           Text(
@@ -57,6 +57,8 @@ class StatCard extends StatelessWidget {
               color: Color(0xFF6B7280),
               height: 1.2,
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

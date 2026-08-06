@@ -90,14 +90,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       if (reset) {
         emit(state.copyWith(
           status: HomeStatus.failure,
-          errorMessage: 'Could not load dashboard. Please try again.',
+          errorMessage: e.toString(),
           isLoadingNextPage: false,
         ));
       } else {
         // Pagination error — don't wipe the screen; just stop the spinner.
         emit(state.copyWith(
           isLoadingNextPage: false,
-          errorMessage: 'Could not load more appointments.',
+          errorMessage: e.toString(),
         ));
       }
     }

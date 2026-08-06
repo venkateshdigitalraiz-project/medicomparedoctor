@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/consultation/screen/filter_tabs.dart';
 import 'package:medicompare/consultation/screen/patient_card.dart';
@@ -34,7 +35,12 @@ class _ConsultationHistoryView extends StatelessWidget {
                 builder: (context, state) {
                   if (state.status == ConsultationStatusFlag.loading ||
                       state.status == ConsultationStatusFlag.initial) {
-                    return const Center(child: CircularProgressIndicator());
+                    return Center(
+                      child: AppLoader(
+                        color: const Color(0xFF6D28D9),
+                        size: 40,
+                      ),
+                    );
                   }
 
                   return CustomScrollView(

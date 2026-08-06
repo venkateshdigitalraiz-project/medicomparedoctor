@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
+
 
 class PrimaryButton extends StatelessWidget {
   final String text;
@@ -30,12 +32,12 @@ class PrimaryButton extends StatelessWidget {
           ),
         ),
         child: loading
-            ? const SizedBox(
-                height: 22,
+            ? SizedBox(
                 width: 22,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
+                height: 22,
+                child: AppLoader(
                   color: Colors.white,
+                  size: 22,
                 ),
               )
             : Text(

@@ -1,4 +1,6 @@
 // import 'package:flutter/material.dart';
+import 'package:medicompare/core/widget/app_loader.dart';
+
 // import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:medicompare/Home/bloc/home_bloc.dart';
 // import 'package:medicompare/Home/screens/home_screen.dart';
@@ -140,7 +142,12 @@ class _MainScreenBody extends StatelessWidget {
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (_) => const Center(child: CircularProgressIndicator()),
+            builder: (_) => Center(
+              child: AppLoader(
+                color: const Color(0xFF6D28D9),
+                size: 40,
+              ),
+            ),
           );
         } else if (state is LogoutSuccess) {
           // Dismiss the loading dialog
