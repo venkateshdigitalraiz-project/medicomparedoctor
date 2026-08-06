@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:medicompare/core/widget/app_loader.dart';
+import 'package:medicompare/core/widget/app_refresh_indicator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/routes/router_name.dart';
 import 'package:medicompare/features/auth/logout/presentation/utils/logout_handler.dart';
@@ -183,206 +185,241 @@ class _HomeViewState extends State<_HomeView> {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       body: SafeArea(
-        child: BlocBuilder<HomeBloc, HomeState>(
-          builder: (context, state) {
-            if (state.status == HomeStatus.loading ||
-                state.status == HomeStatus.initial) {
-              return const CommonLoadingWidget();
-            }
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: DashboardHeader(
+                avatarUrl: 'https://i.pravatar.cc/150?img=47',
+                onAvatarTap: () {
+                  Navigator.pushNamed(context, RouteNames.menubar);
+                },
+                login: () {
+                  LogoutHandler.logout(context);
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: BlocConsumer<HomeBloc, HomeState>(
+                listener: (context, state) {
+                  if (state.status == HomeStatus.failure &&
+                      state.appointments.isNotEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.errorMessage ?? 'Refresh failed'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                builder: (context, state) {
+                  if (state.status == HomeStatus.loading ||
+                      state.status == HomeStatus.initial) {
+                    return const CommonLoadingWidget();
+                  }
 
-            if (state.status == HomeStatus.failure) {
-              return CommonErrorWidget(
-                message: state.errorMessage ?? 'Something went wrong',
-                onRetry: () =>
-                    context.read<HomeBloc>().add(const HomeStarted()),
-              );
-            }
+                  if (state.status == HomeStatus.failure &&
+                      state.appointments.isEmpty) {
+                    return CommonErrorWidget(
+                      message: state.errorMessage ?? 'Something went wrong',
+                      onRetry: () =>
+                          context.read<HomeBloc>().add(const HomeStarted()),
+                    );
+                  }
 
-            return RefreshIndicator(
-              onRefresh: () async =>
-                  context.read<HomeBloc>().add(const HomeRefreshed()),
-              child: ListView(
-                controller: _scrollController,
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                children: [
-                  DashboardHeader(
-                    avatarUrl: 'https://i.pravatar.cc/150?img=47',
-                    onAvatarTap: () {
-                      Navigator.pushNamed(context, RouteNames.menubar);
+                  return AppRefreshIndicator(
+                    color: Colors.green,
+                    topposition: 4,
+                    onRefresh: () async {
+                      final bloc = context.read<HomeBloc>();
+                      if (bloc.state.status == HomeStatus.loading) return;
+                      final completer = Completer<void>();
+                      bloc.add(HomeRefreshed(completer: completer));
+                      await completer.future;
                     },
-                    login: () {
-                      LogoutHandler.logout(context);
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  ClinicStatusCard(status: state.clinicStatus),
-                  const SizedBox(height: 14),
-                  DashboardSearchBar(
-                    onChanged: (q) =>
-                        context.read<HomeBloc>().add(HomeSearchChanged(q)),
-                  ),
-                  const SizedBox(height: 14),
-                  TabSelector(
-                    selected: state.selectedTab,
-                    onTap: (tab) => _onTabTapped(context, tab),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // ---------------- Today's Overview ----------------
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        key: _overviewKey,
-                        child: const Text(
-                          "Today's Overview",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: "Poppins",
-                            color: Colors.black,
+                    child: ListView(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      children: [
+                        ClinicStatusCard(status: state.clinicStatus),
+                        const SizedBox(height: 14),
+                        DashboardSearchBar(
+                          onChanged: (q) => context.read<HomeBloc>().add(
+                            HomeSearchChanged(q),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      OverviewStatsGrid(stats: state.stats),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
+                        const SizedBox(height: 14),
+                        TabSelector(
+                          selected: state.selectedTab,
+                          onTap: (tab) => _onTabTapped(context, tab),
+                        ),
+                        const SizedBox(height: 20),
 
-                  // ---------------- Today's Appointments ----------------
-                  Container(
-                    key: _appointmentsKey,
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: AppColors.infoBg.withOpacity(0.5),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        // ---------------- Today's Overview ----------------
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              key: _overviewKey,
+                              child: const Text(
+                                "Today's Overview",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: "Poppins",
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            OverviewStatsGrid(stats: state.stats),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+
+                        // ---------------- Today's Appointments ----------------
+                        Container(
+                          key: _appointmentsKey,
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: AppColors.infoBg.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    "Today's Appointments",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      fontFamily: "Poppins",
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        RouteNames.todayApartment,
+                                      );
+                                    },
+                                    style: TextButton.styleFrom(
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: const Size(0, 0),
+                                      tapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    child: const Text(
+                                      'View All',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w700,
+                                        fontFamily: "Poppins",
+                                        color: Color(0xFF601CA3),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              if (state.filteredAppointments.isEmpty)
+                                const CommonEmptyWidget(
+                                  message: 'No appointments found',
+                                )
+                              else
+                                ...state.filteredAppointments.map(
+                                  (a) => AppointmentTile(appointment: a),
+                                ),
+                              // ── Pagination loading indicator ──────────────────
+                              if (state.isLoadingNextPage)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  child: Center(
+                                    child: AppLoader(
+                                      color: AppColors.primary,
+                                      size: 30,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 22),
+
+                        // ---------------- Quick Actions ----------------
+                        Column(
+                          key: _actionsKey,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              "Today's Appointments",
+                              'Quick Actions',
                               style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
+                                fontSize: 20,
+                                fontWeight: FontWeight.w600,
                                 fontFamily: "Poppins",
                                 color: Colors.black,
                               ),
                             ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pushNamed(
-                                  context,
-                                  RouteNames.todayApartment,
-                                );
-                              },
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: const Size(0, 0),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              child: const Text(
-                                'View All',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  fontFamily: "Poppins",
-                                  color: Color(0xFF601CA3),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                QuickActionButton(
+                                  icon: Icons.add_circle_outline_rounded,
+                                  label: 'Add\nAvailability',
+                                  color: AppColors.info,
+                                  bgColor: AppColors.infoBg,
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      RouteNames.addavailable,
+                                    );
+                                  },
                                 ),
-                              ),
+                                const SizedBox(width: 10),
+                                QuickActionButton(
+                                  icon: Icons.assignment_outlined,
+                                  label: 'Consultation\nHistory',
+                                  color: AppColors.success,
+                                  bgColor: AppColors.successBg,
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      RouteNames.consultationHistory,
+                                    );
+                                  },
+                                ),
+                                const SizedBox(width: 10),
+                                QuickActionButton(
+                                  icon: Icons.event_note_rounded,
+                                  label: 'Holidays',
+                                  color: AppColors.primary,
+                                  bgColor: AppColors.infoBg,
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      RouteNames.holidays,
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                        const SizedBox(height: 10),
-                        if (state.filteredAppointments.isEmpty)
-                          const CommonEmptyWidget(
-                            message: 'No appointments found',
-                          )
-                        else
-                          ...state.filteredAppointments.map(
-                            (a) => AppointmentTile(appointment: a),
-                          ),
-                        // ── Pagination loading indicator ──────────────────
-                        if (state.isLoadingNextPage)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Center(
-                              child:
-                                  AppLoader(
-                                    color: AppColors.primary,
-                                    size: 30,
-                                  ),
-                            ),
-                          ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 22),
-
-                  // ---------------- Quick Actions ----------------
-                  Column(
-                    key: _actionsKey,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Quick Actions',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: "Poppins",
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          QuickActionButton(
-                            icon: Icons.add_circle_outline_rounded,
-                            label: 'Add\nAvailability',
-                            color: AppColors.info,
-                            bgColor: AppColors.infoBg,
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                RouteNames.addavailable,
-                              );
-                            },
-                          ),
-                          const SizedBox(width: 10),
-                          QuickActionButton(
-                            icon: Icons.assignment_outlined,
-                            label: 'Consultation\nHistory',
-                            color: AppColors.success,
-                            bgColor: AppColors.successBg,
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                RouteNames.consultationHistory,
-                              );
-                            },
-                          ),
-                          const SizedBox(width: 10),
-                          QuickActionButton(
-                            icon: Icons.event_note_rounded,
-                            label: 'Holidays',
-                            color: AppColors.primary,
-                            bgColor: AppColors.infoBg,
-                            onTap: () {
-                              Navigator.pushNamed(context, RouteNames.holidays);
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );

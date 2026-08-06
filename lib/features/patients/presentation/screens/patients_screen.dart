@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:medicompare/core/widget/app_loader.dart';
+import 'package:medicompare/core/widget/app_refresh_indicator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/widget/circle_login_button.dart';
 import 'package:medicompare/core/widget/common_state_widgets.dart';
@@ -54,120 +56,156 @@ class _PatientsScreenState extends State<PatientsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFEFF3FC),
       body: SafeArea(
-        child: BlocBuilder<PatientsBloc, PatientsState>(
-          buildWhen: (previous, current) =>
-              previous.status != current.status ||
-              previous.allPatients != current.allPatients ||
-              previous.visiblePatients != current.visiblePatients ||
-              previous.activeFilter != current.activeFilter ||
-              previous.searchQuery != current.searchQuery ||
-              previous.isLoadingMore != current.isLoadingMore ||
-              previous.totalPatients != current.totalPatients ||
-              previous.newThisMonth != current.newThisMonth ||
-              previous.waitingPatientsCount != current.waitingPatientsCount ||
-              previous.completedPatientsCount !=
-                  current.completedPatientsCount ||
-              previous.cancelledPatientsCount !=
-                  current.cancelledPatientsCount ||
-              previous.errorMessage != current.errorMessage,
-          builder: (context, state) {
-            if (state.status == PatientsStatus.initial ||
-                (state.status == PatientsStatus.loading &&
-                    state.allPatients.isEmpty)) {
-              return const CommonLoadingWidget();
-            }
-
-            if (state.status == PatientsStatus.failure &&
-                state.allPatients.isEmpty) {
-              return CommonErrorWidget(
-                message: state.errorMessage ?? 'Something went wrong',
-                onRetry: () {
-                  context.read<PatientsBloc>().add(
-                    const PatientsLoadRequested(),
+        child: Column(
+          children: [
+            _Header(),
+            Expanded(
+              child: BlocConsumer<PatientsBloc, PatientsState>(
+                listenWhen: (previous, current) =>
+                    previous.status != current.status,
+                listener: (context, state) {
+                  if (state.status == PatientsStatus.failure &&
+                      state.allPatients.isNotEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.errorMessage ?? 'Refresh failed'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                buildWhen: (previous, current) =>
+                    previous.status != current.status ||
+                    previous.allPatients != current.allPatients ||
+                    previous.visiblePatients != current.visiblePatients ||
+                    previous.activeFilter != current.activeFilter ||
+                    previous.searchQuery != current.searchQuery ||
+                    previous.isLoadingMore != current.isLoadingMore ||
+                    previous.totalPatients != current.totalPatients ||
+                    previous.newThisMonth != current.newThisMonth ||
+                    previous.waitingPatientsCount !=
+                        current.waitingPatientsCount ||
+                    previous.completedPatientsCount !=
+                        current.completedPatientsCount ||
+                    previous.cancelledPatientsCount !=
+                        current.cancelledPatientsCount ||
+                    previous.errorMessage != current.errorMessage,
+                builder: (context, state) {
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: AppRefreshIndicator(
+                          topposition: 0,
+                          onRefresh: () async {
+                            final bloc = context.read<PatientsBloc>();
+                            if (bloc.state.status == PatientsStatus.loading)
+                              return;
+                            final completer = Completer<void>();
+                            bloc.add(
+                              PatientsLoadRequested(completer: completer),
+                            );
+                            await completer.future;
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.only(top: 8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE0F0FF),
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(32),
+                                topRight: Radius.circular(32),
+                                bottomLeft: Radius.circular(4),
+                                bottomRight: Radius.circular(4),
+                              ),
+                              border: Border.all(
+                                color: const Color(0xFF9BC4ED),
+                                width: 2,
+                              ),
+                            ),
+                            child: ListView(
+                              controller: _scrollController,
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                              children: [
+                                _StatsRow(state: state),
+                                const SizedBox(height: 16),
+                                FilterTabBar(
+                                  activeFilter: state.activeFilter,
+                                  onChanged: (filter) => context
+                                      .read<PatientsBloc>()
+                                      .add(PatientsFilterChanged(filter)),
+                                ),
+                                const SizedBox(height: 16),
+                                if (state.status == PatientsStatus.initial ||
+                                    (state.status == PatientsStatus.loading &&
+                                        state.allPatients.isEmpty))
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 40),
+                                    child: CommonLoadingWidget(),
+                                  )
+                                else if (state.status ==
+                                        PatientsStatus.failure &&
+                                    state.allPatients.isEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 40,
+                                    ),
+                                    child: CommonErrorWidget(
+                                      message:
+                                          state.errorMessage ??
+                                          'Something went wrong',
+                                      onRetry: () {
+                                        context.read<PatientsBloc>().add(
+                                          const PatientsLoadRequested(),
+                                        );
+                                      },
+                                    ),
+                                  )
+                                else if (state.visiblePatients.isEmpty)
+                                  const CommonEmptyWidget(
+                                    message: 'No patients found',
+                                  )
+                                else ...[
+                                  Container(
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFEFF6FF),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: const Color(0xFFBED0F3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    padding: const EdgeInsets.all(8),
+                                    child: Column(
+                                      children: state.visiblePatients
+                                          .map((p) => PatientCard(patient: p))
+                                          .toList(),
+                                    ),
+                                  ),
+                                  if (state.isLoadingMore)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                      ),
+                                      child: Center(
+                                        child: AppLoader(
+                                          color: const Color(0xFF6D28D9),
+                                          size: 30,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   );
                 },
-              );
-            }
-
-            return Column(
-              children: [
-                _Header(),
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () async {
-                      context.read<PatientsBloc>().add(
-                        const PatientsLoadRequested(),
-                      );
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.only(top: 8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE0F0FF),
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(32),
-                          topRight: Radius.circular(32),
-                          bottomLeft: Radius.circular(4),
-                          bottomRight: Radius.circular(4),
-                        ),
-                        border: Border.all(
-                          color: const Color(0xFF9BC4ED),
-                          width: 2,
-                        ),
-                      ),
-                      child: ListView(
-                        controller: _scrollController,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                        children: [
-                          _StatsRow(state: state),
-                          const SizedBox(height: 16),
-                          FilterTabBar(
-                            activeFilter: state.activeFilter,
-                            onChanged: (filter) => context
-                                .read<PatientsBloc>()
-                                .add(PatientsFilterChanged(filter)),
-                          ),
-                          const SizedBox(height: 16),
-                          if (state.visiblePatients.isEmpty)
-                            const CommonEmptyWidget(
-                              message: 'No patients found',
-                            )
-                          else
-                            Container(
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFEFF6FF),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: const Color(0xFFBED0F3),
-                                  width: 1,
-                                ),
-                              ),
-                              padding: const EdgeInsets.all(8),
-                              child: Column(
-                                children: state.visiblePatients
-                                    .map((p) => PatientCard(patient: p))
-                                    .toList(),
-                              ),
-                            ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: Center(
-                              child:
-                                  AppLoader(
-                                    color: const Color(0xFF6D28D9),
-                                    size: 30,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:equatable/equatable.dart';
 import '../../data/models/patient_filter.dart';
 
@@ -10,7 +11,11 @@ abstract class PatientsEvent extends Equatable {
 
 /// Fired once when the screen loads or pull-to-refresh is executed to fetch the initial patient list.
 class PatientsLoadRequested extends PatientsEvent {
-  const PatientsLoadRequested();
+  final Completer<void>? completer;
+  const PatientsLoadRequested({this.completer});
+
+  @override
+  List<Object?> get props => [completer];
 }
 
 /// Fired when the user scrolls to the bottom of the screen to load the next page of patients.

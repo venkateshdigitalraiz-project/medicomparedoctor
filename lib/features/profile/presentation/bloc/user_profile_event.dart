@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:equatable/equatable.dart';
 import 'package:medicompare/features/profile/data/models/user_profile_model.dart';
 
@@ -10,7 +12,11 @@ abstract class UserProfileEvent extends Equatable {
 
 /// Fired once when the screen first loads, to fetch the profile.
 class UserProfileStarted extends UserProfileEvent {
-  const UserProfileStarted();
+  final Completer<void>? completer;
+  const UserProfileStarted({this.completer});
+
+  @override
+  List<Object?> get props => [completer];
 }
 
 /// Expands/collapses one of the collapsible sections.

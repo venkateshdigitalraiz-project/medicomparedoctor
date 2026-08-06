@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -35,7 +36,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   Future<void> _onRefreshed(
       HomeRefreshed event, Emitter<HomeState> emit) async {
-    await _loadPage(emit, page: 1, reset: true);
+    try {
+      await _loadPage(emit, page: 1, reset: true);
+    } finally {
+      event.completer?.complete();
+    }
   }
 
   Future<void> _onNextPageRequested(

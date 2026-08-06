@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/routes/router_name.dart';
 import 'package:medicompare/core/widget/circle_login_button.dart';
 import 'package:medicompare/core/widget/common_state_widgets.dart';
+import 'package:medicompare/core/widget/app_refresh_indicator.dart';
 import 'package:medicompare/features/auth/logout/presentation/utils/logout_handler.dart';
 import 'package:medicompare/features/profile/data/models/user_profile_model.dart';
 import '../bloc/user_profile_state.dart';
@@ -30,225 +32,332 @@ class _UserProfileView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: BlocBuilder<UserProfileBloc, UserProfileState>(
-        builder: (context, state) {
-            if (state is UserProfileLoading) {
-              return const CommonLoadingWidget();
-            }
-            if (state is UserProfileError) {
-              return CommonErrorWidget(
-                message: state.message,
-                onRetry: () {
-                  context.read<UserProfileBloc>().add(const UserProfileStarted());
-                },
-              );
-            }
-
-          final loaded = state as UserProfileLoaded;
-          final profile = loaded.profile;
-          final bloc = context.read<UserProfileBloc>();
-
-          return SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    //  padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      children: [
-                        Stack(
-                          clipBehavior: Clip.none,
-                          alignment: Alignment.bottomCenter,
-                          children: [
-                            _buildTopGradientHeader(context, profile),
-
-                            Positioned(
-                              bottom: -90,
-                              left: 20,
-                              right: 20,
-                              child: _buildStatsRow(profile),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Always visible header/app bar
+            Padding(
+              padding: const EdgeInsets.only(right: 8, top: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(width: 40),
+                  const Text(
+                    'Profile',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                RouteNames.editProfile,
+                              );
+                            },
+                            child: Container(
+                              width: 42,
+                              height: 42,
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFEFF6FF),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.edit,
+                                size: 18,
+                                color: Colors.black87,
+                              ),
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Edit',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontFamily: "Poppins",
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircleIconButton(
+                            icon: Icons.logout,
+                            onTap: () {
+                              LogoutHandler.logout(context);
+                            },
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Logout',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontFamily: "Poppins",
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: BlocConsumer<UserProfileBloc, UserProfileState>(
+                listener: (context, state) {
+                  if (state is UserProfileLoaded &&
+                      state.refreshError != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.refreshError!),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                builder: (context, state) {
+                  if (state is UserProfileLoading) {
+                    return const CommonLoadingWidget();
+                  }
+                  if (state is UserProfileError) {
+                    return CommonErrorWidget(
+                      message: state.message,
+                      onRetry: () {
+                        context.read<UserProfileBloc>().add(
+                          const UserProfileStarted(),
+                        );
+                      },
+                    );
+                  }
 
-                        const SizedBox(height: 80),
+                  final loaded = state as UserProfileLoaded;
+                  final profile = loaded.profile;
+                  final bloc = context.read<UserProfileBloc>();
 
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: Column(
+                  return AppRefreshIndicator(
+                    topposition: 0,
+                    onRefresh: () async {
+                      if (bloc.state is UserProfileLoading) return;
+                      final completer = Completer<void>();
+                      bloc.add(UserProfileStarted(completer: completer));
+                      await completer.future;
+                    },
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        children: [
+                          Stack(
+                            clipBehavior: Clip.none,
+                            alignment: Alignment.bottomCenter,
                             children: [
-                              const SizedBox(height: 24),
+                              _buildTopGradientHeaderBody(context, profile),
 
-                              UserSectionTile(
-                                leadingIcon: Icons.person_outline_rounded,
-                                title: 'Presonal Information',
-                                isExpanded: loaded.isExpanded(
-                                  UserProfileSection.personalInformation,
-                                ),
-                                onTap: () => bloc.add(
-                                  const UserProfileSectionToggled(
-                                    UserProfileSection.personalInformation,
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(bottom: 6),
-                                  child: Column(
-                                    children: [
-                                      UserInfoRow(
-                                        icon: Icons.school_outlined,
-                                        label: 'Mail ID',
-                                        value: profile.email,
-                                      ),
-                                      UserInfoRow(
-                                        icon: Icons.badge_outlined,
-                                        label: 'Phone Number',
-                                        value: profile.phoneNumber,
-                                      ),
-                                      UserInfoRow(
-                                        icon: Icons.wc_rounded,
-                                        label: 'Gender',
-                                        value: profile.gender,
-                                      ),
-                                      UserInfoRow(
-                                        icon: Icons.location_on_outlined,
-                                        label: 'Address',
-                                        value: profile.address,
-                                        maxLines: 2,
-                                      ),
-                                      UserInfoRow(
-                                        icon: Icons.info_outline,
-                                        label: 'Status',
-                                        value: profile.status,
-                                      ),
-                                      // UserInfoRow(
-                                      //   icon: Icons.calendar_today_outlined,
-                                      //   label: 'Created Date',
-                                      //   value: profile.createdAt,
-                                      // ),
-                                      // UserInfoRow(
-                                      //   icon: Icons.edit_calendar_outlined,
-                                      //   label: 'Updated Date',
-                                      //   value: profile.updatedAt,
-                                      // ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              // // ---- Professional Information ----
-                              UserSectionTile(
-                                leadingIcon: Icons.medical_services_outlined,
-                                title: 'Professional Information',
-                                isExpanded: loaded.isExpanded(
-                                  UserProfileSection.professionalInformation,
-                                ),
-                                onTap: () => bloc.add(
-                                  const UserProfileSectionToggled(
-                                    UserProfileSection.professionalInformation,
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(bottom: 6),
-                                  child: Text(
-                                    '${profile.specialty} - ${profile.experience} Years Experience',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontFamily: "Poppins",
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              // Working Hours
-                              UserSectionTile(
-                                leadingIcon: Icons.access_time_rounded,
-                                title: 'Working Hours',
-                                isExpanded: loaded.isExpanded(
-                                  UserProfileSection.workingHours,
-                                ),
-                                onTap: () => bloc.add(
-                                  const UserProfileSectionToggled(
-                                    UserProfileSection.workingHours,
-                                  ),
-                                ),
-                                trailingChip: profile.isAvailableNow
-                                    ? _buildAvailableChip()
-                                    : null,
-                                child: const Padding(
-                                  padding: EdgeInsets.only(bottom: 6),
-                                  child: Text(
-                                    'Mon - Fri: 9:00 AM - 5:00 PM',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              // // ---- Clinical Information (peek, matches cropped design) ----
-                              UserSectionTile(
-                                leadingIcon: Icons.local_hospital_outlined,
-                                title: 'Clinical Information',
-                                isExpanded: loaded.isExpanded(
-                                  UserProfileSection.clinicalInformation,
-                                ),
-                                onTap: () => Navigator.pushNamed(
-                                  context,
-                                  RouteNames.clinicInfo,
-                                ),
-                                // bloc.add(
-                                //   const UserProfileSectionToggled(
-                                //     UserProfileSection.clinicalInformation,
-                                //   ),
-                                // ),
-                                showDivider: false,
-                                child: const Padding(
-                                  padding: EdgeInsets.only(bottom: 6),
-                                  child: Text(
-                                    'City Heart Hospital, Room 204',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              // // ---- Clinical Information (peek, matches cropped design) ----
-                              UserSectionTile(
-                                leadingIcon: Icons.edit_document,
-                                title: 'Documents',
-                                isExpanded: loaded.isExpanded(
-                                  UserProfileSection.document,
-                                ),
-                                onTap: () => Navigator.pushNamed(
-                                  context,
-                                  RouteNames.document,
-                                ),
-                                showDivider: false,
-                                child: const Padding(
-                                  padding: EdgeInsets.only(bottom: 6),
-                                  child: Text(
-                                    'Set All Documents',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                ),
+                              Positioned(
+                                bottom: -90,
+                                left: 20,
+                                right: 20,
+                                child: _buildStatsRow(profile),
                               ),
                             ],
                           ),
-                        ),
-                      ],
+
+                          const SizedBox(height: 80),
+
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Column(
+                              children: [
+                                const SizedBox(height: 24),
+
+                                UserSectionTile(
+                                  leadingIcon: Icons.person_outline_rounded,
+                                  title: 'Presonal Information',
+                                  isExpanded: loaded.isExpanded(
+                                    UserProfileSection.personalInformation,
+                                  ),
+                                  onTap: () => bloc.add(
+                                    const UserProfileSectionToggled(
+                                      UserProfileSection.personalInformation,
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(bottom: 6),
+                                    child: Column(
+                                      children: [
+                                        UserInfoRow(
+                                          icon: Icons.school_outlined,
+                                          label: 'Mail ID',
+                                          value: profile.email,
+                                        ),
+                                        UserInfoRow(
+                                          icon: Icons.badge_outlined,
+                                          label: 'Phone Number',
+                                          value: profile.phoneNumber,
+                                        ),
+                                        UserInfoRow(
+                                          icon: Icons.wc_rounded,
+                                          label: 'Gender',
+                                          value: profile.gender,
+                                        ),
+                                        UserInfoRow(
+                                          icon: Icons.location_on_outlined,
+                                          label: 'Address',
+                                          value: profile.address,
+                                          maxLines: 2,
+                                        ),
+                                        UserInfoRow(
+                                          icon: Icons.info_outline,
+                                          label: 'Status',
+                                          value: profile.status,
+                                        ),
+                                        // UserInfoRow(
+                                        //   icon: Icons.calendar_today_outlined,
+                                        //   label: 'Created Date',
+                                        //   value: profile.createdAt,
+                                        // ),
+                                        // UserInfoRow(
+                                        //   icon: Icons.edit_calendar_outlined,
+                                        //   label: 'Updated Date',
+                                        //   value: profile.updatedAt,
+                                        // ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                // // ---- Professional Information ----
+                                UserSectionTile(
+                                  leadingIcon: Icons.medical_services_outlined,
+                                  title: 'Professional Information',
+                                  isExpanded: loaded.isExpanded(
+                                    UserProfileSection.professionalInformation,
+                                  ),
+                                  onTap: () => bloc.add(
+                                    const UserProfileSectionToggled(
+                                      UserProfileSection
+                                          .professionalInformation,
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(bottom: 6),
+                                    child: Text(
+                                      '${profile.specialty} - ${profile.experience} Years Experience',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                // Working Hours
+                                UserSectionTile(
+                                  leadingIcon: Icons.access_time_rounded,
+                                  title: 'Working Hours',
+                                  isExpanded: loaded.isExpanded(
+                                    UserProfileSection.workingHours,
+                                  ),
+                                  onTap: () => bloc.add(
+                                    const UserProfileSectionToggled(
+                                      UserProfileSection.workingHours,
+                                    ),
+                                  ),
+                                  trailingChip: profile.isAvailableNow
+                                      ? _buildAvailableChip()
+                                      : null,
+                                  child: const Padding(
+                                    padding: EdgeInsets.only(bottom: 6),
+                                    child: Text(
+                                      'Mon - Fri: 9:00 AM - 5:00 PM',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                // // ---- Clinical Information (peek, matches cropped design) ----
+                                UserSectionTile(
+                                  leadingIcon: Icons.local_hospital_outlined,
+                                  title: 'Clinical Information',
+                                  isExpanded: loaded.isExpanded(
+                                    UserProfileSection.clinicalInformation,
+                                  ),
+                                  onTap: () => Navigator.pushNamed(
+                                    context,
+                                    RouteNames.clinicInfo,
+                                  ),
+                                  // bloc.add(
+                                  //   const UserProfileSectionToggled(
+                                  //     UserProfileSection.clinicalInformation,
+                                  //   ),
+                                  // ),
+                                  showDivider: false,
+                                  child: const Padding(
+                                    padding: EdgeInsets.only(bottom: 6),
+                                    child: Text(
+                                      'City Heart Hospital, Room 204',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // // ---- Clinical Information (peek, matches cropped design) ----
+                                UserSectionTile(
+                                  leadingIcon: Icons.edit_document,
+                                  title: 'Documents',
+                                  isExpanded: loaded.isExpanded(
+                                    UserProfileSection.document,
+                                  ),
+                                  onTap: () => Navigator.pushNamed(
+                                    context,
+                                    RouteNames.document,
+                                  ),
+                                  showDivider: false,
+                                  child: const Padding(
+                                    padding: EdgeInsets.only(bottom: 6),
+                                    child: Text(
+                                      'Set All Documents',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
@@ -287,11 +396,11 @@ class _UserProfileView extends StatelessWidget {
     );
   }
 
-  Widget _buildTopGradientHeader(BuildContext context, profile) {
+  Widget _buildTopGradientHeaderBody(BuildContext context, profile) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.only(top: 8, bottom: 60),
-      decoration: BoxDecoration(
+      padding: const EdgeInsets.only(top: 16, bottom: 60),
+      decoration: const BoxDecoration(
         color: Color(0xFFEFF6FF),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(40),
@@ -300,90 +409,6 @@ class _UserProfileView extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(width: 40),
-                const Text(
-                  'Profile',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              RouteNames.editProfile,
-                            );
-                          },
-                          child: Container(
-                            width: 42,
-                            height: 42,
-                            alignment: Alignment.center,
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.edit,
-                              size: 18,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Edit',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontFamily: "Poppins",
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircleIconButton(
-                          icon: Icons.logout,
-                          onTap: () {
-                            LogoutHandler.logout(context);
-                          },
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Logout',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontFamily: "Poppins",
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 12),
           Stack(
             alignment: Alignment.center,
             children: [

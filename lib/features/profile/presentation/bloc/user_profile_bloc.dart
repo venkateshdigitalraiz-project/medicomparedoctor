@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/features/profile/data/datasources/profile_api_service.dart';
 import 'package:medicompare/features/profile/data/models/user_profile_model.dart';
@@ -28,19 +29,29 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     UserProfileStarted event,
     Emitter<UserProfileState> emit,
   ) async {
-    emit(const UserProfileLoading());
+    final current = state;
+    if (current is! UserProfileLoaded) {
+      emit(const UserProfileLoading());
+    }
     try {
       final profile = await repository.getUserProfile();
       emit(
         UserProfileLoaded(
           profile: profile,
-          // Personal Information starts expanded, matching the design.
-          expandedSections: const {UserProfileSection.personalInformation},
+          expandedSections: current is UserProfileLoaded 
+              ? current.expandedSections 
+              : const {UserProfileSection.personalInformation},
           selectedNavItem: UserBottomNavItem.profile,
         ),
       );
     } catch (e) {
-      emit(UserProfileError(e.toString()));
+      if (current is UserProfileLoaded) {
+        emit(current.copyWith(refreshError: e.toString()));
+      } else {
+        emit(UserProfileError(e.toString()));
+      }
+    } finally {
+      event.completer?.complete();
     }
   }
 

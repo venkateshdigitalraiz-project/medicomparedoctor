@@ -50,6 +50,8 @@ class PatientsBloc extends Bloc<PatientsEvent, PatientsState> {
         status: PatientsStatus.failure,
         errorMessage: e.toString(),
       ));
+    } finally {
+      event.completer?.complete();
     }
   }
 

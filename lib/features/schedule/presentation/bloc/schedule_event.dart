@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:equatable/equatable.dart';
 import '../../data/models/appointment.dart';
 
@@ -13,7 +14,11 @@ class LoadSchedule extends ScheduleEvent {
 }
 
 class RefreshSchedule extends ScheduleEvent {
-  const RefreshSchedule();
+  final Completer<void>? completer;
+  const RefreshSchedule({this.completer});
+
+  @override
+  List<Object?> get props => [completer];
 }
 
 class SelectCalendarDay extends ScheduleEvent {

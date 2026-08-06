@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:developer' as developer;
 import 'package:medicompare/core/widget/app_loader.dart';
+import 'package:medicompare/core/widget/app_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -81,86 +83,97 @@ class _ScheduleViewState extends State<_ScheduleView> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: BlocBuilder<ScheduleBloc, ScheduleState>(
-          buildWhen: (previous, current) =>
-              (previous.status != current.status) ||
-              (previous.errorMessage != current.errorMessage),
-          builder: (context, state) {
-            // Initial loading state (full-screen loader)
-            if (state.status == ScheduleStatus.initialLoading ||
-                state.status == ScheduleStatus.initial) {
-              return const CommonLoadingWidget();
-            }
-            if (state.status == ScheduleStatus.failure) {
-              return CommonErrorWidget(
-                message: state.errorMessage ?? 'Error loading schedule',
-                onRetry: () {
-                  context.read<ScheduleBloc>().add(const LoadSchedule());
-                },
-              );
-            }
-
-            return Column(
-              children: [
-                // App bar
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 28, 0),
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 40),
-                      const Expanded(
-                        child: Center(
-                          child: Text(
-                            'Schedule',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textDark,
-                            ),
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            RouteNames.sechduleSetting,
-                          );
-                        },
-                        child: const Icon(
-                          Icons.settings,
+        child: Column(
+          children: [
+            // App bar
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 28, 0),
+              child: Row(
+                children: [
+                  const SizedBox(width: 40),
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        'Schedule',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontFamily: "Poppins",
+                          fontWeight: FontWeight.w500,
                           color: AppColors.textDark,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircleIconButton(
-                            icon: Icons.logout,
-                            onTap: () {
-                              LogoutHandler.logout(context);
-                            },
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Logout',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        RouteNames.sechduleSetting,
+                      );
+                    },
+                    child: const Icon(
+                      Icons.settings,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircleIconButton(
+                        icon: Icons.logout,
+                        onTap: () {
+                          LogoutHandler.logout(context);
+                        },
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Logout',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontFamily: "Poppins",
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: Container(
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: BlocConsumer<ScheduleBloc, ScheduleState>(
+                listenWhen: (previous, current) => previous.status != current.status,
+                listener: (context, state) {
+                  if (state.status == ScheduleStatus.failure && state.appointments.isNotEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.errorMessage ?? 'Refresh failed'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                buildWhen: (previous, current) =>
+                    (previous.status != current.status) ||
+                    (previous.errorMessage != current.errorMessage),
+                builder: (context, state) {
+                  // Initial loading state (full-screen loader)
+                  if (state.status == ScheduleStatus.initialLoading ||
+                      state.status == ScheduleStatus.initial) {
+                    return const CommonLoadingWidget();
+                  }
+                  if (state.status == ScheduleStatus.failure && state.appointments.isEmpty) {
+                    return CommonErrorWidget(
+                      message: state.errorMessage ?? 'Error loading schedule',
+                      onRetry: () {
+                        context.read<ScheduleBloc>().add(const LoadSchedule());
+                      },
+                    );
+                  }
+
+                  return Container(
                     padding: const EdgeInsets.only(top: 12),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -318,18 +331,13 @@ class _ScheduleViewState extends State<_ScheduleView> {
                                         ScheduleStatus.initialLoading) {
                                   return;
                                 }
-                                final future = sBloc.stream.firstWhere(
-                                  (st) =>
-                                      st.status != ScheduleStatus.refreshing &&
-                                      st.status !=
-                                          ScheduleStatus.initialLoading,
-                                );
-                                sBloc.add(const RefreshSchedule());
-                                await future;
+                                final completer = Completer<void>();
+                                sBloc.add(RefreshSchedule(completer: completer));
+                                await completer.future;
                               }
 
                               if (activeList.isEmpty) {
-                                return RefreshIndicator(
+                                return AppRefreshIndicator(
                                   onRefresh: handleRefresh,
                                   child: SingleChildScrollView(
                                     physics:
@@ -346,7 +354,7 @@ class _ScheduleViewState extends State<_ScheduleView> {
                                 );
                               }
 
-                              return RefreshIndicator(
+                              return AppRefreshIndicator(
                                 onRefresh: handleRefresh,
                                 child: ListView.builder(
                                   controller: _scrollController,
@@ -392,11 +400,11 @@ class _ScheduleViewState extends State<_ScheduleView> {
                         ),
                       ],
                     ),
-                  ),
-                ),
-              ],
-            );
-          },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

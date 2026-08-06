@@ -14,7 +14,11 @@ class HomeStarted extends HomeEvent {
 
 /// Fired on pull-to-refresh.
 class HomeRefreshed extends HomeEvent {
-  const HomeRefreshed();
+  final Completer<void>? completer;
+  const HomeRefreshed({this.completer});
+
+  @override
+  List<Object?> get props => [completer];
 }
 
 /// User typed into the search field.

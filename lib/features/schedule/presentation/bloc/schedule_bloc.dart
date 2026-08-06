@@ -30,7 +30,11 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       RefreshSchedule event, Emitter<ScheduleState> emit) async {
     if (state.status == ScheduleStatus.refreshing || state.status == ScheduleStatus.initialLoading) return;
     emit(state.copyWith(status: ScheduleStatus.refreshing));
-    await _fetchData(emit, page: 1, reset: true);
+    try {
+      await _fetchData(emit, page: 1, reset: true);
+    } finally {
+      event.completer?.complete();
+    }
   }
 
   Future<void> _onSelectCalendarDay(

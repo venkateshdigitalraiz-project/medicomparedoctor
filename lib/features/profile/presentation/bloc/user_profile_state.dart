@@ -28,11 +28,13 @@ class UserProfileLoaded extends UserProfileState {
   final UserProfileModel profile;
   final Set<UserProfileSection> expandedSections;
   final UserBottomNavItem selectedNavItem;
+  final String? refreshError;
 
   const UserProfileLoaded({
     required this.profile,
     required this.expandedSections,
     required this.selectedNavItem,
+    this.refreshError,
   });
 
   bool isExpanded(UserProfileSection section) =>
@@ -42,14 +44,16 @@ class UserProfileLoaded extends UserProfileState {
     UserProfileModel? profile,
     Set<UserProfileSection>? expandedSections,
     UserBottomNavItem? selectedNavItem,
+    String? refreshError,
   }) {
     return UserProfileLoaded(
       profile: profile ?? this.profile,
       expandedSections: expandedSections ?? this.expandedSections,
       selectedNavItem: selectedNavItem ?? this.selectedNavItem,
+      refreshError: refreshError ?? this.refreshError,
     );
   }
 
   @override
-  List<Object?> get props => [profile, expandedSections, selectedNavItem];
+  List<Object?> get props => [profile, expandedSections, selectedNavItem, refreshError];
 }
