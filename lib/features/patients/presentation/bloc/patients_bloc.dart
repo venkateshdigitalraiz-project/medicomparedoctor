@@ -1,4 +1,10 @@
+import 'dart:io';
+import 'dart:async';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medicompare/core/network/network_exception.dart';
+import 'package:medicompare/core/network/error_mapper.dart';
+import 'package:medicompare/core/ui/dialog_helper.dart';
 import '../../data/models/patient.dart';
 import '../../data/models/patient_filter.dart';
 import 'patients_event.dart';
@@ -20,6 +26,7 @@ class PatientsBloc extends Bloc<PatientsEvent, PatientsState> {
     Emitter<PatientsState> emit,
   ) async {
     // If it's the initial load, show the main loader. If it's a refresh, keep the UI state
+    DialogHelper.isAtLoginScreen = false;
     emit(state.copyWith(
       status: PatientsStatus.loading,
       errorMessage: null,
@@ -46,9 +53,21 @@ class PatientsBloc extends Bloc<PatientsEvent, PatientsState> {
         cancelledPatientsCount: response.statistics.cancelled,
       ));
     } catch (e) {
+      final String friendlyMessage;
+      if (e is NetworkException) {
+        friendlyMessage = e.message;
+      } else if (e is DioException && e.error is NetworkException) {
+        friendlyMessage = (e.error as NetworkException).message;
+      } else if (e is SocketException) {
+        friendlyMessage = ErrorMapper.mapNoInternet();
+      } else if (e is TimeoutException) {
+        friendlyMessage = ErrorMapper.mapTimeout();
+      } else {
+        friendlyMessage = ErrorMapper.mapUnknown();
+      }
       emit(state.copyWith(
         status: PatientsStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: friendlyMessage,
       ));
     } finally {
       event.completer?.complete();
@@ -65,7 +84,7 @@ class PatientsBloc extends Bloc<PatientsEvent, PatientsState> {
       return;
     }
 
-    emit(state.copyWith(isLoadingMore: true));
+    emit(state.copyWith(isLoadingMore: true, errorMessage: null));
     try {
       final nextPage = state.page + 1;
       final response = await repository.fetchPatients(page: nextPage, limit: state.limit);
@@ -98,10 +117,22 @@ class PatientsBloc extends Bloc<PatientsEvent, PatientsState> {
         cancelledPatientsCount: response.statistics.cancelled,
       ));
     } catch (e) {
+      final String friendlyMessage;
+      if (e is NetworkException) {
+        friendlyMessage = e.message;
+      } else if (e is DioException && e.error is NetworkException) {
+        friendlyMessage = (e.error as NetworkException).message;
+      } else if (e is SocketException) {
+        friendlyMessage = ErrorMapper.mapNoInternet();
+      } else if (e is TimeoutException) {
+        friendlyMessage = ErrorMapper.mapTimeout();
+      } else {
+        friendlyMessage = ErrorMapper.mapUnknown();
+      }
       emit(state.copyWith(
         isLoadingMore: false,
         status: PatientsStatus.failure,
-        errorMessage: e.toString(),
+        errorMessage: friendlyMessage,
       ));
     }
   }

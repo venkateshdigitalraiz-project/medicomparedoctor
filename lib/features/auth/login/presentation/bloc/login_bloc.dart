@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/core/constants/app_strings.dart';
 import '../../data/datasources/login_remote_data_source.dart';
@@ -20,7 +20,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     : repository =
           repository ??
           LoginRepositoryImpl(
-            remoteDataSource: LoginRemoteDataSourceImpl(client: AppHttpClient.client),
+            remoteDataSource: LoginRemoteDataSourceImpl(client: AppHttpClient.dio),
           ),
       super(const LoginState()) {
     on<PhoneNumberChanged>((event, emit) {
@@ -140,7 +140,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           errorMsg.contains('HandshakeException') ||
           errorMsg.contains('Network is unreachable') ||
           errorMsg.contains('Connection refused') ||
-          e is http.ClientException) {
+          e is DioException) {
         emit(
           state.copyWith(
             status: LoginStatus.failure,

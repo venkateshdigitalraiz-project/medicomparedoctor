@@ -1,5 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dio/dio.dart';
+import 'package:medicompare/core/network/network_exception.dart';
+import 'package:medicompare/core/network/error_mapper.dart';
+import 'package:medicompare/core/ui/dialog_helper.dart';
 import 'package:medicompare/features/profile/data/datasources/profile_api_service.dart';
 import 'package:medicompare/features/profile/data/models/user_profile_model.dart';
 import 'package:medicompare/features/profile/data/repositories/profile_repository_impl.dart';
@@ -16,7 +21,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     : repository =
           repository ??
           UserProfileRepositoryImpl(
-            apiService: ProfileApiServiceImpl(client: AppHttpClient.client),
+            apiService: ProfileApiServiceImpl(client: AppHttpClient.dio),
           ),
       super(const UserProfileLoading()) {
     on<UserProfileStarted>(_onStarted);
@@ -29,26 +34,41 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     UserProfileStarted event,
     Emitter<UserProfileState> emit,
   ) async {
+    DialogHelper.isAtLoginScreen = false;
     final current = state;
     if (current is! UserProfileLoaded) {
       emit(const UserProfileLoading());
+    } else {
+      emit(current.copyWith(refreshError: null));
     }
     try {
       final profile = await repository.getUserProfile();
       emit(
         UserProfileLoaded(
           profile: profile,
-          expandedSections: current is UserProfileLoaded 
-              ? current.expandedSections 
+          expandedSections: current is UserProfileLoaded
+              ? current.expandedSections
               : const {UserProfileSection.personalInformation},
           selectedNavItem: UserBottomNavItem.profile,
         ),
       );
     } catch (e) {
-      if (current is UserProfileLoaded) {
-        emit(current.copyWith(refreshError: e.toString()));
+      final String friendlyMessage;
+      if (e is NetworkException) {
+        friendlyMessage = e.message;
+      } else if (e is DioException && e.error is NetworkException) {
+        friendlyMessage = (e.error as NetworkException).message;
+      } else if (e is SocketException) {
+        friendlyMessage = ErrorMapper.mapNoInternet();
+      } else if (e is TimeoutException) {
+        friendlyMessage = ErrorMapper.mapTimeout();
       } else {
-        emit(UserProfileError(e.toString()));
+        friendlyMessage = ErrorMapper.mapUnknown();
+      }
+      if (current is UserProfileLoaded) {
+        emit(current.copyWith(refreshError: friendlyMessage));
+      } else {
+        emit(UserProfileError(friendlyMessage));
       }
     } finally {
       event.completer?.complete();

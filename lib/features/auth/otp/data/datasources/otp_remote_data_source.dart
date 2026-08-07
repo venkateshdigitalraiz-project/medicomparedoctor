@@ -1,17 +1,17 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
-import 'dart:io';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/features/auth/otp/data/models/verify_otp_response_model.dart';
 import 'package:medicompare/notification/data/datasources/notification_local_data_source.dart';
+import 'package:medicompare/core/network/network_exception.dart';
 
 abstract class OtpRemoteDataSource {
   Future<VerifyOtpResponseModel> verifyOtp({required String phone, required String otp});
 }
 
 class OtpRemoteDataSourceImpl implements OtpRemoteDataSource {
-  final http.Client client;
+  final Dio client;
   final String baseUrl;
 
   OtpRemoteDataSourceImpl({
@@ -21,7 +21,7 @@ class OtpRemoteDataSourceImpl implements OtpRemoteDataSource {
 
   @override
   Future<VerifyOtpResponseModel> verifyOtp({required String phone, required String otp}) async {
-    final url = Uri.parse('$baseUrl${AppConstants.verifyOtpEndpoint}');
+    final urlStr = '$baseUrl${AppConstants.verifyOtpEndpoint}';
     final headers = {'Content-Type': 'application/json'};
     
     // Parse phone and OTP as integers as required by the API
@@ -31,22 +31,24 @@ class OtpRemoteDataSourceImpl implements OtpRemoteDataSource {
     final localDataSource = NotificationLocalDataSourceImpl();
     final fcmToken = await localDataSource.getFCMToken();
 
-    final body = jsonEncode({
+    final body = {
       'phone': phoneVal,
       'otp': otpVal,
       if (fcmToken != null) 'fcmToken': fcmToken,
-    });
+    };
 
     developer.log('=== API REQUEST START (VERIFY OTP) ===', name: 'OtpRemoteDataSource');
     developer.log('Base URL: $baseUrl', name: 'OtpRemoteDataSource');
-    developer.log('Full Request URL: $url', name: 'OtpRemoteDataSource');
+    developer.log('Full Request URL: $urlStr', name: 'OtpRemoteDataSource');
     developer.log('Headers: $headers', name: 'OtpRemoteDataSource');
     developer.log('Body: $body', name: 'OtpRemoteDataSource');
 
     try {
-      final response = await client
-          .post(url, headers: headers, body: body)
-          .timeout(AppConstants.apiTimeout);
+      final response = await client.post(
+        urlStr,
+        options: Options(headers: headers),
+        data: body,
+      );
 
       developer.log(
         '=== API RESPONSE SUCCESS (VERIFY OTP) ===',
@@ -57,11 +59,16 @@ class OtpRemoteDataSourceImpl implements OtpRemoteDataSource {
         name: 'OtpRemoteDataSource',
       );
       developer.log(
-        'Response Body: ${response.body}',
+        'Response Body: ${response.data}',
         name: 'OtpRemoteDataSource',
       );
 
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      final Map<String, dynamic> responseData;
+      if (response.data is String) {
+        responseData = jsonDecode(response.data);
+      } else {
+        responseData = response.data as Map<String, dynamic>;
+      }
       final model = VerifyOtpResponseModel.fromJson(responseData);
       return model;
     } catch (e, stacktrace) {
@@ -72,19 +79,25 @@ class OtpRemoteDataSourceImpl implements OtpRemoteDataSource {
         stackTrace: stacktrace,
       );
 
-      if (e is SocketException ||
-          e.toString().contains('Failed host lookup') ||
-          e.toString().contains('Connection refused') ||
-          e is http.ClientException) {
-        developer.log(
-          'Returning mock successful verify-otp response for demo purposes due to connection error.',
-          name: 'OtpRemoteDataSource',
-        );
-        await Future.delayed(const Duration(milliseconds: 800));
-        return const VerifyOtpResponseModel(
-          success: true,
-          message: 'OTP Verified Successfully (Mock)',
-        );
+      if (e is DioException) {
+        if (e.type == DioExceptionType.connectionError ||
+            e.type == DioExceptionType.connectionTimeout ||
+            e.error is NetworkException ||
+            e.message?.toLowerCase().contains('failed host lookup') == true ||
+            e.message?.toLowerCase().contains('connection refused') == true) {
+          developer.log(
+            'Returning mock successful verify-otp response for demo purposes due to connection error.',
+            name: 'OtpRemoteDataSource',
+          );
+          await Future.delayed(const Duration(milliseconds: 800));
+          return const VerifyOtpResponseModel(
+            success: true,
+            message: 'OTP Verified Successfully (Mock)',
+          );
+        }
+        if (e.error is NetworkException) {
+          throw e.error as NetworkException;
+        }
       }
       rethrow;
     }

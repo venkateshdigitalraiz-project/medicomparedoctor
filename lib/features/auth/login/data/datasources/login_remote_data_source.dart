@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/core/constants/app_strings.dart';
+import 'package:medicompare/core/network/network_exception.dart';
 import '../models/login_request_model.dart';
 import '../models/login_response_model.dart';
 
@@ -12,7 +13,7 @@ abstract class LoginRemoteDataSource {
 }
 
 class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
-  final http.Client client;
+  final Dio client;
   final String baseUrl;
 
   LoginRemoteDataSourceImpl({
@@ -22,24 +23,22 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
 
   @override
   Future<LoginResponseModel> login(LoginRequestModel request) async {
-    final url = Uri.parse('$baseUrl${AppConstants.loginEndpoint}');
+    final urlStr = '$baseUrl${AppConstants.loginEndpoint}';
     final headers = {'Content-Type': 'application/json'};
-    final body = jsonEncode(request.toJson());
+    final body = request.toJson();
 
     developer.log('=== API REQUEST START ===', name: 'LoginRemoteDataSource');
     developer.log('Base URL: $baseUrl', name: 'LoginRemoteDataSource');
-    developer.log('Full Request URL: $url', name: 'LoginRemoteDataSource');
+    developer.log('Full Request URL: $urlStr', name: 'LoginRemoteDataSource');
     developer.log('Headers: $headers', name: 'LoginRemoteDataSource');
     developer.log('Body: $body', name: 'LoginRemoteDataSource');
-    developer.log(
-      'API method client.post() is about to be called.',
-      name: 'LoginRemoteDataSource',
-    );
 
     try {
-      final response = await client
-          .post(url, headers: headers, body: body)
-          .timeout(AppConstants.apiTimeout);
+      final response = await client.post(
+        urlStr,
+        options: Options(headers: headers),
+        data: body,
+      );
 
       developer.log(
         '=== API RESPONSE SUCCESS ===',
@@ -50,18 +49,24 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
         name: 'LoginRemoteDataSource',
       );
       developer.log(
-        'Response Body: ${response.body}',
+        'Response Body: ${response.data}',
         name: 'LoginRemoteDataSource',
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return LoginResponseModel.fromJson(jsonDecode(response.body));
+        final Map<String, dynamic> json;
+        if (response.data is String) {
+          json = jsonDecode(response.data) as Map<String, dynamic>;
+        } else {
+          json = response.data as Map<String, dynamic>;
+        }
+        return LoginResponseModel.fromJson(json);
       } else {
         throw Exception(
           '${AppStrings.failedToLogin} Status code: ${response.statusCode}',
         );
       }
-    } catch (e, stacktrace) {
+    } on DioException catch (e, stacktrace) {
       developer.log(
         '=== API RESPONSE ERROR (FALLING BACK TO MOCK) ===',
         name: 'LoginRemoteDataSource',
@@ -69,10 +74,11 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
         stackTrace: stacktrace,
       );
 
-      if (e is SocketException ||
-          e.toString().contains('Failed host lookup') ||
-          e.toString().contains('Connection refused') ||
-          e is http.ClientException) {
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.error is NetworkException ||
+          e.message?.toLowerCase().contains('failed host lookup') == true ||
+          e.message?.toLowerCase().contains('connection refused') == true) {
         developer.log(
           'Returning mock successful login response for demo purposes due to connection error.',
           name: 'LoginRemoteDataSource',
@@ -83,6 +89,9 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
           message: AppStrings.otpSentMock,
           data: LoginData(phone: request.phone),
         );
+      }
+      if (e.error is NetworkException) {
+        throw e.error as NetworkException;
       }
       rethrow;
     }

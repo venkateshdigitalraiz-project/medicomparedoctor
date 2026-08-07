@@ -1,5 +1,11 @@
 import 'dart:developer' as developer;
+import 'dart:io';
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dio/dio.dart';
+import 'package:medicompare/core/network/network_exception.dart';
+import 'package:medicompare/core/network/error_mapper.dart';
+import 'package:medicompare/core/ui/dialog_helper.dart';
 import '../../data/models/appointment.dart';
 import '../../data/repositories/schedule_repository.dart';
 import 'schedule_event.dart';
@@ -10,8 +16,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   static const int _limit = 10;
 
   ScheduleBloc({ScheduleRepository? repository})
-      : _repository = repository ?? ScheduleRepositoryImpl(),
-        super(ScheduleState.initial()) {
+    : _repository = repository ?? ScheduleRepositoryImpl(),
+      super(ScheduleState.initial()) {
     on<LoadSchedule>(_onLoadSchedule);
     on<RefreshSchedule>(_onRefreshSchedule);
     on<SelectCalendarDay>(_onSelectCalendarDay);
@@ -20,16 +26,23 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   }
 
   Future<void> _onLoadSchedule(
-      LoadSchedule event, Emitter<ScheduleState> emit) async {
+    LoadSchedule event,
+    Emitter<ScheduleState> emit,
+  ) async {
     if (state.status == ScheduleStatus.initialLoading) return;
-    emit(state.copyWith(status: ScheduleStatus.initialLoading));
+    DialogHelper.isAtLoginScreen = false;
+    emit(state.copyWith(status: ScheduleStatus.initialLoading, clearError: true));
     await _fetchData(emit, page: 1, reset: true);
   }
 
   Future<void> _onRefreshSchedule(
-      RefreshSchedule event, Emitter<ScheduleState> emit) async {
-    if (state.status == ScheduleStatus.refreshing || state.status == ScheduleStatus.initialLoading) return;
-    emit(state.copyWith(status: ScheduleStatus.refreshing));
+    RefreshSchedule event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    if (state.status == ScheduleStatus.refreshing ||
+        state.status == ScheduleStatus.initialLoading)
+      return;
+    emit(state.copyWith(status: ScheduleStatus.refreshing, clearError: true));
     try {
       await _fetchData(emit, page: 1, reset: true);
     } finally {
@@ -38,19 +51,25 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   }
 
   Future<void> _onSelectCalendarDay(
-      SelectCalendarDay event, Emitter<ScheduleState> emit) async {
-    emit(state.copyWith(
-      selectedDateString: event.day.dateString,
-      selectedDayDate: event.day.date,
-    ));
+    SelectCalendarDay event,
+    Emitter<ScheduleState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        selectedDateString: event.day.dateString,
+        selectedDayDate: event.day.date,
+      ),
+    );
   }
 
   Future<void> _onLoadNextSchedulePage(
-      LoadNextSchedulePage event, Emitter<ScheduleState> emit) async {
+    LoadNextSchedulePage event,
+    Emitter<ScheduleState> emit,
+  ) async {
     if (state.isLoadingNextPage) return;
     if (state.hasReachedEnd) return;
 
-    emit(state.copyWith(isLoadingNextPage: true));
+    emit(state.copyWith(isLoadingNextPage: true, clearError: true));
     await _fetchData(
       emit,
       page: state.currentPage + 1,
@@ -60,7 +79,9 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   }
 
   Future<void> _onJumpToToday(
-      JumpToToday event, Emitter<ScheduleState> emit) async {
+    JumpToToday event,
+    Emitter<ScheduleState> emit,
+  ) async {
     if (state.status == ScheduleStatus.initialLoading) return;
     emit(state.copyWith(status: ScheduleStatus.initialLoading));
     await _fetchData(emit, page: 1, reset: true);
@@ -88,7 +109,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       final seen = <String>{};
       final deduped = newAppts.where((a) => seen.add(a.id)).toList();
 
-      final hasReachedEnd = response.appointments.totalPages == 0 ||
+      final hasReachedEnd =
+          response.appointments.totalPages == 0 ||
           response.appointments.page >= response.appointments.totalPages;
 
       // Find the currently selected date's details from calendar
@@ -101,7 +123,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
           final firstTime = response.appointments.list.first.time;
           try {
             final parsedDate = DateTime.parse(firstTime);
-            selectedDateStr = "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
+            selectedDateStr =
+                "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
           } catch (_) {
             if (response.calendar.isNotEmpty) {
               selectedDateStr = response.calendar.first.dateString;
@@ -130,49 +153,79 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       if (skipCalendarUpdate && state.calendar.isEmpty) {
         shouldUpdateCalendar = true;
       }
-      
+
       // Also force calendar update if the month/year of the returned calendar differs from state
-      if (!shouldUpdateCalendar && response.calendar.isNotEmpty && state.calendar.isNotEmpty) {
+      if (!shouldUpdateCalendar &&
+          response.calendar.isNotEmpty &&
+          state.calendar.isNotEmpty) {
         try {
-          final newMonth = DateTime.parse(response.calendar.first.dateString).month;
-          final oldMonth = DateTime.parse(state.calendar.first.dateString).month;
+          final newMonth = DateTime.parse(
+            response.calendar.first.dateString,
+          ).month;
+          final oldMonth = DateTime.parse(
+            state.calendar.first.dateString,
+          ).month;
           if (newMonth != oldMonth) {
             shouldUpdateCalendar = true;
           }
         } catch (_) {}
       }
 
-      final finalStatus = deduped.isEmpty ? ScheduleStatus.empty : ScheduleStatus.success;
+      final finalStatus = deduped.isEmpty
+          ? ScheduleStatus.empty
+          : ScheduleStatus.success;
 
-      emit(state.copyWith(
-        status: finalStatus,
-        calendar: shouldUpdateCalendar ? response.calendar : state.calendar,
-        stats: response.summary,
-        appointments: deduped,
-        selectedDateString: selectedDateStr,
-        selectedDayDate: selectedDayDt,
-        currentPage: response.appointments.page,
-        totalPages: response.appointments.totalPages,
-        hasReachedEnd: hasReachedEnd,
-        isLoadingNextPage: false,
-        isAppointmentsLoading: false,
-        clearError: true,
-      ));
+      emit(
+        state.copyWith(
+          status: finalStatus,
+          calendar: shouldUpdateCalendar ? response.calendar : state.calendar,
+          stats: response.summary,
+          appointments: deduped,
+          selectedDateString: selectedDateStr,
+          selectedDayDate: selectedDayDt,
+          currentPage: response.appointments.page,
+          totalPages: response.appointments.totalPages,
+          hasReachedEnd: hasReachedEnd,
+          isLoadingNextPage: false,
+          isAppointmentsLoading: false,
+          clearError: true,
+        ),
+      );
     } catch (e, stack) {
-      developer.log('Error in _fetchData: $e', stackTrace: stack, name: 'ScheduleBloc');
-      if (reset) {
-        emit(state.copyWith(
-          status: ScheduleStatus.failure,
-          errorMessage: e.toString(),
-          isLoadingNextPage: false,
-          isAppointmentsLoading: false,
-        ));
+      developer.log(
+        'Error in _fetchData: $e',
+        stackTrace: stack,
+        name: 'ScheduleBloc',
+      );
+      final String friendlyMessage;
+      if (e is NetworkException) {
+        friendlyMessage = e.message;
+      } else if (e is DioException && e.error is NetworkException) {
+        friendlyMessage = (e.error as NetworkException).message;
+      } else if (e is SocketException) {
+        friendlyMessage = ErrorMapper.mapNoInternet();
+      } else if (e is TimeoutException) {
+        friendlyMessage = ErrorMapper.mapTimeout();
       } else {
-        emit(state.copyWith(
-          isLoadingNextPage: false,
-          isAppointmentsLoading: false,
-          errorMessage: 'Could not load more appointments.',
-        ));
+        friendlyMessage = ErrorMapper.mapUnknown();
+      }
+      if (reset) {
+        emit(
+          state.copyWith(
+            status: ScheduleStatus.failure,
+            errorMessage: friendlyMessage,
+            isLoadingNextPage: false,
+            isAppointmentsLoading: false,
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            isLoadingNextPage: false,
+            isAppointmentsLoading: false,
+            errorMessage: friendlyMessage,
+          ),
+        );
       }
     }
   }

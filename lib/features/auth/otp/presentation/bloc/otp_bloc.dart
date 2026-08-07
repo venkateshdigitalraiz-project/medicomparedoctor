@@ -22,7 +22,7 @@ class OtpBloc extends Bloc<OtpEvent, OtpState> {
           repository ??
           OtpRepositoryImpl(
             remoteDataSource: OtpRemoteDataSourceImpl(
-              client: AppHttpClient.client,
+              client: AppHttpClient.dio,
             ),
           ),
       super(OtpState.initial()) {

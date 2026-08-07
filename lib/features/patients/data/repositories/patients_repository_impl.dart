@@ -1,22 +1,21 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
-import 'dart:io';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/core/services/session_manager.dart';
+import 'package:medicompare/core/network/network_exception.dart';
 import '../../domain/repositories/patients_repository.dart';
 import '../models/patient.dart';
-
 import 'package:medicompare/core/network/global_client.dart';
 
 class PatientsRepositoryImpl implements PatientsRepository {
-  final http.Client client;
+  final Dio client;
   final String baseUrl;
 
   PatientsRepositoryImpl({
-    http.Client? client,
+    Dio? client,
     this.baseUrl = AppConstants.baseUrl,
-  }) : client = client ?? AppHttpClient.client;
+  }) : client = client ?? AppHttpClient.dio;
 
   @override
   Future<PatientListResponse> fetchPatients({
@@ -24,45 +23,52 @@ class PatientsRepositoryImpl implements PatientsRepository {
     required int limit,
   }) async {
     final token = await SessionManager.getToken();
-    final uri = Uri.parse(
-      '$baseUrl/doctor/dashboard/patient-list?page=$page&limit=$limit',
-    );
+    final uriStr = '$baseUrl${AppConstants.patientsEndpoint}?page=$page&limit=$limit';
 
     developer.log('=== PATIENT LIST API REQUEST ===', name: 'PatientsRepository');
-    developer.log('URL: $uri', name: 'PatientsRepository');
+    developer.log('URL: $uriStr', name: 'PatientsRepository');
 
     try {
       final response = await client.get(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token',
-        },
-      ).timeout(AppConstants.apiTimeout);
+        uriStr,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            if (token != null) 'Authorization': 'Bearer $token',
+          },
+        ),
+      );
 
       developer.log('Status: ${response.statusCode}', name: 'PatientsRepository');
-      developer.log('Body: ${response.body}', name: 'PatientsRepository');
+      developer.log('Body: ${response.data}', name: 'PatientsRepository');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final json = jsonDecode(response.body) as Map<String, dynamic>;
+        final Map<String, dynamic> json;
+        if (response.data is String) {
+          json = jsonDecode(response.data) as Map<String, dynamic>;
+        } else {
+          json = response.data as Map<String, dynamic>;
+        }
         return PatientListResponse.fromJson(json);
       } else {
         throw Exception(
           'Failed to fetch patient list. Status: ${response.statusCode}',
         );
       }
-    } on SocketException {
-      developer.log(
-        'SocketException — returning empty mock list response',
-        name: 'PatientsRepository',
-      );
-      return _emptyMock();
-    } on http.ClientException {
-      developer.log(
-        'ClientException — returning empty mock list response',
-        name: 'PatientsRepository',
-      );
-      return _emptyMock();
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.connectionTimeout ||
+          e.error is NetworkException) {
+        developer.log(
+          'Dio connection error — returning empty mock list response',
+          name: 'PatientsRepository',
+        );
+        return _emptyMock();
+      }
+      if (e.error is NetworkException) {
+        throw e.error as NetworkException;
+      }
+      rethrow;
     }
   }
 

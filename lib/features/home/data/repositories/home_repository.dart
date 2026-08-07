@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
-import 'dart:io';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/core/services/session_manager.dart';
+import 'package:medicompare/core/network/network_exception.dart';
 import '../models/appointment.dart';
 import '../models/clinic_status.dart';
 import '../models/dashboard_response.dart';
@@ -23,11 +23,11 @@ abstract class HomeRepository {
 // Implementation
 // ---------------------------------------------------------------------------
 class HomeRepositoryImpl implements HomeRepository {
-  final http.Client client;
+  final Dio client;
   final String baseUrl;
 
-  HomeRepositoryImpl({http.Client? client, this.baseUrl = AppConstants.baseUrl})
-    : client = client ?? AppHttpClient.client;
+  HomeRepositoryImpl({Dio? client, this.baseUrl = AppConstants.baseUrl})
+    : client = client ?? AppHttpClient.dio;
 
   @override
   Future<DashboardResponse> fetchDashboard({
@@ -35,47 +35,47 @@ class HomeRepositoryImpl implements HomeRepository {
     required int limit,
   }) async {
     final token = await SessionManager.getToken();
-    final uri = Uri.parse(
-      '$baseUrl${AppConstants.dashboardEndpoint}?page=$page&limit=$limit',
-    );
+    final uriStr = '$baseUrl${AppConstants.dashboardEndpoint}?page=$page&limit=$limit';
 
     developer.log('=== DASHBOARD API REQUEST ===', name: 'HomeRepository');
-    developer.log('URL: $uri', name: 'HomeRepository');
+    developer.log('URL: $uriStr', name: 'HomeRepository');
 
     try {
-      final response = await client
-          .get(
-            uri,
-            headers: {
-              'Content-Type': 'application/json',
-              if (token != null) 'Authorization': 'Bearer $token',
-            },
-          )
-          .timeout(AppConstants.apiTimeout);
+      final response = await client.get(
+        uriStr,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            if (token != null) 'Authorization': 'Bearer $token',
+          },
+        ),
+      );
 
       developer.log('Status: ${response.statusCode}', name: 'HomeRepository');
-      developer.log('Body: ${response.body}', name: 'HomeRepository');
+      developer.log('Body: ${response.data}', name: 'HomeRepository');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final json = jsonDecode(response.body) as Map<String, dynamic>;
+        final Map<String, dynamic> json;
+        if (response.data is String) {
+          json = jsonDecode(response.data) as Map<String, dynamic>;
+        } else {
+          json = response.data as Map<String, dynamic>;
+        }
         return DashboardResponse.fromJson(json);
       } else {
         throw Exception(
           'Dashboard fetch failed. Status: ${response.statusCode}',
         );
       }
-    } on SocketException {
+    } on DioException catch (e) {
       developer.log(
-        'SocketException — returning empty mock dashboard',
+        'DioException — propagating error',
         name: 'HomeRepository',
       );
-      return _emptyMock();
-    } on http.ClientException {
-      developer.log(
-        'ClientException — returning empty mock dashboard',
-        name: 'HomeRepository',
-      );
-      return _emptyMock();
+      if (e.error is NetworkException) {
+        throw e.error as NetworkException;
+      }
+      rethrow;
     }
   }
 

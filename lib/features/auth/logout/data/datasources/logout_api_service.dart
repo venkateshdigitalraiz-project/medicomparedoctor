@@ -1,15 +1,16 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/core/services/session_manager.dart';
+import 'package:medicompare/core/network/network_exception.dart';
 
 abstract class LogoutApiService {
   Future<void> logout();
 }
 
 class LogoutApiServiceImpl implements LogoutApiService {
-  final http.Client client;
+  final Dio client;
   final String baseUrl;
 
   LogoutApiServiceImpl({
@@ -19,7 +20,7 @@ class LogoutApiServiceImpl implements LogoutApiService {
 
   @override
   Future<void> logout() async {
-    final url = Uri.parse('$baseUrl/doctor/profile/logout');
+    final urlStr = '$baseUrl${AppConstants.logoutEndpoint}';
     final token = await SessionManager.getToken();
     final headers = {
       'Content-Type': 'application/json',
@@ -27,13 +28,14 @@ class LogoutApiServiceImpl implements LogoutApiService {
     };
 
     developer.log('=== LOGOUT API REQUEST START ===', name: 'LogoutApiService');
-    developer.log('URL: $url', name: 'LogoutApiService');
+    developer.log('URL: $urlStr', name: 'LogoutApiService');
     developer.log('Headers: $headers', name: 'LogoutApiService');
 
     try {
-      final response = await client
-          .post(url, headers: headers)
-          .timeout(AppConstants.apiTimeout);
+      final response = await client.post(
+        urlStr,
+        options: Options(headers: headers),
+      );
 
       developer.log(
         '=== LOGOUT API RESPONSE ===',
@@ -44,12 +46,17 @@ class LogoutApiServiceImpl implements LogoutApiService {
         name: 'LogoutApiService',
       );
       developer.log(
-        'Response Body: ${response.body}',
+        'Response Body: ${response.data}',
         name: 'LogoutApiService',
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        final Map<String, dynamic> responseData;
+        if (response.data is String) {
+          responseData = jsonDecode(response.data);
+        } else {
+          responseData = response.data as Map<String, dynamic>;
+        }
         if (responseData['success'] == true) {
           return;
         } else {
@@ -58,17 +65,25 @@ class LogoutApiServiceImpl implements LogoutApiService {
       } else {
         String errorMsg = 'Failed to logout';
         try {
-          final Map<String, dynamic> responseData = jsonDecode(response.body);
+          final Map<String, dynamic> responseData;
+          if (response.data is String) {
+            responseData = jsonDecode(response.data);
+          } else {
+            responseData = response.data as Map<String, dynamic>;
+          }
           errorMsg = responseData['message'] ?? errorMsg;
         } catch (_) {}
         throw Exception('$errorMsg (Status code: ${response.statusCode})');
       }
-    } catch (e) {
+    } on DioException catch (e) {
       developer.log(
         'Error during logout API execution',
         name: 'LogoutApiService',
         error: e,
       );
+      if (e.error is NetworkException) {
+        throw e.error as NetworkException;
+      }
       rethrow;
     }
   }

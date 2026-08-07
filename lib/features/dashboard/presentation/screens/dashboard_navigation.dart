@@ -120,7 +120,7 @@ class MainScreen extends StatelessWidget {
           create: (_) => LogoutBloc(
             logoutUseCase: LogoutUseCase(
               repository: LogoutRepositoryImpl(
-                apiService: LogoutApiServiceImpl(client: AppHttpClient.client),
+                apiService: LogoutApiServiceImpl(client: AppHttpClient.dio),
               ),
             ),
           ),

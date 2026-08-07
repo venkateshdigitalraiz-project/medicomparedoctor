@@ -9,48 +9,53 @@ class OverviewStatsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _StatCard(
-            icon: Icons.people_alt_rounded,
-            iconColor: AppColors.info,
-            iconBg: AppColors.infoBg,
-            value: stats.totalAppointments.toString(),
-            label: 'Total\nAppointments',
+    return IntrinsicHeight(
+      // 👈 makes the Row measure the tallest child once
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment
+            .stretch, // 👈 forces all cards to match that height
+        children: [
+          Expanded(
+            child: _StatCard(
+              icon: Icons.people_alt_rounded,
+              iconColor: AppColors.info,
+              iconBg: AppColors.infoBg,
+              value: stats.totalAppointments.toString(),
+              label: 'Total\nAppointments',
+            ),
           ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _StatCard(
-            icon: Icons.check_circle_rounded,
-            iconColor: AppColors.success,
-            iconBg: AppColors.successBg,
-            value: stats.completedVisits.toString(),
-            label: 'Completed\nVisits',
+          const SizedBox(width: 10),
+          Expanded(
+            child: _StatCard(
+              icon: Icons.check_circle_rounded,
+              iconColor: AppColors.success,
+              iconBg: AppColors.successBg,
+              value: stats.completedVisits.toString(),
+              label: 'Completed\nVisits',
+            ),
           ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _StatCard(
-            icon: Icons.videocam_rounded,
-            iconColor: Colors.red,
-            iconBg: AppColors.warningBg,
-            value: stats.upcomingConsults.toString(),
-            label: 'Upcoming\nConsult',
+          const SizedBox(width: 10),
+          Expanded(
+            child: _StatCard(
+              icon: Icons.videocam_rounded,
+              iconColor: Colors.red,
+              iconBg: AppColors.warningBg,
+              value: stats.upcomingConsults.toString(),
+              label: 'Upcoming\nConsult',
+            ),
           ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: _StatCard(
-            icon: Icons.cancel_rounded,
-            iconColor: AppColors.danger,
-            iconBg: AppColors.dangerBg,
-            value: stats.cancelled.toString(),
-            label: 'Cancelled',
+          const SizedBox(width: 10),
+          Expanded(
+            child: _StatCard(
+              icon: Icons.cancel_rounded,
+              iconColor: AppColors.danger,
+              iconBg: AppColors.dangerBg,
+              value: stats.cancelled.toString(),
+              label: 'Cancelled',
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -73,6 +78,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      // height: 130,
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
       decoration: BoxDecoration(
         color: Colors.white,

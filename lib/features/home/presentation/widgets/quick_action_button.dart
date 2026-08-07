@@ -21,6 +21,7 @@ class QuickActionButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        height: 72,
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
           color: bgColor,
@@ -31,7 +32,7 @@ class QuickActionButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Icon(icon, color: color, size: 22),
-            const SizedBox(height: 8),
+            const SizedBox(width: 4),
             Text(
               label,
               textAlign: TextAlign.center,

@@ -1,6 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dio/dio.dart';
+import 'package:medicompare/core/network/network_exception.dart';
+import 'package:medicompare/core/network/error_mapper.dart';
+import 'package:medicompare/core/ui/dialog_helper.dart';
 
 import '../../data/models/appointment.dart';
 import '../../data/models/clinic_status.dart';
@@ -15,8 +20,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   static const int _pageLimit = 10;
 
   HomeBloc({HomeRepository? repository})
-      : _repository = repository ?? HomeRepositoryImpl(),
-        super(const HomeState()) {
+    : _repository = repository ?? HomeRepositoryImpl(),
+      super(const HomeState()) {
     on<HomeStarted>(_onStarted);
     on<HomeRefreshed>(_onRefreshed);
     on<HomeSearchChanged>(_onSearchChanged);
@@ -30,12 +35,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   // -------------------------------------------------------------------------
 
   Future<void> _onStarted(HomeStarted event, Emitter<HomeState> emit) async {
-    emit(state.copyWith(status: HomeStatus.loading));
+    DialogHelper.isAtLoginScreen = false;
+    emit(state.copyWith(status: HomeStatus.loading, clearError: true));
     await _loadPage(emit, page: 1, reset: true);
   }
 
   Future<void> _onRefreshed(
-      HomeRefreshed event, Emitter<HomeState> emit) async {
+    HomeRefreshed event,
+    Emitter<HomeState> emit,
+  ) async {
+    emit(state.copyWith(clearError: true));
     try {
       await _loadPage(emit, page: 1, reset: true);
     } finally {
@@ -44,13 +53,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   Future<void> _onNextPageRequested(
-      HomeNextPageRequested event, Emitter<HomeState> emit) async {
+    HomeNextPageRequested event,
+    Emitter<HomeState> emit,
+  ) async {
     // Guard: do not fetch if already loading, or no more pages exist.
     if (state.isLoadingNextPage) return;
     if (state.hasReachedEnd) return;
 
     final nextPage = state.currentPage + 1;
-    emit(state.copyWith(isLoadingNextPage: true));
+    emit(state.copyWith(isLoadingNextPage: true, clearError: true));
     await _loadPage(emit, page: nextPage, reset: false);
   }
 
@@ -78,32 +89,50 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final seen = <String>{};
       final deduplicated = newList.where((a) => seen.add(a.id)).toList();
 
-      final hasReachedEnd = incoming.totalPages == 0 ||
-          incoming.page >= incoming.totalPages;
+      final hasReachedEnd =
+          incoming.totalPages == 0 || incoming.page >= incoming.totalPages;
 
-      emit(state.copyWith(
-        status: HomeStatus.success,
-        stats: reset ? response.counts : state.stats,
-        appointments: deduplicated,
-        currentPage: incoming.page,
-        totalPages: incoming.totalPages,
-        hasReachedEnd: hasReachedEnd,
-        isLoadingNextPage: false,
-        clearError: true,
-      ));
-    } catch (e) {
-      if (reset) {
-        emit(state.copyWith(
-          status: HomeStatus.failure,
-          errorMessage: e.toString(),
+      emit(
+        state.copyWith(
+          status: HomeStatus.success,
+          stats: reset ? response.counts : state.stats,
+          appointments: deduplicated,
+          currentPage: incoming.page,
+          totalPages: incoming.totalPages,
+          hasReachedEnd: hasReachedEnd,
           isLoadingNextPage: false,
-        ));
+          clearError: true,
+        ),
+      );
+    } catch (e) {
+      final String friendlyMessage;
+      if (e is NetworkException) {
+        friendlyMessage = e.message;
+      } else if (e is DioException && e.error is NetworkException) {
+        friendlyMessage = (e.error as NetworkException).message;
+      } else if (e is SocketException) {
+        friendlyMessage = ErrorMapper.mapNoInternet();
+      } else if (e is TimeoutException) {
+        friendlyMessage = ErrorMapper.mapTimeout();
+      } else {
+        friendlyMessage = ErrorMapper.mapUnknown();
+      }
+      if (reset) {
+        emit(
+          state.copyWith(
+            status: HomeStatus.failure,
+            errorMessage: friendlyMessage,
+            isLoadingNextPage: false,
+          ),
+        );
       } else {
         // Pagination error — don't wipe the screen; just stop the spinner.
-        emit(state.copyWith(
-          isLoadingNextPage: false,
-          errorMessage: e.toString(),
-        ));
+        emit(
+          state.copyWith(
+            isLoadingNextPage: false,
+            errorMessage: friendlyMessage,
+          ),
+        );
       }
     }
   }
@@ -121,7 +150,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   void _onBottomNavChanged(
-      HomeBottomNavChanged event, Emitter<HomeState> emit) {
+    HomeBottomNavChanged event,
+    Emitter<HomeState> emit,
+  ) {
     emit(state.copyWith(bottomNavIndex: event.index));
   }
 }
