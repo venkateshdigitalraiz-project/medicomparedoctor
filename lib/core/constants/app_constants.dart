@@ -1,6 +1,7 @@
 class AppConstants {
   static const String appName = 'MediCompare Doctor';
-  static const String baseUrl = 'http://192.168.0.161:9001/api/v1';
+  static const String baseUrl = "https://api.medicompares.com/api/v1";
+  // 'http://192.168.0.161:9001/api/v1';
 
   // API Endpoints
   static const String loginEndpoint = '/doctor/auth/login';

@@ -22,6 +22,7 @@ class PatientsScreen extends StatefulWidget {
 
 class _PatientsScreenState extends State<PatientsScreen> {
   final ScrollController _scrollController = ScrollController();
+  bool _isRefreshing = false;
 
   @override
   void initState() {
@@ -92,7 +93,7 @@ class _PatientsScreenState extends State<PatientsScreen> {
                     previous.errorMessage != current.errorMessage,
                 builder: (context, state) {
                   return Column(
-                    children: [
+                     children: [
                       Expanded(
                         child: AppRefreshIndicator(
                           topposition: 0,
@@ -100,11 +101,22 @@ class _PatientsScreenState extends State<PatientsScreen> {
                             final bloc = context.read<PatientsBloc>();
                             if (bloc.state.status == PatientsStatus.loading)
                               return;
+                            setState(() {
+                              _isRefreshing = true;
+                            });
                             final completer = Completer<void>();
                             bloc.add(
                               PatientsLoadRequested(completer: completer),
                             );
-                            await completer.future;
+                            try {
+                              await completer.future;
+                            } finally {
+                              if (mounted) {
+                                setState(() {
+                                  _isRefreshing = false;
+                                });
+                              }
+                            }
                           },
                           child: Container(
                             padding: const EdgeInsets.only(top: 8),
@@ -135,9 +147,9 @@ class _PatientsScreenState extends State<PatientsScreen> {
                                       .add(PatientsFilterChanged(filter)),
                                 ),
                                 const SizedBox(height: 16),
-                                if (state.status == PatientsStatus.initial ||
+                                if (((state.status == PatientsStatus.initial ||
                                     (state.status == PatientsStatus.loading &&
-                                        state.allPatients.isEmpty))
+                                        state.allPatients.isEmpty))) && !_isRefreshing)
                                   const Padding(
                                     padding: EdgeInsets.symmetric(vertical: 40),
                                     child: CommonLoadingWidget(),

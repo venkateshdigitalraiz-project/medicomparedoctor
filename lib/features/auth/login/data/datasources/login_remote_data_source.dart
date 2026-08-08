@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/core/constants/app_strings.dart';
@@ -83,7 +82,9 @@ class LoginRemoteDataSourceImpl implements LoginRemoteDataSource {
           'Returning mock successful login response for demo purposes due to connection error.',
           name: 'LoginRemoteDataSource',
         );
-        await Future.delayed(const Duration(milliseconds: 800)); // simulate latency
+        await Future.delayed(
+          const Duration(milliseconds: 800),
+        ); // simulate latency
         return LoginResponseModel(
           success: true,
           message: AppStrings.otpSentMock,
