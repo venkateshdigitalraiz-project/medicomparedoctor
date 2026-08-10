@@ -149,12 +149,12 @@ class _LoginViewState extends State<_LoginView> {
   }
 
   Widget _buildIllustration() {
-    return SizedBox(
-      width: 260,
-      height: 260,
-      child: Center(
-        child: Image.asset("assets/images/login.png", fit: BoxFit.contain),
+    return Container(
+      constraints: const BoxConstraints(
+        maxWidth: 260,
+        maxHeight: 260,
       ),
+      child: Image.asset("assets/images/login.png", fit: BoxFit.contain),
     );
   }
 
@@ -301,32 +301,36 @@ class _LoginViewState extends State<_LoginView> {
               ),
               child: state.status == LoginStatus.submitting
                   ? SizedBox(
-                      width: 22,
+                      width: 60,
                       height: 22,
                       child: AppLoader(
                         color: Colors.white,
                         size: 22,
                       ),
                     )
-                  : const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Continue',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 17,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w700,
+                  : const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Continue',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 10),
-                        Icon(
-                          Icons.arrow_forward,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ],
+                          SizedBox(width: 10),
+                          Icon(
+                            Icons.arrow_forward,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ],
+                      ),
                     ),
             ),
           ),

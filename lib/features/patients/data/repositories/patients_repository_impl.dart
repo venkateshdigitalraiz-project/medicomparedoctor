@@ -4,8 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/core/services/session_manager.dart';
 import 'package:medicompare/core/network/network_exception.dart';
-import '../../domain/repositories/patients_repository.dart';
-import '../models/patient.dart';
+import 'package:medicompare/features/patients/domain/repositories/patients_repository.dart';
+import 'package:medicompare/features/patients/data/models/patient.dart';
 import 'package:medicompare/core/network/global_client.dart';
 
 class PatientsRepositoryImpl implements PatientsRepository {

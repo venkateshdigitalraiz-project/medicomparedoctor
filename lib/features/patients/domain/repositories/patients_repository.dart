@@ -1,4 +1,4 @@
-import '../../data/models/patient.dart';
+import 'package:medicompare/features/patients/data/models/patient.dart';
 
 abstract class PatientsRepository {
   Future<PatientListResponse> fetchPatients({

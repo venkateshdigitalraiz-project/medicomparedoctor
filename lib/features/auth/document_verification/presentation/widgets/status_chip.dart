@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../data/models/document_model.dart';
+import 'package:medicompare/features/auth/document_verification/data/models/document_model.dart';
 
 class StatusChip extends StatelessWidget {
   final DocumentStatus status;

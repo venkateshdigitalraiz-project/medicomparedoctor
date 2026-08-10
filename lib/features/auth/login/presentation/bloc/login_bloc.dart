@@ -5,22 +5,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/core/constants/app_strings.dart';
-import '../../data/datasources/login_remote_data_source.dart';
-import '../../data/repositories/login_repository_impl.dart';
-import '../../domain/repositories/login_repository.dart';
-import 'login_event.dart';
-import 'login_state.dart';
+import 'package:medicompare/features/auth/login/data/datasources/login_remote_data_source.dart';
+import 'package:medicompare/features/auth/login/data/repositories/login_repository_impl.dart';
+import 'package:medicompare/features/auth/login/domain/usecases/login_usecase.dart';
+import 'package:medicompare/features/auth/login/presentation/bloc/login_event.dart';
+import 'package:medicompare/features/auth/login/presentation/bloc/login_state.dart';
 
 import 'package:medicompare/core/network/global_client.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  final LoginRepository repository;
+  final LoginUseCase loginUseCase;
 
-  LoginBloc({LoginRepository? repository})
-    : repository =
-          repository ??
-          LoginRepositoryImpl(
-            remoteDataSource: LoginRemoteDataSourceImpl(client: AppHttpClient.dio),
+  LoginBloc({LoginUseCase? loginUseCase})
+    : loginUseCase = loginUseCase ??
+          LoginUseCase(
+            LoginRepositoryImpl(
+              remoteDataSource: LoginRemoteDataSourceImpl(client: AppHttpClient.dio),
+            ),
           ),
       super(const LoginState()) {
     on<PhoneNumberChanged>((event, emit) {
@@ -74,12 +75,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
     try {
       developer.log(
-        'Attempting repository.login() API method call...',
+        'Attempting loginUseCase() API method call...',
         name: 'LoginBloc',
       );
-      final response = await repository.login(state.phoneNumber.trim());
+      final response = await loginUseCase(state.phoneNumber.trim());
       developer.log(
-        'repository.login() completed successfully.',
+        'loginUseCase() completed successfully.',
         name: 'LoginBloc',
       );
 

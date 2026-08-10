@@ -26,20 +26,6 @@ class SplashScreen extends StatefulWidget {
     this.logoAssetPath = 'assets/images/applogo.png',
   });
 
-  /// Called once the splash sequence (including the trailing 500ms delay)
-  /// has fully completed. Typically used to push the Home or Login route:
-  ///
-  /// ```dart
-  /// SplashScreen(
-  ///   onFinished: () {
-  ///     Navigator.of(context).pushReplacement(
-  ///       MaterialPageRoute(
-  ///         builder: (_) => isAuthenticated ? const HomeScreen() : const LoginScreen(),
-  ///       ),
-  ///     );
-  ///   },
-  /// )
-  /// ```
   final VoidCallback onFinished;
 
   /// Path to the MediCompares logo asset. Must be registered under
@@ -58,6 +44,24 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
     _animations = SplashAnimationController(vsync: this);
+
+    int lastPrintedStage = 0;
+    _animations.controller.addListener(() {
+      final t = _animations.controller.value;
+      int currentStage = 1;
+      if (t >= AppDurations.stage4Start) {
+        currentStage = 4;
+      } else if (t >= AppDurations.stage3Start) {
+        currentStage = 3;
+      } else if (t >= AppDurations.stage2Start) {
+        currentStage = 2;
+      }
+      if (currentStage != lastPrintedStage) {
+        lastPrintedStage = currentStage;
+        debugPrint("Animation Stage: $currentStage");
+      }
+    });
+
     _runSequence();
   }
 

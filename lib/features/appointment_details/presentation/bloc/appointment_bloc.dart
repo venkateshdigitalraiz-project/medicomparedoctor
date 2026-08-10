@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/features/appointment_details/data/models/appointment_model.dart';
-import 'appointment_event.dart';
-import 'appointment_state.dart';
+import 'package:medicompare/features/appointment_details/presentation/bloc/appointment_event.dart';
+import 'package:medicompare/features/appointment_details/presentation/bloc/appointment_state.dart';
 
 class AppointmentBloc extends Bloc<AppointmentEvent, AppointmentState> {
   AppointmentBloc() : super(const AppointmentLoading()) {

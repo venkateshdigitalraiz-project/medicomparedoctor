@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../data/models/patient_filter.dart';
+import 'package:medicompare/features/patients/data/models/patient_filter.dart';
 
 class FilterTabBar extends StatelessWidget {
   final PatientFilter activeFilter;

@@ -1,23 +1,19 @@
+import 'package:medicompare/features/home/domain/repositories/home_repository.dart';
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/core/services/session_manager.dart';
 import 'package:medicompare/core/network/network_exception.dart';
-import '../models/appointment.dart';
-import '../models/clinic_status.dart';
-import '../models/dashboard_response.dart';
+import 'package:medicompare/features/home/data/models/appointment.dart';
+import 'package:medicompare/features/home/data/models/clinic_status.dart';
+import 'package:medicompare/features/home/data/models/dashboard_response.dart';
 import 'package:medicompare/core/network/global_client.dart';
 
 // ---------------------------------------------------------------------------
 // Abstract interface
 // ---------------------------------------------------------------------------
-abstract class HomeRepository {
-  Future<DashboardResponse> fetchDashboard({
-    required int page,
-    required int limit,
-  });
-}
+
 
 // ---------------------------------------------------------------------------
 // Implementation
@@ -35,10 +31,12 @@ class HomeRepositoryImpl implements HomeRepository {
     required int limit,
   }) async {
     final token = await SessionManager.getToken();
-    final uriStr = '$baseUrl${AppConstants.dashboardEndpoint}?page=$page&limit=$limit';
+    final uriStr =
+        '$baseUrl${AppConstants.dashboardEndpoint}?page=$page&limit=$limit';
 
     developer.log('=== DASHBOARD API REQUEST ===', name: 'HomeRepository');
     developer.log('URL: $uriStr', name: 'HomeRepository');
+    developer.log('Token: $token', name: 'HomeRepository');
 
     try {
       final response = await client.get(
@@ -68,10 +66,7 @@ class HomeRepositoryImpl implements HomeRepository {
         );
       }
     } on DioException catch (e) {
-      developer.log(
-        'DioException — propagating error',
-        name: 'HomeRepository',
-      );
+      developer.log('DioException — propagating error', name: 'HomeRepository');
       if (e.error is NetworkException) {
         throw e.error as NetworkException;
       }

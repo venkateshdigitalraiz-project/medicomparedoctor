@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import '../../data/models/patient.dart';
-import '../../data/models/patient_filter.dart';
+import 'package:medicompare/features/patients/data/models/patient.dart';
+import 'package:medicompare/features/patients/data/models/patient_filter.dart';
 
 enum PatientsStatus { initial, loading, success, failure }
 

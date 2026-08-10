@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
-import 'connectivity_service.dart';
-import 'network_exception.dart';
-import 'error_mapper.dart';
+import 'package:medicompare/core/network/connectivity_service.dart';
+import 'package:medicompare/core/network/network_exception.dart';
+import 'package:medicompare/core/network/error_mapper.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/main.dart';
 import 'package:medicompare/core/ui/dialog_helper.dart';

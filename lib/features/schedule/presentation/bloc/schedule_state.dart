@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../data/models/appointment.dart';
+import 'package:medicompare/features/schedule/data/models/appointment.dart';
 
 enum ScheduleStatus {
   initial,

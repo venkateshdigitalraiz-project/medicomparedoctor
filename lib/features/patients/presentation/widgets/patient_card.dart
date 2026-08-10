@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../data/models/patient.dart';
+import 'package:medicompare/features/patients/data/models/patient.dart';
 
 class PatientCard extends StatelessWidget {
   final Patient patient;

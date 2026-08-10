@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:medicompare/core/services/session_manager.dart';
-import '../../domain/usecases/logout_usecase.dart';
-import 'logout_event.dart';
-import 'logout_state.dart';
+import 'package:medicompare/features/auth/logout/domain/usecases/logout_usecase.dart';
+import 'package:medicompare/features/auth/logout/presentation/bloc/logout_event.dart';
+import 'package:medicompare/features/auth/logout/presentation/bloc/logout_state.dart';
 
 class LogoutBloc extends Bloc<LogoutEvent, LogoutState> {
   final LogoutUseCase logoutUseCase;

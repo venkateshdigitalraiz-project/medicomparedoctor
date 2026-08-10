@@ -5,11 +5,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/network/network_exception.dart';
 import 'package:medicompare/core/network/error_mapper.dart';
 import 'package:medicompare/core/ui/dialog_helper.dart';
-import '../../data/models/patient.dart';
-import '../../data/models/patient_filter.dart';
-import 'patients_event.dart';
-import '../../domain/repositories/patients_repository.dart';
-import 'patients_state.dart';
+import 'package:medicompare/features/patients/data/models/patient.dart';
+import 'package:medicompare/features/patients/data/models/patient_filter.dart';
+import 'package:medicompare/features/patients/presentation/bloc/patients_event.dart';
+import 'package:medicompare/features/patients/domain/repositories/patients_repository.dart';
+import 'package:medicompare/features/patients/presentation/bloc/patients_state.dart';
 
 class PatientsBloc extends Bloc<PatientsEvent, PatientsState> {
   final PatientsRepository repository;

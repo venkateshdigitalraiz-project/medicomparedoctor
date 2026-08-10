@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:equatable/equatable.dart';
-import '../../data/models/patient_filter.dart';
+import 'package:medicompare/features/patients/data/models/patient_filter.dart';
 
 abstract class PatientsEvent extends Equatable {
   const PatientsEvent();

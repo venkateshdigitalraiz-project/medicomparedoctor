@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'pin_event.dart';
-import 'pin_state.dart';
+import 'package:medicompare/features/auth/pin/presentation/bloc/pin_event.dart';
+import 'package:medicompare/features/auth/pin/presentation/bloc/pin_state.dart';
 
 class PinBloc extends Bloc<PinEvent, PinState> {
   PinBloc() : super(const PinState()) {

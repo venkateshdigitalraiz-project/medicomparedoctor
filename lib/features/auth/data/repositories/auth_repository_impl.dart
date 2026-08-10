@@ -1,9 +1,9 @@
 import 'package:medicompare/features/auth/login/data/models/login_request_model.dart';
 import 'package:medicompare/features/auth/login/data/models/login_response_model.dart';
-import 'package:medicompare/notification/data/datasources/notification_local_data_source.dart';
+import 'package:medicompare/features/notification/data/datasources/notification_local_data_source.dart';
 
-import '../../domain/repositories/auth_repository.dart';
-import '../datasources/auth_remote_data_source.dart';
+import 'package:medicompare/features/auth/domain/repositories/auth_repository.dart';
+import 'package:medicompare/features/auth/data/datasources/auth_remote_data_source.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;

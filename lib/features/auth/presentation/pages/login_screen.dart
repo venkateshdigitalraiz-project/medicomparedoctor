@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
+import 'package:medicompare/core/constants/app_colors.dart';
 
 /// Placeholder Login screen — replace with your real auth feature.
 ///

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'appointment.dart';
-import 'clinic_status.dart';
+import 'package:medicompare/features/home/data/models/appointment.dart';
+import 'package:medicompare/features/home/data/models/clinic_status.dart';
 
 // ---------------------------------------------------------------------------
 // Top-level dashboard response

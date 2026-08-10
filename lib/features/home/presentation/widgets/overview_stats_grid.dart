@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../data/models/clinic_status.dart';
+import 'package:medicompare/features/home/data/models/clinic_status.dart';
 import 'package:medicompare/core/theme/app_theme.dart';
 
 class OverviewStatsGrid extends StatelessWidget {

@@ -6,17 +6,18 @@ import 'package:dio/dio.dart';
 import 'package:medicompare/core/network/network_exception.dart';
 import 'package:medicompare/core/network/error_mapper.dart';
 import 'package:medicompare/core/ui/dialog_helper.dart';
-import '../../data/models/appointment.dart';
-import '../../data/repositories/schedule_repository.dart';
-import 'schedule_event.dart';
-import 'schedule_state.dart';
+import 'package:medicompare/features/schedule/data/models/appointment.dart';
+import 'package:medicompare/features/schedule/domain/usecases/get_schedule_usecase.dart';
+import 'package:medicompare/features/schedule/data/repositories/schedule_repository.dart';
+import 'package:medicompare/features/schedule/presentation/bloc/schedule_event.dart';
+import 'package:medicompare/features/schedule/presentation/bloc/schedule_state.dart';
 
 class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
-  final ScheduleRepository _repository;
+  final GetScheduleUseCase _getScheduleUseCase;
   static const int _limit = 10;
 
-  ScheduleBloc({ScheduleRepository? repository})
-    : _repository = repository ?? ScheduleRepositoryImpl(),
+  ScheduleBloc({GetScheduleUseCase? getScheduleUseCase})
+    : _getScheduleUseCase = getScheduleUseCase ?? GetScheduleUseCase(ScheduleRepositoryImpl()),
       super(ScheduleState.initial()) {
     on<LoadSchedule>(_onLoadSchedule);
     on<RefreshSchedule>(_onRefreshSchedule);
@@ -95,7 +96,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     bool skipCalendarUpdate = false,
   }) async {
     try {
-      final response = await _repository.fetchSchedule(
+      final response = await _getScheduleUseCase(
         page: page,
         limit: _limit,
         date: date,

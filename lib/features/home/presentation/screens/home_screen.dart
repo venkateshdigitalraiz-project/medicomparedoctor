@@ -8,14 +8,14 @@ import 'package:medicompare/features/auth/logout/presentation/utils/logout_handl
 
 import 'package:medicompare/core/theme/app_theme.dart';
 import 'package:medicompare/core/widget/common_state_widgets.dart';
-import '../bloc/home_bloc.dart';
-import '../widgets/appointment_tile.dart';
-import '../widgets/clinic_status_card.dart';
-import '../widgets/dashboard_header.dart';
-import '../widgets/dashboard_search_bar.dart';
-import '../widgets/overview_stats_grid.dart';
-import '../widgets/quick_action_button.dart';
-import '../widgets/tab_selector.dart';
+import 'package:medicompare/features/home/presentation/bloc/home_bloc.dart';
+import 'package:medicompare/features/home/presentation/widgets/appointment_tile.dart';
+import 'package:medicompare/features/home/presentation/widgets/clinic_status_card.dart';
+import 'package:medicompare/features/home/presentation/widgets/dashboard_header.dart';
+import 'package:medicompare/features/home/presentation/widgets/dashboard_search_bar.dart';
+import 'package:medicompare/features/home/presentation/widgets/overview_stats_grid.dart';
+import 'package:medicompare/features/home/presentation/widgets/quick_action_button.dart';
+import 'package:medicompare/features/home/presentation/widgets/tab_selector.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -190,7 +190,7 @@ class _HomeViewState extends State<_HomeView> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
               child: DashboardHeader(
-                avatarUrl: 'https://i.pravatar.cc/150?img=47',
+                avatarUrl: 'https://i.pravatar.cc/300?img=45',
                 onAvatarTap: () {
                   Navigator.pushNamed(context, RouteNames.menubar);
                 },

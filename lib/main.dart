@@ -11,11 +11,13 @@ import 'package:medicompare/core/services/session_manager.dart';
 
 import 'package:medicompare/features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'package:medicompare/features/onboarding/presentation/bloc/onboarding_state.dart';
+import 'package:medicompare/injection_container.dart' as di;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await FirebaseTokenService.init();
+  await di.init();
   runApp(
     // MyApp(initialRoute: loggedIn ? RouteNames.homeBottomNav : RouteNames.login),
     MyApp(),

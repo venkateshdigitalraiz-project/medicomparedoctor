@@ -7,9 +7,9 @@ import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/core/constants/app_strings.dart';
 import 'package:medicompare/features/auth/login/presentation/bloc/login_event.dart';
 import 'package:medicompare/features/auth/login/presentation/bloc/login_state.dart';
-import '../../data/datasources/auth_remote_data_source.dart';
-import '../../data/repositories/auth_repository_impl.dart';
-import '../../domain/repositories/auth_repository.dart';
+import 'package:medicompare/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:medicompare/features/auth/data/repositories/auth_repository_impl.dart';
+import 'package:medicompare/features/auth/domain/repositories/auth_repository.dart';
 
 import 'package:medicompare/core/network/global_client.dart';
 

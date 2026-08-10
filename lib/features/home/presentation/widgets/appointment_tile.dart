@@ -1,7 +1,7 @@
 // ignore_for_file: unused_local_variable
 
 import 'package:flutter/material.dart';
-import '../../data/models/appointment.dart';
+import 'package:medicompare/features/home/data/models/appointment.dart';
 import 'package:medicompare/core/theme/app_theme.dart';
 
 class AppointmentTile extends StatelessWidget {

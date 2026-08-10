@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'network_info.dart';
+import 'package:medicompare/core/network/network_info.dart';
 
 class ConnectivityServiceImpl implements NetworkInfo {
   final Duration checkTimeout;

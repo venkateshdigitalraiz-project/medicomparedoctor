@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:medicompare/common/common_add/appcolor.dart';
-import '../../data/models/appointment.dart';
+import 'package:medicompare/features/schedule/data/models/appointment.dart';
 
 class DateSelector extends StatelessWidget {
   final String? selectedDateString;

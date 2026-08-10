@@ -7,12 +7,12 @@ import 'package:medicompare/core/widget/common_state_widgets.dart';
 import 'package:medicompare/core/widget/app_refresh_indicator.dart';
 import 'package:medicompare/features/auth/logout/presentation/utils/logout_handler.dart';
 import 'package:medicompare/features/profile/data/models/user_profile_model.dart';
-import '../bloc/user_profile_state.dart';
-import 'user_section_tile.dart';
-import 'user_stat_card.dart';
+import 'package:medicompare/features/profile/presentation/bloc/user_profile_state.dart';
+import 'package:medicompare/features/profile/presentation/screens/user_section_tile.dart';
+import 'package:medicompare/features/profile/presentation/screens/user_stat_card.dart';
 
-import '../bloc/user_profile_bloc.dart';
-import '../bloc/user_profile_event.dart';
+import 'package:medicompare/features/profile/presentation/bloc/user_profile_bloc.dart';
+import 'package:medicompare/features/profile/presentation/bloc/user_profile_event.dart';
 
 class UserProfileScreen extends StatelessWidget {
   const UserProfileScreen({super.key});

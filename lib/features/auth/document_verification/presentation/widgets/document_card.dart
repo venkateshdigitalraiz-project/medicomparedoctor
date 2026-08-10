@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/features/auth/document_verification/presentation/bloc/document_verification_bloc.dart';
 import 'package:medicompare/features/auth/document_verification/data/models/document_model.dart';
 import 'package:medicompare/features/auth/document_verification/presentation/bloc/document_verification_event.dart';
-import 'status_chip.dart';
+import 'package:medicompare/features/auth/document_verification/presentation/widgets/status_chip.dart';
 
 class DocumentCard extends StatelessWidget {
   final DocumentModel document;

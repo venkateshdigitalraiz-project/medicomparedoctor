@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/features/auth/otp/data/models/verify_otp_response_model.dart';
-import 'package:medicompare/notification/data/datasources/notification_local_data_source.dart';
+import 'package:medicompare/features/notification/data/datasources/notification_local_data_source.dart';
 import 'package:medicompare/core/network/network_exception.dart';
 
 abstract class OtpRemoteDataSource {

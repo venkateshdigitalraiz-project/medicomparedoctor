@@ -1,19 +1,14 @@
+import 'package:medicompare/features/schedule/domain/repositories/schedule_repository.dart';
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/core/services/session_manager.dart';
 import 'package:medicompare/core/network/network_exception.dart';
-import '../models/appointment.dart';
+import 'package:medicompare/features/schedule/data/models/appointment.dart';
 import 'package:medicompare/core/network/global_client.dart';
 
-abstract class ScheduleRepository {
-  Future<ScheduleResponse> fetchSchedule({
-    required int page,
-    required int limit,
-    String? date,
-  });
-}
+
 
 class ScheduleRepositoryImpl implements ScheduleRepository {
   final Dio client;

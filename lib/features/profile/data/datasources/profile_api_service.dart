@@ -50,6 +50,10 @@ class ProfileApiServiceImpl implements ProfileApiService {
         name: 'ProfileApiService',
       );
       developer.log(
+        'Response Headers: ${response.headers}',
+        name: 'ProfileApiService',
+      );
+      developer.log(
         'Response Body: ${response.data}',
         name: 'ProfileApiService',
       );
@@ -61,11 +65,10 @@ class ProfileApiServiceImpl implements ProfileApiService {
         } else {
           responseData = response.data as Map<String, dynamic>;
         }
-        if (responseData['success'] == true) {
-          return UserProfileModel.fromJson(responseData);
-        } else {
+        if (responseData['success'] == false || responseData['status'] == false) {
           throw Exception(responseData['message'] ?? 'Failed to get profile');
         }
+        return UserProfileModel.fromJson(responseData);
       } else {
         String errorMsg = 'Failed to get profile';
         try {

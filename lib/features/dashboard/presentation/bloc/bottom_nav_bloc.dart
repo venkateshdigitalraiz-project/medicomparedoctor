@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'bottom_nav_event.dart';
-import 'bottom_nav_state.dart';
+import 'package:medicompare/features/dashboard/presentation/bloc/bottom_nav_event.dart';
+import 'package:medicompare/features/dashboard/presentation/bloc/bottom_nav_state.dart';
 
 class BottomNavBloc extends Bloc<BottomNavEvent, BottomNavState> {
   BottomNavBloc() : super(const BottomNavState()) {

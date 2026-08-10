@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/onboarding_page_data.dart';
-import '../widgets/onboarding_page_view.dart';
+import 'package:medicompare/features/onboarding/domain/onboarding_page_data.dart';
+import 'package:medicompare/features/onboarding/presentation/widgets/onboarding_page_view.dart';
 
 /// The 3-page intro/onboarding flow shown right after the splash screen.
 ///

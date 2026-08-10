@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:equatable/equatable.dart';
-import '../../data/models/appointment.dart';
+import 'package:medicompare/features/schedule/data/models/appointment.dart';
 
 abstract class ScheduleEvent extends Equatable {
   const ScheduleEvent();

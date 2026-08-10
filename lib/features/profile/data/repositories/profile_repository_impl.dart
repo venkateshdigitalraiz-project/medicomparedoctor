@@ -1,7 +1,7 @@
 import 'package:medicompare/features/profile/data/models/user_profile_model.dart';
 
-import '../../domain/repositories/profile_repository.dart';
-import '../datasources/profile_api_service.dart';
+import 'package:medicompare/features/profile/domain/repositories/profile_repository.dart';
+import 'package:medicompare/features/profile/data/datasources/profile_api_service.dart';
 
 class UserProfileRepositoryImpl implements UserProfileRepository {
   final ProfileApiService apiService;

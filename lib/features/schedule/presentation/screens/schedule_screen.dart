@@ -106,10 +106,7 @@ class _ScheduleViewState extends State<_ScheduleView> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        RouteNames.sechduleSetting,
-                      );
+                      Navigator.pushNamed(context, RouteNames.sechduleSetting);
                     },
                     child: const Icon(
                       Icons.settings,
@@ -143,203 +140,205 @@ class _ScheduleViewState extends State<_ScheduleView> {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: BlocConsumer<ScheduleBloc, ScheduleState>(
-                listenWhen: (previous, current) => previous.status != current.status,
-                listener: (context, state) {
-                  if (state.status == ScheduleStatus.failure && state.appointments.isNotEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(state.errorMessage ?? 'Refresh failed'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
+              child: AppRefreshIndicator(
+                onRefresh: () async {
+                  final sBloc = context.read<ScheduleBloc>();
+                  if (sBloc.state.status == ScheduleStatus.refreshing ||
+                      sBloc.state.status == ScheduleStatus.initialLoading) {
+                    return;
                   }
+                  final completer = Completer<void>();
+                  sBloc.add(RefreshSchedule(completer: completer));
+                  await completer.future;
                 },
-                buildWhen: (previous, current) =>
-                    (previous.status != current.status) ||
-                    (previous.errorMessage != current.errorMessage),
-                builder: (context, state) {
-                  // Initial loading state (full-screen loader)
-                  if (state.status == ScheduleStatus.initialLoading ||
-                      state.status == ScheduleStatus.initial) {
-                    return const CommonLoadingWidget();
-                  }
-                  if (state.status == ScheduleStatus.failure && state.appointments.isEmpty) {
-                    return CommonErrorWidget(
-                      message: state.errorMessage ?? 'Error loading schedule',
-                      onRetry: () {
-                        context.read<ScheduleBloc>().add(const LoadSchedule());
-                      },
-                    );
-                  }
+                child: BlocConsumer<ScheduleBloc, ScheduleState>(
+                  listenWhen: (previous, current) =>
+                      previous.status != current.status,
+                  listener: (context, state) {
+                    if (state.status == ScheduleStatus.failure &&
+                        state.appointments.isNotEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(state.errorMessage ?? 'Refresh failed'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  },
+                  buildWhen: (previous, current) =>
+                      (previous.status != current.status) ||
+                      (previous.errorMessage != current.errorMessage),
+                  builder: (context, state) {
+                    // Initial loading state (full-screen loader)
+                    if (state.status == ScheduleStatus.initialLoading ||
+                        state.status == ScheduleStatus.initial) {
+                      return const CommonLoadingWidget();
+                    }
+                    if (state.status == ScheduleStatus.failure &&
+                        state.appointments.isEmpty) {
+                      return CommonErrorWidget(
+                        message: state.errorMessage ?? 'Error loading schedule',
+                        onRetry: () {
+                          context.read<ScheduleBloc>().add(
+                            const LoadSchedule(),
+                          );
+                        },
+                      );
+                    }
 
-                  return Container(
-                    padding: const EdgeInsets.only(top: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: const Color(0xFFEAEAF2)),
-                    ),
-                    child: Column(
-                      children: [
-                        // 1. HORIZONTAL CALENDAR (Only rebuilds when calendar data or selection changes)
-                        BlocBuilder<ScheduleBloc, ScheduleState>(
-                          buildWhen: (previous, current) =>
-                              previous.selectedDateString !=
-                                  current.selectedDateString ||
-                              previous.calendar != current.calendar,
-                          builder: (context, state) {
-                            // Generate 5 days centered around today's date
-                            final DateTime centerDate = DateTime.now();
+                    return Container(
+                      padding: const EdgeInsets.only(top: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: const Color(0xFFEAEAF2)),
+                      ),
+                      child: Column(
+                        children: [
+                          // 1. HORIZONTAL CALENDAR (Only rebuilds when calendar data or selection changes)
+                          BlocBuilder<ScheduleBloc, ScheduleState>(
+                            buildWhen: (previous, current) =>
+                                previous.selectedDateString !=
+                                    current.selectedDateString ||
+                                previous.calendar != current.calendar,
+                            builder: (context, state) {
+                              // Generate 5 days centered around today's date
+                              final DateTime centerDate = DateTime.now();
 
-                            // Generate 5 days centered around centerDate
-                            final List<CalendarDay> fiveDaysList = [];
-                            for (int i = -2; i <= 2; i++) {
-                              final currentDay = centerDate.add(
-                                Duration(days: i),
+                              // Generate 5 days centered around centerDate
+                              final List<CalendarDay> fiveDaysList = [];
+                              for (int i = -2; i <= 2; i++) {
+                                final currentDay = centerDate.add(
+                                  Duration(days: i),
+                                );
+                                final formattedStr = DateFormat(
+                                  'yyyy-MM-dd',
+                                ).format(currentDay);
+
+                                // Try to find matching day in state.calendar to retain appointment count indicator
+                                final match = state.calendar.firstWhere(
+                                  (d) => d.dateString == formattedStr,
+                                  orElse: () => CalendarDay(
+                                    dayName: DateFormat('E').format(currentDay),
+                                    date: currentDay.day,
+                                    count: 0,
+                                    dateString: formattedStr,
+                                  ),
+                                );
+                                fiveDaysList.add(match);
+                              }
+
+                              return DateSelector(
+                                selectedDateString: state.selectedDateString,
+                                week: fiveDaysList,
+                                onDateSelected: (d) =>
+                                    bloc.add(SelectCalendarDay(d)),
+                                onTodayTap: () {
+                                  bloc.add(const JumpToToday());
+                                },
                               );
-                              final formattedStr = DateFormat(
-                                'yyyy-MM-dd',
-                              ).format(currentDay);
+                            },
+                          ),
+                          const SizedBox(height: 18),
 
-                              // Try to find matching day in state.calendar to retain appointment count indicator
-                              final match = state.calendar.firstWhere(
-                                (d) => d.dateString == formattedStr,
-                                orElse: () => CalendarDay(
-                                  dayName: DateFormat('E').format(currentDay),
-                                  date: currentDay.day,
-                                  count: 0,
-                                  dateString: formattedStr,
+                          // 2. STAT CARDS (Only rebuilds when summary stats change)
+                          BlocBuilder<ScheduleBloc, ScheduleState>(
+                            buildWhen: (previous, current) =>
+                                previous.stats != current.stats,
+                            builder: (context, state) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Expanded(
+                                      child: StatCard(
+                                        icon: Icons.groups_2_rounded,
+                                        color: AppColors.blue,
+                                        value: state.stats.total,
+                                        label: 'Total Appts',
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: StatCard(
+                                        icon: Icons.check_circle_rounded,
+                                        color: AppColors.green,
+                                        value: state.stats.confirmed,
+                                        label: 'Confirmed',
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: StatCard(
+                                        icon: Icons.hourglass_bottom_rounded,
+                                        color: AppColors.orange,
+                                        value: state.stats.waiting,
+                                        label: 'Waiting',
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: StatCard(
+                                        icon: Icons.close_rounded,
+                                        color: AppColors.red,
+                                        value: state.stats.cancelled,
+                                        label: 'Cancelled',
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               );
-                              fiveDaysList.add(match);
-                            }
+                            },
+                          ),
 
-                            return DateSelector(
-                              selectedDateString: state.selectedDateString,
-                              week: fiveDaysList,
-                              onDateSelected: (d) =>
-                                  bloc.add(SelectCalendarDay(d)),
-                              onTodayTap: () {
-                                bloc.add(const JumpToToday());
-                              },
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 18),
+                          const SizedBox(height: 22),
 
-                        // 2. STAT CARDS (Only rebuilds when summary stats change)
-                        BlocBuilder<ScheduleBloc, ScheduleState>(
-                          buildWhen: (previous, current) =>
-                              previous.stats != current.stats,
-                          builder: (context, state) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Expanded(
-                                    child: StatCard(
-                                      icon: Icons.groups_2_rounded,
-                                      color: AppColors.blue,
-                                      value: state.stats.total,
-                                      label: 'Total Appts',
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: StatCard(
-                                      icon: Icons.check_circle_rounded,
-                                      color: AppColors.green,
-                                      value: state.stats.confirmed,
-                                      label: 'Confirmed',
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: StatCard(
-                                      icon: Icons.hourglass_bottom_rounded,
-                                      color: AppColors.orange,
-                                      value: state.stats.waiting,
-                                      label: 'Waiting',
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: StatCard(
-                                      icon: Icons.close_rounded,
-                                      color: AppColors.red,
-                                      value: state.stats.cancelled,
-                                      label: 'Cancelled',
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-
-                        const SizedBox(height: 22),
-
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              "Today's Schedule",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textDark,
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "Today's Schedule",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textDark,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 12),
+                          const SizedBox(height: 12),
 
-                        // 3. APPOINTMENTS LIST (Rebuilds only on appointments loading, pagination or appointment updates)
-                        Expanded(
-                          child: BlocBuilder<ScheduleBloc, ScheduleState>(
-                            buildWhen: (previous, current) =>
-                                previous.appointments != current.appointments ||
-                                previous.isAppointmentsLoading !=
-                                    current.isAppointmentsLoading ||
-                                previous.isLoadingNextPage !=
-                                    current.isLoadingNextPage,
-                            builder: (context, state) {
-                              final activeList = state.appointments;
+                          // 3. APPOINTMENTS LIST (Rebuilds only on appointments loading, pagination or appointment updates)
+                          Expanded(
+                            child: BlocBuilder<ScheduleBloc, ScheduleState>(
+                              buildWhen: (previous, current) =>
+                                  previous.appointments !=
+                                      current.appointments ||
+                                  previous.isAppointmentsLoading !=
+                                      current.isAppointmentsLoading ||
+                                  previous.isLoadingNextPage !=
+                                      current.isLoadingNextPage,
+                              builder: (context, state) {
+                                final activeList = state.appointments;
 
-                              // Log appointments list length inside UI builder
-                              developer.log(
-                                'UI BUILDER: active list length = ${activeList.length}',
-                                name: 'ScheduleScreenUI',
-                              );
+                                // Log appointments list length inside UI builder
+                                developer.log(
+                                  'UI BUILDER: active list length = ${activeList.length}',
+                                  name: 'ScheduleScreenUI',
+                                );
 
-                              if (state.isAppointmentsLoading) {
-                                return const CommonLoadingWidget();
-                              }
-
-                              Future<void> handleRefresh() async {
-                                final sBloc = context.read<ScheduleBloc>();
-                                if (sBloc.state.status ==
-                                        ScheduleStatus.refreshing ||
-                                    sBloc.state.status ==
-                                        ScheduleStatus.initialLoading) {
-                                  return;
+                                if (state.isAppointmentsLoading) {
+                                  return const CommonLoadingWidget();
                                 }
-                                final completer = Completer<void>();
-                                sBloc.add(RefreshSchedule(completer: completer));
-                                await completer.future;
-                              }
 
-                              if (activeList.isEmpty) {
-                                return AppRefreshIndicator(
-                                  onRefresh: handleRefresh,
-                                  child: SingleChildScrollView(
+                                if (activeList.isEmpty) {
+                                  return SingleChildScrollView(
                                     physics:
                                         const AlwaysScrollableScrollPhysics(),
                                     child: SizedBox(
@@ -350,13 +349,10 @@ class _ScheduleViewState extends State<_ScheduleView> {
                                         message: "No Appointments Found",
                                       ),
                                     ),
-                                  ),
-                                );
-                              }
+                                  );
+                                }
 
-                              return AppRefreshIndicator(
-                                onRefresh: handleRefresh,
-                                child: ListView.builder(
+                                return ListView.builder(
                                   controller: _scrollController,
                                   physics:
                                       const AlwaysScrollableScrollPhysics(),
@@ -376,11 +372,10 @@ class _ScheduleViewState extends State<_ScheduleView> {
                                           vertical: 12,
                                         ),
                                         child: Center(
-                                          child:
-                                              AppLoader(
-                                                color: const Color(0xFF6D28D9),
-                                                size: 30,
-                                              ),
+                                          child: AppLoader(
+                                            color: const Color(0xFF6D28D9),
+                                            size: 30,
+                                          ),
                                         ),
                                       );
                                     }
@@ -393,15 +388,15 @@ class _ScheduleViewState extends State<_ScheduleView> {
                                       ),
                                     );
                                   },
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ],

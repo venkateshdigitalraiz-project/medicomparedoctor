@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/features/onboarding/data/onboarding_preferences.dart';
-import 'onboarding_event.dart';
-import 'onboarding_state.dart';
+import 'package:medicompare/features/onboarding/presentation/bloc/onboarding_event.dart';
+import 'package:medicompare/features/onboarding/presentation/bloc/onboarding_state.dart';
 
 /// Bloc handling onboarding flow.
 ///

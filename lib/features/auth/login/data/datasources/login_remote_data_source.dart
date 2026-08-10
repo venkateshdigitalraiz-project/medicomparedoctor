@@ -4,8 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/core/constants/app_strings.dart';
 import 'package:medicompare/core/network/network_exception.dart';
-import '../models/login_request_model.dart';
-import '../models/login_response_model.dart';
+import 'package:medicompare/features/auth/login/data/models/login_request_model.dart';
+import 'package:medicompare/features/auth/login/data/models/login_response_model.dart';
 
 abstract class LoginRemoteDataSource {
   Future<LoginResponseModel> login(LoginRequestModel request);

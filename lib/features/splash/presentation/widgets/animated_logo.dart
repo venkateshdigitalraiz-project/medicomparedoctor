@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../controllers/splash_animation_controller.dart';
+import 'package:medicompare/features/splash/presentation/controllers/splash_animation_controller.dart';
 
 /// Renders the MediCompares logo exactly as supplied (no color/shape
 /// changes), applying only the Stage 4 subtle horizontal shake on top.
@@ -26,11 +26,11 @@ class AnimatedLogo extends StatelessWidget {
       builder: (context, _) {
         // Amplitude scales with screen width so the shake reads as
         // "subtle" consistently across phones and tablets.
-        final amplitude = MediaQuery.of(context).size.width * 0.012;
-        final shakeX = animations.logoShakeOffset(controller.value, amplitude);
+        final amplitude = MediaQuery.of(context).size.width * 0.02;
+        final shakeY = animations.logoShakeOffset(controller.value, amplitude);
 
         return Transform.translate(
-          offset: Offset(shakeX, 0),
+          offset: Offset(0, shakeY),
           child: Image.asset(logoAssetPath, width: width, fit: BoxFit.contain),
         );
       },

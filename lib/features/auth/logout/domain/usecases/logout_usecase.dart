@@ -1,11 +1,12 @@
-import '../repositories/logout_repository.dart';
+import 'package:medicompare/features/auth/logout/data/repositories/logout_repository_impl.dart';
+import 'package:medicompare/features/auth/logout/domain/repositories/logout_repository.dart';
 
 class LogoutUseCase {
   final LogoutRepository repository;
 
-  LogoutUseCase({required this.repository});
+  LogoutUseCase(this.repository);
 
   Future<void> call() async {
-    await repository.logout();
+    return await repository.logout();
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/models/document_model.dart';
-import 'document_verification_event.dart';
-import 'document_verification_state.dart';
+import 'package:medicompare/features/auth/document_verification/data/models/document_model.dart';
+import 'package:medicompare/features/auth/document_verification/presentation/bloc/document_verification_event.dart';
+import 'package:medicompare/features/auth/document_verification/presentation/bloc/document_verification_state.dart';
 
 class DocumentVerificationBloc
     extends Bloc<DocumentVerificationEvent, DocumentVerificationState> {

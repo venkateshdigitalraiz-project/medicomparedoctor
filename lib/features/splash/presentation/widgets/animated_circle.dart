@@ -25,15 +25,17 @@ class AnimatedCircle extends StatelessWidget {
       animation: controller,
       builder: (context, _) {
         final t = controller.value;
-        final screenSize = MediaQuery.of(context).size;
-        final screenHeight = screenSize.height;
+        final screenSize = MediaQuery.of(context).size * .95;
+        final screenHeight = screenSize.height * .95;
 
         // Target scale = however much the base diameter needs to grow to
         // exactly span the screen's width. Computed live (not hardcoded)
         // so it stays correct across every device size.
         final targetScale = screenSize.width / diameter;
 
-        final offsetY = animations.circleOffsetY(t); // fraction of screen height
+        final offsetY = animations.circleOffsetY(
+          t,
+        ); // fraction of screen height
         final scale = animations.circleScale(t, targetScale);
         final opacity = animations.circleOpacity(t);
         final shadowOpacity = animations.circleShadowOpacity(t);
@@ -56,13 +58,17 @@ class AnimatedCircle extends StatelessWidget {
                   boxShadow: [
                     // Soft glow behind the expanding circle.
                     BoxShadow(
-                      color: AppColors.glowColor.withOpacity(glow.clamp(0.0, 1.0)),
+                      color: AppColors.glowColor.withOpacity(
+                        glow.clamp(0.0, 1.0),
+                      ),
                       blurRadius: diameter * 0.6,
                       spreadRadius: diameter * 0.1,
                     ),
                     // Standard drop shadow, lightening as the circle grows.
                     BoxShadow(
-                      color: Colors.black.withOpacity(shadowOpacity.clamp(0.0, 1.0)),
+                      color: Colors.black.withOpacity(
+                        shadowOpacity.clamp(0.0, 1.0),
+                      ),
                       blurRadius: 24,
                       offset: const Offset(0, 8),
                     ),

@@ -9,8 +9,8 @@ import 'package:medicompare/features/profile/data/datasources/profile_api_servic
 import 'package:medicompare/features/profile/data/models/user_profile_model.dart';
 import 'package:medicompare/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:medicompare/features/profile/domain/repositories/profile_repository.dart';
-import 'user_profile_state.dart';
-import 'user_profile_event.dart';
+import 'package:medicompare/features/profile/presentation/bloc/user_profile_state.dart';
+import 'package:medicompare/features/profile/presentation/bloc/user_profile_event.dart';
 
 import 'package:medicompare/core/network/global_client.dart';
 

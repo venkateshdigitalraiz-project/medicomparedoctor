@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_colors.dart';
-import '../../domain/onboarding_page_data.dart';
-import 'curved_clippers.dart';
+import 'package:medicompare/core/constants/app_colors.dart';
+import 'package:medicompare/features/onboarding/domain/onboarding_page_data.dart';
+import 'package:medicompare/features/onboarding/presentation/widgets/curved_clippers.dart';
 
 /// A single onboarding/intro page: hero illustration up top on white,
 /// a curved purple footer with title + description below, an optional

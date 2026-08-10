@@ -7,20 +7,21 @@ import 'package:medicompare/core/network/network_exception.dart';
 import 'package:medicompare/core/network/error_mapper.dart';
 import 'package:medicompare/core/ui/dialog_helper.dart';
 
-import '../../data/models/appointment.dart';
-import '../../data/models/clinic_status.dart';
-import '../../data/repositories/home_repository.dart';
+import 'package:medicompare/features/home/data/models/appointment.dart';
+import 'package:medicompare/features/home/data/models/clinic_status.dart';
+import 'package:medicompare/features/home/domain/usecases/get_dashboard_usecase.dart';
+import 'package:medicompare/features/home/data/repositories/home_repository.dart';
 
 part 'home_event.dart';
 part 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  final HomeRepository _repository;
+  final GetDashboardUseCase _getDashboardUseCase;
 
   static const int _pageLimit = 10;
 
-  HomeBloc({HomeRepository? repository})
-    : _repository = repository ?? HomeRepositoryImpl(),
+  HomeBloc({GetDashboardUseCase? getDashboardUseCase})
+    : _getDashboardUseCase = getDashboardUseCase ?? GetDashboardUseCase(HomeRepositoryImpl()),
       super(const HomeState()) {
     on<HomeStarted>(_onStarted);
     on<HomeRefreshed>(_onRefreshed);
@@ -75,7 +76,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required bool reset,
   }) async {
     try {
-      final response = await _repository.fetchDashboard(
+      final response = await _getDashboardUseCase(
         page: page,
         limit: _pageLimit,
       );

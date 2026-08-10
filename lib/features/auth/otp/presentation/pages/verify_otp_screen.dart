@@ -59,7 +59,7 @@ class _VerifyOtpViewState extends State<_VerifyOtpView> {
         child: BlocConsumer<OtpBloc, OtpState>(
           listener: (context, state) {
             if (state.status == OtpSubmissionStatus.success) {
-              log("Successfully Verify otp then go to dashBoard");
+              log("[OTP Flow] Navigation: Navigating to Dashboard (RouteNames.homeBottomNav)");
               Navigator.pushReplacementNamed(context, RouteNames.homeBottomNav);
             } else if (state.status == OtpSubmissionStatus.failure &&
                 state.errorMessage != null) {
@@ -260,7 +260,7 @@ class _VerifyOtpViewState extends State<_VerifyOtpView> {
                                   },
                             child: isSubmitting
                                 ? SizedBox(
-                                    width: 22,
+                                    width: 60,
                                     height: 22,
                                     child:
                                         AppLoader(
@@ -268,24 +268,28 @@ class _VerifyOtpViewState extends State<_VerifyOtpView> {
                                           size: 22,
                                         ),
                                   )
-                                : const Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'Verify',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w700,
-                                          fontFamily: "Poppins",
+                                : const FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Verify',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w700,
+                                            fontFamily: "Poppins",
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Icon(
+                                          Icons.arrow_forward,
                                           color: Colors.white,
                                         ),
-                                      ),
-                                      SizedBox(width: 8),
-                                      Icon(
-                                        Icons.arrow_forward,
-                                        color: Colors.white,
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                           ),
                         ),
@@ -312,12 +316,12 @@ class _VerifyOtpViewState extends State<_VerifyOtpView> {
   }
 
   Widget _buildIllustration() {
-    return SizedBox(
-      width: 260,
-      height: 260,
-      child: Center(
-        child: Image.asset("assets/images/login.png", fit: BoxFit.contain),
+    return Container(
+      constraints: const BoxConstraints(
+        maxWidth: 260,
+        maxHeight: 260,
       ),
+      child: Image.asset("assets/images/login.png", fit: BoxFit.contain),
     );
   }
 }

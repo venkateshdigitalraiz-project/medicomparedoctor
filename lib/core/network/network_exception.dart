@@ -1,4 +1,4 @@
-import 'error_mapper.dart';
+import 'package:medicompare/core/network/error_mapper.dart';
 
 /// Centralized exception representing any network/API error.
 ///
