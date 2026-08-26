@@ -43,6 +43,18 @@ class SessionManager {
     return null;
   }
 
+  /// Retrieve stored user / doctor ID
+  static Future<String?> getUserId() async {
+    final user = await getUserData();
+    if (user != null) {
+      return user['id']?.toString() ??
+          user['_id']?.toString() ??
+          user['userId']?.toString() ??
+          user['doctorId']?.toString();
+    }
+    return null;
+  }
+
   /// Clear the local user session
   static Future<void> clearSession() async {
     final prefs = await SharedPreferences.getInstance();

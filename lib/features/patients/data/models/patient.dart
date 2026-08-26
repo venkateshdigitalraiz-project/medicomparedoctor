@@ -2,6 +2,7 @@ enum PatientStatus { completed, waiting, cancelled }
 
 class Patient {
   final String id;
+  final String userId;
   final String name;
   final String pid;
   final int age;
@@ -13,6 +14,7 @@ class Patient {
 
   const Patient({
     required this.id,
+    this.userId = '',
     required this.name,
     required this.pid,
     required this.age,
@@ -43,17 +45,62 @@ class Patient {
       }
     }
 
+    String userIdVal = '';
+    if (json['userId'] != null) {
+      if (json['userId'] is Map) {
+        userIdVal =
+            json['userId']['_id']?.toString() ??
+            json['userId']['id']?.toString() ??
+            '';
+      } else {
+        userIdVal = json['userId'].toString();
+      }
+    } else if (json['user'] != null) {
+      if (json['user'] is Map) {
+        userIdVal =
+            json['user']['_id']?.toString() ??
+            json['user']['id']?.toString() ??
+            '';
+      } else {
+        userIdVal = json['user'].toString();
+      }
+    }
+    if (userIdVal.isEmpty) {
+      userIdVal =
+          json['patientId']?.toString() ?? json['_id']?.toString() ?? '';
+    }
+
     return Patient(
       id: json['_id']?.toString() ?? '',
+      userId: userIdVal,
       name: json['name']?.toString() ?? '',
       pid: json['patientId']?.toString() ?? '',
       age: ageVal,
       gender: json['gender']?.toString() ?? '',
       phone: json['phone']?.toString() ?? '',
-      lastVisit: json['lastVisit']?.toString() ?? (json['createdAt']?.toString() ?? ''),
-      avatarUrl: json['image']?.toString() ?? 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
+      lastVisit:
+          json['lastVisit']?.toString() ??
+          (json['createdAt']?.toString() ?? ''),
+      avatarUrl:
+          json['image']?.toString() ??
+          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
       status: statusValue,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'userId': userId,
+      'name': name,
+      'patientId': pid,
+      'age': age,
+      'gender': gender,
+      'phone': phone,
+      'lastVisit': lastVisit,
+      'image': avatarUrl,
+      'status': status.name,
+    };
   }
 }
 
@@ -125,9 +172,10 @@ class PatientListResponse {
     return PatientListResponse(
       statistics: PatientStatistics.fromJson(statsJson),
       pagination: PatientPagination.fromJson(pagJson),
-      patients: patientsList
-          .map((e) => Patient.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      patients:
+          patientsList
+              .map((e) => Patient.fromJson(e as Map<String, dynamic>))
+              .toList(),
     );
   }
 }
