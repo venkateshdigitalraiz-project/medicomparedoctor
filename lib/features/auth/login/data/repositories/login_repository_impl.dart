@@ -9,11 +9,12 @@ class LoginRepositoryImpl implements LoginRepository {
   LoginRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<LoginResponseModel> login(String phone) async {
+  Future<LoginResponseModel> login(String phone, {String? fcmToken}) async {
     return remoteDataSource.login(
       LoginRequestModel(
         loginType: 'phone',
         phone: phone,
+        fcmToken: fcmToken,
       ),
     );
   }

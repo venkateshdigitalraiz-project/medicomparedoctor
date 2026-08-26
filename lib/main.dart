@@ -1,34 +1,28 @@
 import 'dart:developer';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/routes/app_routes.dart';
 import 'package:medicompare/core/routes/router_name.dart';
-import 'package:medicompare/core/services/firebase_service.dart';
+
 import 'package:medicompare/core/services/session_manager.dart';
 
+import 'package:medicompare/core/network/toast_helper.dart';
 import 'package:medicompare/features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import 'package:medicompare/features/onboarding/presentation/bloc/onboarding_state.dart';
 import 'package:medicompare/injection_container.dart' as di;
+import 'package:medicompare/core/services/firebase_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  await FirebaseTokenService.init();
+  await PushNotificationManager.init();
   await di.init();
   runApp(
     // MyApp(initialRoute: loggedIn ? RouteNames.homeBottomNav : RouteNames.login),
     MyApp(),
   );
-}
-
-@pragma('vm:entry-point')
-Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-
-  print("Background message: ${message.messageId}");
 }
 
 // class MyApp extends StatelessWidget {
@@ -66,6 +60,7 @@ class MyApp extends StatelessWidget {
       create: (_) => OnboardingBloc(),
       child: MaterialApp(
         navigatorKey: navigatorKey,
+        scaffoldMessengerKey: ToastHelper.messengerKey,
         debugShowCheckedModeBanner: false,
         title: 'MediCompares',
         theme: ThemeData(

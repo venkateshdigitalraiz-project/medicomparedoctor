@@ -34,6 +34,13 @@ class ConnectivityServiceImpl implements NetworkInfo {
 
   Future<bool> _checkConnectionDirectly() async {
     try {
+      final result = await InternetAddress.lookup('api.medicompares.com').timeout(checkTimeout);
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      }
+    } catch (_) {}
+
+    try {
       final result = await InternetAddress.lookup('google.com').timeout(checkTimeout);
       return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
     } catch (_) {

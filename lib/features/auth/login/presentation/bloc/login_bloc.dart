@@ -1,26 +1,30 @@
-import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:io';
-import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:dio/dio.dart';
-import 'package:medicompare/core/constants/app_constants.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:medicompare/core/constants/app_strings.dart';
+import 'package:medicompare/core/network/global_client.dart';
+import 'package:medicompare/core/network/network_exception.dart';
+
 import 'package:medicompare/features/auth/login/data/datasources/login_remote_data_source.dart';
 import 'package:medicompare/features/auth/login/data/repositories/login_repository_impl.dart';
 import 'package:medicompare/features/auth/login/domain/usecases/login_usecase.dart';
 import 'package:medicompare/features/auth/login/presentation/bloc/login_event.dart';
 import 'package:medicompare/features/auth/login/presentation/bloc/login_state.dart';
 
-import 'package:medicompare/core/network/global_client.dart';
-
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final LoginUseCase loginUseCase;
 
   LoginBloc({LoginUseCase? loginUseCase})
-    : loginUseCase = loginUseCase ??
+    : loginUseCase =
+          loginUseCase ??
           LoginUseCase(
             LoginRepositoryImpl(
-              remoteDataSource: LoginRemoteDataSourceImpl(client: AppHttpClient.dio),
+              remoteDataSource: LoginRemoteDataSourceImpl(
+                client: AppHttpClient.dio,
+              ),
             ),
           ),
       super(const LoginState()) {
@@ -40,17 +44,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<LoginSubmitted>(_onLoginSubmitted);
   }
 
-  Future<bool> _checkInternetReachability() async {
-    try {
-      final lookup = await InternetAddress.lookup(
-        'google.com',
-      ).timeout(AppConstants.internetCheckTimeout);
-      return lookup.isNotEmpty && lookup[0].rawAddress.isNotEmpty;
-    } catch (_) {
-      return false;
-    }
-  }
-
   Future<void> _onLoginSubmitted(
     LoginSubmitted event,
     Emitter<LoginState> emit,
@@ -58,6 +51,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     if (!state.isValid) {
       emit(
         state.copyWith(
+          status: LoginStatus.failure,
           errorText: AppStrings.enterValid10DigitPhone,
         ),
       );
@@ -66,93 +60,70 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
     emit(state.copyWith(status: LoginStatus.submitting, clearError: true));
 
-    developer.log('=== CONNECTIVITY DIAGNOSTICS START ===', name: 'LoginBloc');
-    bool hasConnectivity = await _checkInternetReachability();
-    developer.log(
-      'Connectivity pre-check state: ${hasConnectivity ? "ONLINE" : "OFFLINE"}',
-      name: 'LoginBloc',
-    );
+    developer.log('=== LOGIN SUBMISSION START ===', name: 'LoginBloc');
 
     try {
-      developer.log(
-        'Attempting loginUseCase() API method call...',
-        name: 'LoginBloc',
+      // Fetch FCM token to send with login request
+      String? fcmToken;
+      try {
+        fcmToken = await FirebaseMessaging.instance.getToken();
+        developer.log('FCM Token: $fcmToken', name: 'LoginBloc');
+      } catch (e) {
+        developer.log('Failed to get FCM token: $e', name: 'LoginBloc');
+      }
+
+      developer.log('Calling loginUseCase...', name: 'LoginBloc');
+
+      final response = await loginUseCase(
+        state.phoneNumber.trim(),
+        fcmToken: fcmToken,
       );
-      final response = await loginUseCase(state.phoneNumber.trim());
-      developer.log(
-        'loginUseCase() completed successfully.',
-        name: 'LoginBloc',
-      );
+
+      developer.log('loginUseCase completed successfully.', name: 'LoginBloc');
 
       if (response.success) {
-        emit(state.copyWith(status: LoginStatus.success));
+        emit(state.copyWith(status: LoginStatus.success, clearError: true));
       } else {
         emit(
           state.copyWith(
             status: LoginStatus.failure,
-            errorText: response.message,
+            errorText: response.message.isNotEmpty
+                ? response.message
+                : AppStrings.somethingWentWrong,
           ),
         );
       }
-    } on SocketException catch (e, stacktrace) {
+    } on DioException catch (e, stackTrace) {
       developer.log(
-        'SocketException caught in LoginBloc submission!',
+        'DioException caught during login.',
         name: 'LoginBloc',
         error: e,
-        stackTrace: stacktrace,
+        stackTrace: stackTrace,
       );
-      final isInternetAvailable = await _checkInternetReachability();
-      emit(
-        state.copyWith(
-          status: LoginStatus.failure,
-          errorText: isInternetAvailable
-              ? AppStrings.serverUnreachable
-              : AppStrings.noInternetConnection,
-        ),
-      );
-    } on TimeoutException catch (e, stacktrace) {
-      developer.log(
-        'TimeoutException caught in LoginBloc submission!',
-        name: 'LoginBloc',
-        error: e,
-        stackTrace: stacktrace,
-      );
-      final isInternetAvailable = await _checkInternetReachability();
-      emit(
-        state.copyWith(
-          status: LoginStatus.failure,
-          errorText: isInternetAvailable
-              ? AppStrings.requestTimeout
-              : AppStrings.noInternetConnection,
-        ),
-      );
-    } catch (e, stacktrace) {
-      developer.log(
-        'Unexpected Exception caught in LoginBloc submission!',
-        name: 'LoginBloc',
-        error: e,
-        stackTrace: stacktrace,
-      );
-      final errorMsg = e.toString().replaceAll('Exception: ', '');
-      final isInternetAvailable = await _checkInternetReachability();
 
-      if (errorMsg.contains('SocketException') ||
-          errorMsg.contains('Failed host lookup') ||
-          errorMsg.contains('HandshakeException') ||
-          errorMsg.contains('Network is unreachable') ||
-          errorMsg.contains('Connection refused') ||
-          e is DioException) {
-        emit(
-          state.copyWith(
-            status: LoginStatus.failure,
-            errorText: isInternetAvailable
-                ? AppStrings.serverUnreachable
-                : AppStrings.noInternetConnection,
-          ),
-        );
-      } else {
-        emit(state.copyWith(status: LoginStatus.failure, errorText: errorMsg));
+      String message = AppStrings.somethingWentWrong;
+
+      if (e.error is NetworkException) {
+        message = (e.error as NetworkException).message;
+      } else if (e.message != null && e.message!.isNotEmpty) {
+        message = e.message!;
       }
+
+      emit(state.copyWith(status: LoginStatus.failure, errorText: message));
+    } catch (e, stackTrace) {
+      developer.log(
+        'Unexpected exception caught during login.',
+        name: 'LoginBloc',
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      emit(
+        state.copyWith(
+          status: LoginStatus.failure,
+          errorText: e.toString().replaceFirst('Exception: ', ''),
+        ),
+      );
     }
   }
 }

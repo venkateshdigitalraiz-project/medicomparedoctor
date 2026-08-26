@@ -68,6 +68,7 @@ class HomeState extends Equatable {
     int? totalPages,
     bool? isLoadingNextPage,
     bool? hasReachedEnd,
+
     /// Pass true to explicitly clear the errorMessage field.
     bool clearError = false,
   }) {
@@ -89,17 +90,17 @@ class HomeState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        clinicStatus,
-        stats,
-        appointments,
-        searchQuery,
-        selectedTab,
-        bottomNavIndex,
-        errorMessage,
-        currentPage,
-        totalPages,
-        isLoadingNextPage,
-        hasReachedEnd,
-      ];
+    status,
+    clinicStatus,
+    stats,
+    appointments,
+    searchQuery,
+    selectedTab,
+    bottomNavIndex,
+    errorMessage,
+    currentPage,
+    totalPages,
+    isLoadingNextPage,
+    hasReachedEnd,
+  ];
 }

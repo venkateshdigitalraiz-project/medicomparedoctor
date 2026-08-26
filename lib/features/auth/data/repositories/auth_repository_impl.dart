@@ -1,3 +1,5 @@
+import 'dart:developer' show log;
+
 import 'package:medicompare/features/auth/login/data/models/login_request_model.dart';
 import 'package:medicompare/features/auth/login/data/models/login_response_model.dart';
 import 'package:medicompare/features/notification/data/datasources/notification_local_data_source.dart';
@@ -14,6 +16,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<LoginResponseModel> login(String phone) async {
     final localDataSource = NotificationLocalDataSourceImpl();
     final fcmToken = await localDataSource.getFCMToken();
+    log("fcmToken :$fcmToken");
     return remoteDataSource.login(
       LoginRequestModel(loginType: 'phone', phone: phone, fcmToken: fcmToken),
     );

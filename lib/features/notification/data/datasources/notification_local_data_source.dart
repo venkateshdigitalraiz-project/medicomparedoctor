@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 abstract class NotificationLocalDataSource {
   Future<String?> getFCMToken();
   Future<void> saveFCMToken(String token);
+  Future<void> deleteFCMToken();
 }
 
 class NotificationLocalDataSourceImpl implements NotificationLocalDataSource {
@@ -18,5 +19,11 @@ class NotificationLocalDataSourceImpl implements NotificationLocalDataSource {
   Future<void> saveFCMToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyFcmToken, token);
+  }
+
+  @override
+  Future<void> deleteFCMToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyFcmToken);
   }
 }

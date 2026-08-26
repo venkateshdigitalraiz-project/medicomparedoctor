@@ -6,7 +6,7 @@ class LoginUseCase {
 
   LoginUseCase(this.repository);
 
-  Future<LoginResponseModel> call(String phone) async {
-    return await repository.login(phone);
+  Future<LoginResponseModel> call(String phone, {String? fcmToken}) async {
+    return await repository.login(phone, fcmToken: fcmToken);
   }
 }

@@ -67,30 +67,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
     } on DioException catch (e, stacktrace) {
       developer.log(
-        '=== API RESPONSE ERROR (FALLING BACK TO MOCK) ===',
+        '=== API RESPONSE ERROR ===',
         name: 'AuthRemoteDataSource',
         error: e,
         stackTrace: stacktrace,
       );
 
-      if (e.type == DioExceptionType.connectionError ||
-          e.type == DioExceptionType.connectionTimeout ||
-          e.error is NetworkException ||
-          e.message?.toLowerCase().contains('failed host lookup') == true ||
-          e.message?.toLowerCase().contains('connection refused') == true) {
-        developer.log(
-          'Returning mock successful login response for demo purposes due to connection error.',
-          name: 'AuthRemoteDataSource',
-        );
-        await Future.delayed(
-          const Duration(milliseconds: 800),
-        ); // simulate latency
-        return LoginResponseModel(
-          success: true,
-          message: AppStrings.otpSentMock,
-          data: LoginData(phone: request.phone),
-        );
-      }
       if (e.error is NetworkException) {
         throw e.error as NetworkException;
       }

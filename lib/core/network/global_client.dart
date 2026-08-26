@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:medicompare/core/network/connectivity_service.dart';
 import 'package:medicompare/core/network/network_exception.dart';
 import 'package:medicompare/core/network/error_mapper.dart';
+import 'package:medicompare/core/network/toast_helper.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/main.dart';
 import 'package:medicompare/core/ui/dialog_helper.dart';
@@ -24,9 +25,26 @@ class AppHttpClient {
 
     dioInstance.interceptors.add(
       InterceptorsWrapper(
+        // onRequest: (options, handler) async {
+        //   final connected = await connectivityService.isConnected;
+        //   if (!connected) {
+        //     ToastHelper.showNoInternetToast();
+        //     return handler.reject(
+        //       DioException(
+        //         requestOptions: options,
+        //         error: NetworkException(message: ErrorMapper.mapNoInternet()),
+        //         type: DioExceptionType.connectionError,
+        //       ),
+        //     );
+        //   }
+        //   return handler.next(options);
+        // },
         onRequest: (options, handler) async {
           final connected = await connectivityService.isConnected;
+
           if (!connected) {
+            ToastHelper.showNoInternetToast();
+
             return handler.reject(
               DioException(
                 requestOptions: options,
@@ -35,6 +53,7 @@ class AppHttpClient {
               ),
             );
           }
+
           return handler.next(options);
         },
         onError: (DioException e, handler) {
@@ -57,6 +76,7 @@ class AppHttpClient {
               e.message?.toLowerCase().contains('socketexception') == true ||
               e.message?.toLowerCase().contains('handshakeexception') == true) {
             friendlyMessage = ErrorMapper.mapNoInternet();
+            ToastHelper.showNoInternetToast();
           } else {
             friendlyMessage = ErrorMapper.mapUnknown();
           }
