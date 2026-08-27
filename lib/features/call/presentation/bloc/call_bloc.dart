@@ -5,6 +5,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 
 import 'package:medicompare/core/globals.dart';
+import 'package:medicompare/core/services/session_manager.dart';
 
 import 'package:medicompare/core/storage/local_storage_service.dart';
 import '../pages/call_screen.dart';
@@ -32,6 +33,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   String? _currentCallId;
   String? _targetUserId;
   final List<RTCIceCandidate> _pendingOutgoingIceCandidates = [];
+  Timer? _peerDisconnectTimer;
 
   CallBloc({
     required this.webrtcService,
@@ -41,6 +43,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   }) : super(const CallInitial()) {
     on<InitializeCallServiceEvent>(_onInitialize);
     on<DisconnectCallServiceEvent>(_onDisconnect);
+    on<AutoConnectCallServiceEvent>((event, emit) async => await _autoConnectSocket());
     on<StartOutgoingCallEvent>(_onStartOutgoingCall);
     on<IncomingCallDetectedEvent>(_onIncomingCallDetected);
     on<AcceptCallEvent>(_onAcceptCall);
@@ -94,6 +97,44 @@ class CallBloc extends Bloc<CallEvent, CallState> {
         );
       } else {
         _pendingOutgoingIceCandidates.add(candidate);
+      }
+    };
+
+    webrtcService.onConnectionStateChanged = (state) {
+      debugPrint('📶 [CallBloc] WebRTC connection state: $state');
+      if (state == RTCPeerConnectionState.RTCPeerConnectionStateClosed) {
+        _peerDisconnectTimer?.cancel();
+        add(const RemoteCallEndedEvent(reason: 'Peer disconnected'));
+      } else if (state == RTCPeerConnectionState.RTCPeerConnectionStateDisconnected ||
+          state == RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
+        _peerDisconnectTimer?.cancel();
+        _peerDisconnectTimer = Timer(const Duration(seconds: 3), () {
+          if (this.state is CallConnectedState) {
+            debugPrint('⚠️ [CallBloc] Peer disconnected for >3s, ending call session');
+            add(const RemoteCallEndedEvent(reason: 'Call connection lost'));
+          }
+        });
+      } else if (state == RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
+        _peerDisconnectTimer?.cancel();
+      }
+    };
+
+    webrtcService.onIceConnectionStateChanged = (state) {
+      debugPrint('🧊 [CallBloc] WebRTC ICE connection state: $state');
+      if (state == RTCIceConnectionState.RTCIceConnectionStateClosed) {
+        _peerDisconnectTimer?.cancel();
+        add(const RemoteCallEndedEvent(reason: 'ICE connection closed'));
+      } else if (state == RTCIceConnectionState.RTCIceConnectionStateDisconnected ||
+          state == RTCIceConnectionState.RTCIceConnectionStateFailed) {
+        _peerDisconnectTimer?.cancel();
+        _peerDisconnectTimer = Timer(const Duration(seconds: 3), () {
+          if (this.state is CallConnectedState) {
+            debugPrint('⚠️ [CallBloc] ICE disconnected for >3s, ending call session');
+            add(const RemoteCallEndedEvent(reason: 'Call connection lost'));
+          }
+        });
+      } else if (state == RTCIceConnectionState.RTCIceConnectionStateConnected) {
+        _peerDisconnectTimer?.cancel();
       }
     };
   }
@@ -202,7 +243,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     _iceSub?.cancel();
     _rejectedSub?.cancel();
     _endedSub?.cancel();
-    signalingService.dispose();
+    signalingService.disconnect();
     emit(const CallInitial());
   }
 
@@ -221,12 +262,45 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       final offer = await webrtcService.createOffer();
 
       // 3. Initiate call on server (offer is saved in PendingCall)
+      String callerName = event.callerName;
+      String? callerAvatar = event.callerAvatar;
+
+      if (callerName == 'Doctor' ||
+          callerName.isEmpty ||
+          callerAvatar == null ||
+          callerAvatar.isEmpty) {
+        final userData = await SessionManager.getUserData();
+        if (userData != null) {
+          if (callerName == 'Doctor' || callerName.isEmpty) {
+            final docName =
+                userData['name']?.toString() ??
+                '${userData['firstName'] ?? ''} ${userData['lastName'] ?? ''}'
+                    .trim();
+            if (docName.isNotEmpty) {
+              callerName = docName;
+            }
+          }
+          if (callerAvatar == null || callerAvatar.isEmpty) {
+            final img =
+                userData['profileImage'] ??
+                userData['avatar'] ??
+                userData['image'];
+            if (img is List && img.isNotEmpty) {
+              callerAvatar = img[0].toString();
+            } else if (img is String && img.isNotEmpty) {
+              callerAvatar = img;
+            }
+          }
+        }
+      }
+
       final result = await callRepository.initiateCall(
         targetUserId: event.targetUserId,
         callType: event.callType,
-        callerName: event.callerName,
-        callerAvatar: event.callerAvatar,
+        callerName: callerName,
+        callerAvatar: callerAvatar,
         offer: {'type': offer.type, 'sdp': offer.sdp},
+        targetUserType: event.targetUserType,
       );
 
       result.fold(
@@ -463,7 +537,10 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
   Future<void> _onEndCall(EndCallEvent event, Emitter<CallState> emit) async {
     if (_currentCallId != null) {
-      await callRepository.endCall(callId: _currentCallId!);
+      await callRepository.endCall(
+        callId: _currentCallId!,
+        targetUserId: _targetUserId,
+      );
       await callKitService.endCall(_currentCallId!);
     }
     await _cleanupCall();
@@ -520,6 +597,8 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   }
 
   Future<void> _cleanupCall() async {
+    _peerDisconnectTimer?.cancel();
+    _peerDisconnectTimer = null;
     _currentCallId = null;
     _targetUserId = null;
     _localCandidatePayloads.clear();

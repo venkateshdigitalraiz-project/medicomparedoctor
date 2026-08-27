@@ -36,8 +36,8 @@ Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
       id: callId.isNotEmpty ? callId : const Uuid().v4(),
       nameCaller: callerName,
       appName: 'MediCompare Doctor',
-      avatar: callerAvatar ?? '',
-      handle: isVideo ? 'Incoming Video Call...' : 'Incoming Audio Call...',
+      avatar: (callerAvatar != null && callerAvatar.isNotEmpty) ? callerAvatar : '',
+      handle: isVideo ? 'Incoming Video Call' : 'Incoming Audio Call',
       type: isVideo ? 1 : 0,
       duration: 45000,
       extra: <String, dynamic>{

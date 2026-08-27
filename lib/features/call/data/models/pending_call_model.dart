@@ -6,6 +6,7 @@ class PendingCallModel {
   final String callerName;
   final String? callerAvatar;
   final CallType callType;
+  final ParticipantType callerType;
   final Map<String, dynamic> offer;
 
   PendingCallModel({
@@ -14,6 +15,7 @@ class PendingCallModel {
     required this.callerName,
     this.callerAvatar,
     required this.callType,
+    this.callerType = ParticipantType.doctor,
     required this.offer,
   });
 
@@ -27,6 +29,7 @@ class PendingCallModel {
       callerName: callerInfo['name']?.toString() ?? 'Caller',
       callerAvatar: callerInfo['avatar']?.toString(),
       callType: callTypeStr == 'video' ? CallType.video : CallType.audio,
+      callerType: participantTypeFromString(json['callerType'] as String?),
       offer:
           json['offer'] is Map
               ? Map<String, dynamic>.from(json['offer'])
@@ -38,9 +41,11 @@ class PendingCallModel {
     return {
       'callId': callId,
       'callerId': callerId,
+      'callerType': participantTypeToString(callerType),
       'callerInfo': {'name': callerName, 'avatar': callerAvatar},
       'callType': callType == CallType.video ? 'video' : 'audio',
       'offer': offer,
     };
   }
 }
+

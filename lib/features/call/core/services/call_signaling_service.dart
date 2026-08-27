@@ -5,6 +5,7 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 class CallSignalingService {
   io.Socket? _socket;
   bool _isConnected = false;
+  String? _currentUserId;
 
   final _incomingCallController =
       StreamController<Map<String, dynamic>>.broadcast();
@@ -35,7 +36,19 @@ class CallSignalingService {
     required String userId,
     String? token,
   }) {
-    if (_socket != null && _isConnected) return;
+    // Same user, already connected — no-op
+    if (_socket != null && _currentUserId == userId && _isConnected) return;
+
+    // Different user or stale socket — clean up before reconnecting
+    if (_socket != null) {
+      _socket?.clearListeners();
+      _socket?.disconnect();
+      _socket?.dispose();
+      _socket = null;
+      _isConnected = false;
+    }
+
+    _currentUserId = userId;
 
     _socket = io.io(
       serverUrl,
@@ -59,7 +72,7 @@ class CallSignalingService {
       debugPrint(
         '🟢 Signaling Socket Connected [ID: ${_socket!.id}] for user: $userId',
       );
-      _socket!.emit('call:register', {'userId': userId});
+      _socket!.emit('call:register', {'userId': userId, 'userType': 'doctor'});
     });
 
     _socket!.onDisconnect((_) {
@@ -115,11 +128,15 @@ class CallSignalingService {
     required String callerName,
     String? callerAvatar,
     required Map<String, dynamic> offer,
+    String callerType = 'doctor',
+    String targetUserType = 'user',
   }) async {
     final completer = Completer<Map<String, dynamic>>();
 
     final payload = {
       'targetUserId': targetUserId,
+      'targetUserType': targetUserType,
+      'callerType': callerType,
       'callType': callType,
       'callerInfo': {'name': callerName, 'avatar': callerAvatar},
       'offer': offer,
@@ -167,17 +184,24 @@ class CallSignalingService {
     _socket?.emit('call:reject', {'callId': callId, 'reason': reason});
   }
 
-  void endCall({required String callId}) {
-    _socket?.emit('call:end', {'callId': callId});
+  void endCall({required String callId, String? targetUserId}) {
+    _socket?.emit('call:end', {
+      'callId': callId,
+      if (targetUserId != null) 'targetUserId': targetUserId,
+    });
   }
 
-  void dispose() {
+  void disconnect() {
     _socket?.clearListeners();
     _socket?.disconnect();
     _socket?.dispose();
     _socket = null;
     _isConnected = false;
+    _currentUserId = null;
+  }
 
+  void dispose() {
+    disconnect();
     _incomingCallController.close();
     _callAnsweredController.close();
     _iceCandidateController.close();

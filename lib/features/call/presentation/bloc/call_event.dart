@@ -27,6 +27,10 @@ class DisconnectCallServiceEvent extends CallEvent {
   const DisconnectCallServiceEvent();
 }
 
+class AutoConnectCallServiceEvent extends CallEvent {
+  const AutoConnectCallServiceEvent();
+}
+
 class StartOutgoingCallEvent extends CallEvent {
   final String targetUserId;
   final String targetUserName;
@@ -34,6 +38,7 @@ class StartOutgoingCallEvent extends CallEvent {
   final String callerName;
   final String? callerAvatar;
   final CallType callType;
+  final String targetUserType;
 
   const StartOutgoingCallEvent({
     required this.targetUserId,
@@ -42,6 +47,7 @@ class StartOutgoingCallEvent extends CallEvent {
     this.callerName = 'Doctor',
     this.callerAvatar,
     required this.callType,
+    this.targetUserType = 'user',
   });
 
   @override
@@ -52,6 +58,7 @@ class StartOutgoingCallEvent extends CallEvent {
     callerName,
     callerAvatar,
     callType,
+    targetUserType,
   ];
 }
 

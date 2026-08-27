@@ -30,9 +30,10 @@ class _CallMinimizedBubbleState extends State<CallMinimizedBubble>
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     )..repeat(reverse: true);
-    _pulse = Tween<double>(begin: 1.0, end: 1.05).animate(
-      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
-    );
+    _pulse = Tween<double>(
+      begin: 1.0,
+      end: 1.05,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -50,9 +51,7 @@ class _CallMinimizedBubbleState extends State<CallMinimizedBubble>
       children: [
         // Transparent pass-through layer
         Positioned.fill(
-          child: IgnorePointer(
-            child: Container(color: Colors.transparent),
-          ),
+          child: IgnorePointer(child: Container(color: Colors.transparent)),
         ),
 
         // Draggable Floating Bubble

@@ -21,23 +21,22 @@ class WebRTCService {
     'iceServers': [
       {
         'urls': [
-          'stun:51.20.18.126:3478',
+          'stun:62.72.12.50:3478',
           'stun:stun.l.google.com:19302',
           'stun:stun1.l.google.com:19302',
-          'stun:stun2.l.google.com:19302',
         ],
       },
       {
         'urls': [
-          'turn:51.20.18.126:3478',
-          'turn:51.20.18.126:3478?transport=udp',
-          'turn:51.20.18.126:3478?transport=tcp',
-          'turn:51.20.18.126:80?transport=tcp',
-          'turn:51.20.18.126:443?transport=tcp',
-          'turns:51.20.18.126:5349?transport=tcp',
+          'turn:62.72.12.50:3478',
+          'turn:62.72.12.50:3478?transport=udp',
+          'turn:62.72.12.50:3478?transport=tcp',
+          'turn:62.72.12.50:80?transport=tcp',
+          'turn:62.72.12.50:443?transport=tcp',
+          'turns:62.72.12.50:5349?transport=tcp',
         ],
-        'username': 'MedicomparesCalls',
-        'credential': 'Medicompares1406',
+        'username': 'solohearts_media_relay',
+        'credential': 'SoloHeartsLiveRelay99#Secure2026',
       },
     ],
     'sdpSemantics': 'unified-plan',

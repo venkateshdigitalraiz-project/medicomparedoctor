@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:medicompare/core/constants/app_constants.dart';
 import 'package:medicompare/features/auth/otp/data/models/verify_otp_response_model.dart';
 import 'package:medicompare/features/notification/data/datasources/notification_local_data_source.dart';
@@ -28,13 +29,31 @@ class OtpRemoteDataSourceImpl implements OtpRemoteDataSource {
     final int phoneVal = int.tryParse(phone.replaceAll(RegExp(r'\D'), '')) ?? 0;
     final int otpVal = int.tryParse(otp) ?? 0;
     
-    final localDataSource = NotificationLocalDataSourceImpl();
-    final fcmToken = await localDataSource.getFCMToken();
+    String? fcmToken;
+    try {
+      final settings = await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      developer.log('FCM permission status: ${settings.authorizationStatus}', name: 'OtpRemoteDataSource');
+      fcmToken = await FirebaseMessaging.instance.getToken();
+      developer.log('FCM Token: $fcmToken', name: 'OtpRemoteDataSource');
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        await NotificationLocalDataSourceImpl().saveFCMToken(fcmToken);
+      }
+    } catch (e) {
+      developer.log('Failed to get FCM token from FirebaseMessaging: $e', name: 'OtpRemoteDataSource');
+      try {
+        final localDataSource = NotificationLocalDataSourceImpl();
+        fcmToken = await localDataSource.getFCMToken();
+      } catch (_) {}
+    }
 
     final body = {
       'phone': phoneVal,
       'otp': otpVal,
-      if (fcmToken != null) 'fcmToken': fcmToken,
+      if (fcmToken != null && fcmToken.isNotEmpty) 'fcmToken': fcmToken,
     };
 
     developer.log('=== API REQUEST START (VERIFY OTP) ===', name: 'OtpRemoteDataSource');

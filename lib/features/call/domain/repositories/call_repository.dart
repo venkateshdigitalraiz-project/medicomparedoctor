@@ -9,6 +9,7 @@ abstract class CallRepository {
     required Map<String, dynamic> offer,
     required String callerName,
     String? callerAvatar,
+    String targetUserType = 'user',
   });
 
   Future<Either<Failure, Map<String, dynamic>>> getPendingCallOffer({
@@ -27,6 +28,7 @@ abstract class CallRepository {
 
   Future<Either<Failure, void>> endCall({
     required String callId,
+    String? targetUserId,
   });
 
   Future<Either<Failure, void>> sendIceCandidate({

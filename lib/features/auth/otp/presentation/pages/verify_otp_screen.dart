@@ -8,6 +8,8 @@ import 'package:medicompare/core/widget/spraytype.dart';
 
 import 'package:medicompare/features/auth/otp/presentation/bloc/otp_bloc.dart';
 import 'package:medicompare/features/auth/otp/presentation/widgets/otp_digit_box.dart';
+import 'package:medicompare/features/call/presentation/bloc/call_bloc.dart';
+import 'package:medicompare/features/call/presentation/bloc/call_event.dart';
 
 const _primaryPurple = Color(0xFF601CA3);
 const _darkTeal = Color(0xFF1B2E3C);
@@ -59,6 +61,7 @@ class _VerifyOtpViewState extends State<_VerifyOtpView> {
         child: BlocConsumer<OtpBloc, OtpState>(
           listener: (context, state) {
             if (state.status == OtpSubmissionStatus.success) {
+              context.read<CallBloc>().add(const AutoConnectCallServiceEvent());
               log("[OTP Flow] Navigation: Navigating to Dashboard (RouteNames.homeBottomNav)");
               Navigator.pushReplacementNamed(context, RouteNames.homeBottomNav);
             } else if (state.status == OtpSubmissionStatus.failure &&

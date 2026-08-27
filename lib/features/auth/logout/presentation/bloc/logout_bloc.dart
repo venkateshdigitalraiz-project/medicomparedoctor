@@ -3,6 +3,7 @@
 import 'dart:developer' as developer;
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:medicompare/core/network/network_exception.dart';
 import 'package:medicompare/core/services/session_manager.dart';
 import 'package:medicompare/core/services/firebase_service.dart';
@@ -10,6 +11,9 @@ import 'package:medicompare/core/services/firebase_service.dart';
 import 'package:medicompare/features/auth/logout/domain/usecases/logout_usecase.dart';
 import 'package:medicompare/features/auth/logout/presentation/bloc/logout_event.dart';
 import 'package:medicompare/features/auth/logout/presentation/bloc/logout_state.dart';
+import 'package:medicompare/features/call/presentation/bloc/call_bloc.dart';
+import 'package:medicompare/features/call/presentation/bloc/call_event.dart';
+import 'package:medicompare/injection_container.dart' as di;
 
 class LogoutBloc extends Bloc<LogoutEvent, LogoutState> {
   final LogoutUseCase logoutUseCase;
@@ -62,10 +66,16 @@ class LogoutBloc extends Bloc<LogoutEvent, LogoutState> {
     // -------------------------------------------------------------------------
 
     try {
+      await FirebaseMessaging.instance.deleteToken();
       await PushNotificationManager.notificationService.deleteFCMToken();
+      developer.log('🗑️ FCM Token deleted on doctor logout', name: 'LogoutBloc');
     } catch (e) {
       developer.log('Failed to delete FCM token during logout: $e', name: 'LogoutBloc');
     }
+
+    try {
+      di.sl<CallBloc>().add(const DisconnectCallServiceEvent());
+    } catch (_) {}
 
     try {
       await SessionManager.clearSession();

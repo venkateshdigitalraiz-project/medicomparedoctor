@@ -125,8 +125,8 @@ class CallKitService {
       id: callId,
       nameCaller: callerName,
       appName: 'MediCompare Doctor',
-      avatar: callerAvatar ?? '',
-      handle: callerId,
+      avatar: (callerAvatar != null && callerAvatar.isNotEmpty) ? callerAvatar : '',
+      handle: isVideo ? 'Incoming Video Call' : 'Incoming Audio Call',
       type: isVideo ? 1 : 0, // 0 - Audio, 1 - Video
       duration: 45000, // 45 seconds ringing timeout
       extra: <String, dynamic>{

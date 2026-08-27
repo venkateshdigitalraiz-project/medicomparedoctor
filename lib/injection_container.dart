@@ -36,7 +36,7 @@ void _initCall() {
   );
 
   // Bloc
-  sl.registerFactory(
+  sl.registerLazySingleton(
     () => CallBloc(
       webrtcService: sl(),
       callKitService: sl(),

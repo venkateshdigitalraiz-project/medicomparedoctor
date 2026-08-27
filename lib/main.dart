@@ -84,10 +84,8 @@ class _MyAppState extends State<MyApp> {
         globals.navigatorKey.currentState?.push(
           MaterialPageRoute(
             builder:
-                (_) => CallScreen(
-                  callId: widget.initialCallId,
-                  isIncoming: true,
-                ),
+                (_) =>
+                    CallScreen(callId: widget.initialCallId, isIncoming: true),
           ),
         );
       });
@@ -99,10 +97,7 @@ class _MyAppState extends State<MyApp> {
     return MultiBlocProvider(
       providers: [
         BlocProvider<OnboardingBloc>(create: (_) => OnboardingBloc()),
-        BlocProvider<CallBloc>(
-          lazy: false,
-          create: (_) => di.sl<CallBloc>(),
-        ),
+        BlocProvider<CallBloc>(lazy: false, create: (_) => di.sl<CallBloc>()),
       ],
       child: MaterialApp(
         navigatorKey: globals.navigatorKey,

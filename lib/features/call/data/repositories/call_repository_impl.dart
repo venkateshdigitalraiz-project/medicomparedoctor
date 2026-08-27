@@ -22,6 +22,7 @@ class CallRepositoryImpl implements CallRepository {
     required Map<String, dynamic> offer,
     required String callerName,
     String? callerAvatar,
+    String targetUserType = 'user',
   }) async {
     try {
       final response = await signalingService.initiateCall(
@@ -30,6 +31,8 @@ class CallRepositoryImpl implements CallRepository {
         callerName: callerName,
         callerAvatar: callerAvatar,
         offer: offer,
+        callerType: 'doctor',
+        targetUserType: targetUserType,
       );
 
       final callId =
@@ -103,9 +106,12 @@ class CallRepositoryImpl implements CallRepository {
   }
 
   @override
-  Future<Either<Failure, void>> endCall({required String callId}) async {
+  Future<Either<Failure, void>> endCall({
+    required String callId,
+    String? targetUserId,
+  }) async {
     try {
-      signalingService.endCall(callId: callId);
+      signalingService.endCall(callId: callId, targetUserId: targetUserId);
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
