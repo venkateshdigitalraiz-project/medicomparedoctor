@@ -5,12 +5,14 @@ import 'package:medicompare/core/theme/app_theme.dart';
 
 class DashboardHeader extends StatelessWidget {
   final String avatarUrl;
+  final bool isAvailableNow;
   final VoidCallback? login;
   final VoidCallback? onAvatarTap;
 
   const DashboardHeader({
     super.key,
     required this.avatarUrl,
+    this.isAvailableNow = true,
     required this.login,
     required this.onAvatarTap,
   });
@@ -80,7 +82,7 @@ class DashboardHeader extends StatelessWidget {
                   width: 11,
                   height: 11,
                   decoration: BoxDecoration(
-                    color: AppColors.danger,
+                    color: isAvailableNow ? const Color(0xFF10B981) : AppColors.danger,
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2),
                   ),

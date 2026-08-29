@@ -11,6 +11,7 @@ import '../bloc/call_state.dart';
 import '../widgets/call_controls.dart';
 import '../widgets/local_video_preview.dart';
 import '../widgets/call_session_manager.dart';
+import '../widgets/call_timer_text.dart';
 
 class CallScreen extends StatefulWidget {
   final String? callId;
@@ -334,6 +335,37 @@ class _CallScreenState extends State<CallScreen>
                           color: Colors.white,
                           fontSize: 26,
                           fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.access_time_rounded,
+                              size: 14,
+                              color: Color(0xFF34C759),
+                            ),
+                            const SizedBox(width: 6),
+                            CallTimerText(
+                              connectedAt: state.connectedAt,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

@@ -1,6 +1,6 @@
 part of 'home_bloc.dart';
 
-enum HomeTab { overview, appointments, actions }
+enum HomeTab { overview, appointments }
 
 enum HomeStatus { initial, loading, success, failure }
 

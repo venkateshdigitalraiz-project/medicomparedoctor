@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:medicompare/common/common_add/appcolor.dart';
+import 'package:medicompare/features/call/domain/entities/call_entity.dart';
+import 'package:medicompare/features/call/presentation/bloc/call_bloc.dart';
+import 'package:medicompare/features/call/presentation/bloc/call_event.dart';
+import 'package:medicompare/features/call/presentation/pages/call_screen.dart';
 import 'package:medicompare/features/schedule/data/models/appointment.dart';
 
 class AppointmentCard extends StatelessWidget {
@@ -54,6 +59,31 @@ class AppointmentCard extends StatelessWidget {
       case AppointmentMode.linkExpired:
         return Icons.videocam_off_rounded;
     }
+  }
+
+  void _startCall(BuildContext context, CallType callType) {
+    final avatar =
+        (appointment.avatarUrl.startsWith('http://') ||
+                appointment.avatarUrl.startsWith('https://'))
+            ? appointment.avatarUrl
+            : null;
+
+    final targetId = appointment.id;
+
+    context.read<CallBloc>().add(
+      StartOutgoingCallEvent(
+        targetUserId: targetId,
+        targetUserName: appointment.patientName,
+        targetUserAvatar: avatar,
+        callerName: 'Doctor',
+        callType: callType,
+      ),
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const CallScreen()),
+    );
   }
 
   @override
@@ -113,15 +143,45 @@ class AppointmentCard extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           radius: 25,
-                          backgroundColor: AppColors.chipBorder,
-                          backgroundImage: (appointment.avatarUrl.startsWith('http://') ||
-                                  appointment.avatarUrl.startsWith('https://'))
-                              ? NetworkImage(appointment.avatarUrl)
-                              : null,
-                          child: !(appointment.avatarUrl.startsWith('http://') ||
-                                  appointment.avatarUrl.startsWith('https://'))
-                              ? const Icon(Icons.person, size: 25)
-                              : null,
+                          backgroundColor: const Color(0xFFEFF6FF),
+                          child: ClipOval(
+                            child: (appointment.avatarUrl.startsWith('http://') ||
+                                    appointment.avatarUrl.startsWith('https://'))
+                                ? Image.network(
+                                    appointment.avatarUrl,
+                                    width: 50,
+                                    height: 50,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Center(
+                                        child: Text(
+                                          appointment.patientName.isNotEmpty
+                                              ? appointment.patientName[0].toUpperCase()
+                                              : 'P',
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: "Poppins",
+                                            color: Color(0xFF6C4FE0),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : Center(
+                                    child: Text(
+                                      appointment.patientName.isNotEmpty
+                                          ? appointment.patientName[0].toUpperCase()
+                                          : 'P',
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: "Poppins",
+                                        color: Color(0xFF6C4FE0),
+                                      ),
+                                    ),
+                                  ),
+                          ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -132,15 +192,18 @@ class AppointmentCard extends StatelessWidget {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    appointment.patientName,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      fontFamily: "Poppins",
-                                      color: AppColors.textDark,
+                                  Expanded(
+                                    child: Text(
+                                      appointment.patientName,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: "Poppins",
+                                        color: AppColors.textDark,
+                                      ),
                                     ),
                                   ),
+                                  const SizedBox(width: 6),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 10,
@@ -159,6 +222,91 @@ class AppointmentCard extends StatelessWidget {
                                         fontFamily: "Poppins",
                                       ),
                                     ),
+                                  ),
+                                  PopupMenuButton<String>(
+                                    icon: const Icon(
+                                      Icons.more_vert,
+                                      color: Colors.grey,
+                                      size: 20,
+                                    ),
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    elevation: 6,
+                                    onSelected: (value) {
+                                      if (value == 'audio') {
+                                        _startCall(context, CallType.audio);
+                                      } else if (value == 'video') {
+                                        _startCall(context, CallType.video);
+                                      }
+                                    },
+                                    itemBuilder:
+                                        (context) => [
+                                          PopupMenuItem<String>(
+                                            value: 'audio',
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: const Color(
+                                                      0xFF6C4CF1,
+                                                    ).withValues(alpha: 0.1),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.phone_rounded,
+                                                    size: 18,
+                                                    color: Color(0xFF6C4CF1),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                const Text(
+                                                  'Voice Call',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontFamily: 'Poppins',
+                                                    color: Color(0xFF1F2333),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem<String>(
+                                            value: 'video',
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: const Color(
+                                                      0xFF34C759,
+                                                    ).withValues(alpha: 0.1),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.videocam_rounded,
+                                                    size: 18,
+                                                    color: Color(0xFF34C759),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                const Text(
+                                                  'Video Call',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontFamily: 'Poppins',
+                                                    color: Color(0xFF1F2333),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                   ),
                                 ],
                               ),

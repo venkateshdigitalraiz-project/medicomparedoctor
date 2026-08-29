@@ -25,7 +25,6 @@ class TabSelector extends StatelessWidget {
             Icons.calendar_today_rounded,
             'Appointments',
           ),
-          _tab(HomeTab.actions, Icons.bolt_rounded, 'Actions'),
         ],
       ),
     );

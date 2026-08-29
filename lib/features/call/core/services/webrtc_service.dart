@@ -86,8 +86,8 @@ class WebRTCService {
           isVideo
               ? {
                 'facingMode': 'user',
-                'width': {'ideal': 720, 'min': 480, 'max': 1280},
-                'height': {'ideal': 1280, 'min': 640, 'max': 1920},
+                'width': {'ideal': 1080, 'min': 720, 'max': 1920},
+                'height': {'ideal': 1920, 'min': 1280, 'max': 1920},
                 'frameRate': {'ideal': 30, 'min': 24, 'max': 30},
               }
               : false,
@@ -111,8 +111,8 @@ class WebRTCService {
           final params = sender.parameters;
           if (params.encodings != null && params.encodings!.isNotEmpty) {
             for (final encoding in params.encodings!) {
-              encoding.maxBitrate = 1800000;
-              encoding.minBitrate = 150000;
+              encoding.maxBitrate = 3200000;
+              encoding.minBitrate = 500000;
               encoding.maxFramerate = 30;
             }
             await sender.setParameters(params);
@@ -124,10 +124,68 @@ class WebRTCService {
     }
   }
 
+  /// Prefer H.264 hardware codec (High Profile preferred) for sharper video and lower battery usage.
+  String _preferH264(String sdp) {
+    try {
+      final lines = sdp.split('\r\n');
+      final result = <String>[];
+      bool inVideo = false;
+      String? h264PayloadType;
+      String? h264HighPayloadType;
+
+      // First pass: find all H.264 payload types in video section
+      final h264Pts = <String>[];
+      for (final line in lines) {
+        if (line.startsWith('m=video')) inVideo = true;
+        if (line.startsWith('m=audio')) inVideo = false;
+        if (inVideo && line.startsWith('a=rtpmap:') && line.contains('H264/')) {
+          final pt = line.split(':')[1].split(' ')[0];
+          h264Pts.add(pt);
+          h264PayloadType ??= pt;
+        }
+      }
+
+      // Check for High Profile (6400...)
+      for (final line in lines) {
+        if (line.startsWith('a=fmtp:')) {
+          for (final pt in h264Pts) {
+            if (line.startsWith('a=fmtp:$pt ') &&
+                line.contains('profile-level-id=6400')) {
+              h264HighPayloadType = pt;
+              break;
+            }
+          }
+        }
+      }
+
+      final chosenPt = h264HighPayloadType ?? h264PayloadType;
+      if (chosenPt == null) return sdp;
+
+      // Second pass: move chosen H.264 to first position in m=video line
+      for (final line in lines) {
+        if (line.startsWith('m=video')) {
+          final parts = line.split(' ');
+          // parts[0]=m=video, [1]=port, [2]=proto, [3..]=payload types
+          if (parts.length > 3) {
+            final payloads = parts.sublist(3);
+            payloads.remove(chosenPt);
+            payloads.insert(0, chosenPt);
+            result.add('${parts.sublist(0, 3).join(' ')} ${payloads.join(' ')}');
+            continue;
+          }
+        }
+        result.add(line);
+      }
+      return result.join('\r\n');
+    } catch (_) {
+      return sdp;
+    }
+  }
+
   String _setSdpBitrate(
     String sdp, {
-    int videoBitrateKbps = 1800,
-    int audioBitrateKbps = 64,
+    int videoBitrateKbps = 3200,
+    int audioBitrateKbps = 128,
   }) {
     try {
       final lines = sdp.split('\r\n');
@@ -279,10 +337,21 @@ class WebRTCService {
       'optional': [],
     });
 
-    final optimizedSdp =
-        isVideo
-            ? _setSdpBitrate(rawOffer.sdp ?? '', videoBitrateKbps: 1800)
-            : rawOffer.sdp;
+    String optimizedSdp = rawOffer.sdp ?? '';
+    if (isVideo) {
+      optimizedSdp = _preferH264(optimizedSdp);
+      optimizedSdp = _setSdpBitrate(
+        optimizedSdp,
+        videoBitrateKbps: 3200,
+        audioBitrateKbps: 128,
+      );
+    } else {
+      optimizedSdp = _setSdpBitrate(
+        optimizedSdp,
+        videoBitrateKbps: 0,
+        audioBitrateKbps: 128,
+      );
+    }
     final offer = RTCSessionDescription(optimizedSdp, rawOffer.type);
 
     await _peerConnection!.setLocalDescription(offer);
@@ -329,10 +398,21 @@ class WebRTCService {
       'optional': [],
     });
 
-    final optimizedSdp =
-        isVideo
-            ? _setSdpBitrate(rawAnswer.sdp ?? '', videoBitrateKbps: 1800)
-            : rawAnswer.sdp;
+    String optimizedSdp = rawAnswer.sdp ?? '';
+    if (isVideo) {
+      optimizedSdp = _preferH264(optimizedSdp);
+      optimizedSdp = _setSdpBitrate(
+        optimizedSdp,
+        videoBitrateKbps: 3200,
+        audioBitrateKbps: 128,
+      );
+    } else {
+      optimizedSdp = _setSdpBitrate(
+        optimizedSdp,
+        videoBitrateKbps: 0,
+        audioBitrateKbps: 128,
+      );
+    }
     final answer = RTCSessionDescription(optimizedSdp, rawAnswer.type);
 
     await _peerConnection!.setLocalDescription(answer);

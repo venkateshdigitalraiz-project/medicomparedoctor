@@ -5,5 +5,7 @@ abstract class ScheduleRepository {
     required int page,
     required int limit,
     String? date,
+    String? month,
+    String? loadingType,
   });
 }

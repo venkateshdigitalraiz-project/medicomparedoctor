@@ -10,12 +10,14 @@ import 'package:medicompare/core/theme/app_theme.dart';
 import 'package:medicompare/core/widget/common_state_widgets.dart';
 import 'package:medicompare/features/home/presentation/bloc/home_bloc.dart';
 import 'package:medicompare/features/home/presentation/widgets/appointment_tile.dart';
-import 'package:medicompare/features/home/presentation/widgets/clinic_status_card.dart';
 import 'package:medicompare/features/home/presentation/widgets/dashboard_header.dart';
 import 'package:medicompare/features/home/presentation/widgets/dashboard_search_bar.dart';
 import 'package:medicompare/features/home/presentation/widgets/overview_stats_grid.dart';
-import 'package:medicompare/features/home/presentation/widgets/quick_action_button.dart';
 import 'package:medicompare/features/home/presentation/widgets/tab_selector.dart';
+import 'package:medicompare/features/dashboard/presentation/bloc/bottom_nav_bloc.dart';
+import 'package:medicompare/features/dashboard/presentation/bloc/bottom_nav_event.dart';
+import 'package:medicompare/features/profile/presentation/bloc/user_profile_bloc.dart';
+import 'package:medicompare/features/profile/presentation/bloc/user_profile_state.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -48,7 +50,6 @@ class _HomeViewState extends State<_HomeView> {
   final GlobalKey _appointmentsKey = GlobalKey(
     debugLabel: 'appointmentsSection',
   );
-  final GlobalKey _actionsKey = GlobalKey(debugLabel: 'actionsSection');
 
   // Guards against the scroll listener fighting with a tab-tap-triggered
   // programmatic scroll (ensureVisible also fires scroll notifications).
@@ -88,8 +89,6 @@ class _HomeViewState extends State<_HomeView> {
         return _overviewKey;
       case HomeTab.appointments:
         return _appointmentsKey;
-      case HomeTab.actions:
-        return _actionsKey;
     }
   }
 
@@ -138,16 +137,6 @@ class _HomeViewState extends State<_HomeView> {
       }
     }
 
-    final actionsCtx = _actionsKey.currentContext;
-    if (actionsCtx != null) {
-      final box = actionsCtx.findRenderObject() as RenderBox?;
-      if (box != null) {
-        final offset = box.localToGlobal(Offset.zero);
-        if (offset.dy <= _activationOffset) {
-          activeTab = HomeTab.actions;
-        }
-      }
-    }
 
     activeTab ??= HomeTab.overview;
 
@@ -172,10 +161,6 @@ class _HomeViewState extends State<_HomeView> {
       case HomeTab.appointments:
         _scrollToSection(_appointmentsKey);
         break;
-
-      case HomeTab.actions:
-        _scrollToSection(_actionsKey);
-        break;
     }
     //  _scrollToTab(tab);
   }
@@ -189,13 +174,24 @@ class _HomeViewState extends State<_HomeView> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: DashboardHeader(
-                avatarUrl: 'https://i.pravatar.cc/300?img=45',
-                onAvatarTap: () {
-                  Navigator.pushNamed(context, RouteNames.menubar);
-                },
-                login: () {
-                  LogoutHandler.logout(context);
+              child: BlocBuilder<UserProfileBloc, UserProfileState>(
+                builder: (context, profileState) {
+                  String avatarUrl = '';
+                  bool isAvailable = true;
+                  if (profileState is UserProfileLoaded) {
+                    avatarUrl = profileState.profile.avatarUrl;
+                    isAvailable = profileState.profile.isAvailableNow;
+                  }
+                  return DashboardHeader(
+                    avatarUrl: avatarUrl,
+                    isAvailableNow: isAvailable,
+                    onAvatarTap: () {
+                      context.read<BottomNavBloc>().add(ChangeTab(3));
+                    },
+                    login: () {
+                      LogoutHandler.logout(context);
+                    },
+                  );
                 },
               ),
             ),
@@ -223,8 +219,9 @@ class _HomeViewState extends State<_HomeView> {
                       state.appointments.isEmpty) {
                     return CommonErrorWidget(
                       message: state.errorMessage ?? 'Something went wrong',
-                      onRetry: () =>
-                          context.read<HomeBloc>().add(const HomeStarted()),
+                      onRetry:
+                          () =>
+                              context.read<HomeBloc>().add(const HomeStarted()),
                     );
                   }
 
@@ -242,12 +239,11 @@ class _HomeViewState extends State<_HomeView> {
                       controller: _scrollController,
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                       children: [
-                        ClinicStatusCard(status: state.clinicStatus),
-                        const SizedBox(height: 14),
                         DashboardSearchBar(
-                          onChanged: (q) => context.read<HomeBloc>().add(
-                            HomeSearchChanged(q),
-                          ),
+                          onChanged:
+                              (q) => context.read<HomeBloc>().add(
+                                HomeSearchChanged(q),
+                              ),
                         ),
                         const SizedBox(height: 14),
                         TabSelector(
@@ -351,67 +347,6 @@ class _HomeViewState extends State<_HomeView> {
                                 ),
                             ],
                           ),
-                        ),
-                        const SizedBox(height: 22),
-
-                        // ---------------- Quick Actions ----------------
-                        Column(
-                          key: _actionsKey,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Quick Actions',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: "Poppins",
-                                color: Colors.black,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                QuickActionButton(
-                                  icon: Icons.add_circle_outline_rounded,
-                                  label: 'Add\nAvailability',
-                                  color: AppColors.info,
-                                  bgColor: AppColors.infoBg,
-                                  onTap: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      RouteNames.addavailable,
-                                    );
-                                  },
-                                ),
-                                const SizedBox(width: 10),
-                                QuickActionButton(
-                                  icon: Icons.assignment_outlined,
-                                  label: 'Consultation\nHistory',
-                                  color: AppColors.success,
-                                  bgColor: AppColors.successBg,
-                                  onTap: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      RouteNames.consultationHistory,
-                                    );
-                                  },
-                                ),
-                                const SizedBox(width: 10),
-                                QuickActionButton(
-                                  icon: Icons.event_note_rounded,
-                                  label: 'Holidays',
-                                  color: AppColors.primary,
-                                  bgColor: AppColors.infoBg,
-                                  onTap: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      RouteNames.holidays,
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
                         ),
                       ],
                     ),

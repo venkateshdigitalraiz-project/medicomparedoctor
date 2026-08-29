@@ -66,7 +66,9 @@ import 'package:medicompare/features/search_id/presentation/screens/search_scree
 import 'package:medicompare/features/setting/presentation/bloc/settings_bloc.dart';
 import 'package:medicompare/features/setting/presentation/screens/settings_screen.dart';
 import 'package:medicompare/features/today_appointment/presentation/bloc/appointment_bloc.dart';
+import 'package:medicompare/features/today_appointment/presentation/bloc/appointment_event.dart';
 import 'package:medicompare/features/today_appointment/presentation/screens/appointments_screen.dart';
+import 'package:medicompare/injection_container.dart';
 import 'package:medicompare/features/videocall/presentation/bloc/video_call_bloc.dart';
 import 'package:medicompare/features/videocall/presentation/screens/video_call_screen.dart';
 
@@ -131,7 +133,8 @@ class AppRoutes {
       case RouteNames.todayApartment:
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (_) => AppointmentBloc(),
+            create: (_) =>
+                sl<AppointmentBloc>()..add(const LoadTodayAppointments()),
             child: const AppointmentsScreen(),
           ),
         );

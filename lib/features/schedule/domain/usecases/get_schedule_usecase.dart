@@ -10,7 +10,15 @@ class GetScheduleUseCase {
     required int page,
     required int limit,
     String? date,
+    String? month,
+    String? loadingType,
   }) async {
-    return await repository.fetchSchedule(page: page, limit: limit, date: date);
+    return await repository.fetchSchedule(
+      page: page,
+      limit: limit,
+      date: date,
+      month: month,
+      loadingType: loadingType,
+    );
   }
 }

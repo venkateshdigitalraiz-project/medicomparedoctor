@@ -98,7 +98,10 @@ class CallRepositoryImpl implements CallRepository {
     required String reason,
   }) async {
     try {
+      // 1. Socket emit (fast foreground path)
       signalingService.rejectCall(callId: callId, reason: reason);
+      // 2. REST API fallback (guaranteed background path)
+      await remoteDataSource.rejectCall(callId: callId, reason: reason);
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
@@ -111,7 +114,10 @@ class CallRepositoryImpl implements CallRepository {
     String? targetUserId,
   }) async {
     try {
+      // 1. Socket emit (fast foreground path)
       signalingService.endCall(callId: callId, targetUserId: targetUserId);
+      // 2. REST API fallback (guaranteed background path)
+      await remoteDataSource.endCall(callId: callId, targetUserId: targetUserId);
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(e.toString()));

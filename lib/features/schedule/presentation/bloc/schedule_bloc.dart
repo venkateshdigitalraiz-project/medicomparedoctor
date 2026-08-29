@@ -69,8 +69,16 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
 
     emit(state.copyWith(status: ScheduleStatus.refreshing, clearError: true));
 
+    final targetDate = event.date ?? state.selectedDateString;
+
     try {
-      await _fetchData(emit, page: 1, reset: true);
+      await _fetchData(
+        emit,
+        page: 1,
+        reset: true,
+        date: targetDate,
+        skipCalendarUpdate: targetDate != null && targetDate.isNotEmpty,
+      );
     } finally {
       if (event.completer != null && !event.completer!.isCompleted) {
         event.completer!.complete();
@@ -172,11 +180,16 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     required int page,
     required bool reset,
     String? date,
+    String? month,
+    String? loadingType,
     bool skipCalendarUpdate = false,
   }) async {
     try {
+      final effectiveLoadingType =
+          loadingType ?? (reset ? 'initials' : 'pagination');
+
       developer.log(
-        'Fetching schedule: page=$page, limit=$_limit, date=$date',
+        'Fetching schedule: page=$page, limit=$_limit, date=$date, month=$month, loadingType=$effectiveLoadingType',
         name: 'ScheduleBloc',
       );
 
@@ -184,6 +197,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
         page: page,
         limit: _limit,
         date: date,
+        month: month,
+        loadingType: effectiveLoadingType,
       );
 
       // -----------------------------------------------------------------------

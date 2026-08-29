@@ -15,10 +15,11 @@ class LoadSchedule extends ScheduleEvent {
 
 class RefreshSchedule extends ScheduleEvent {
   final Completer<void>? completer;
-  const RefreshSchedule({this.completer});
+  final String? date;
+  const RefreshSchedule({this.completer, this.date});
 
   @override
-  List<Object?> get props => [completer];
+  List<Object?> get props => [completer, date];
 }
 
 class SelectCalendarDay extends ScheduleEvent {

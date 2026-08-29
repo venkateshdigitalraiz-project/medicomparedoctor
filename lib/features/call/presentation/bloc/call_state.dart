@@ -71,8 +71,9 @@ class CallConnectedState extends CallState {
   final bool isCameraOff;
   final bool isSpeakerOn;
   final bool isFrontCamera;
+  final DateTime connectedAt;
 
-  const CallConnectedState({
+  CallConnectedState({
     required this.callId,
     required this.peerName,
     this.peerAvatar,
@@ -81,7 +82,8 @@ class CallConnectedState extends CallState {
     this.isCameraOff = false,
     this.isSpeakerOn = false,
     this.isFrontCamera = true,
-  });
+    DateTime? connectedAt,
+  }) : connectedAt = connectedAt ?? DateTime.now();
 
   CallConnectedState copyWith({
     String? callId,
@@ -92,6 +94,7 @@ class CallConnectedState extends CallState {
     bool? isCameraOff,
     bool? isSpeakerOn,
     bool? isFrontCamera,
+    DateTime? connectedAt,
   }) {
     return CallConnectedState(
       callId: callId ?? this.callId,
@@ -102,6 +105,7 @@ class CallConnectedState extends CallState {
       isCameraOff: isCameraOff ?? this.isCameraOff,
       isSpeakerOn: isSpeakerOn ?? this.isSpeakerOn,
       isFrontCamera: isFrontCamera ?? this.isFrontCamera,
+      connectedAt: connectedAt ?? this.connectedAt,
     );
   }
 
@@ -115,6 +119,7 @@ class CallConnectedState extends CallState {
     isCameraOff,
     isSpeakerOn,
     isFrontCamera,
+    connectedAt,
   ];
 }
 

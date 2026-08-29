@@ -43,7 +43,9 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   }) : super(const CallInitial()) {
     on<InitializeCallServiceEvent>(_onInitialize);
     on<DisconnectCallServiceEvent>(_onDisconnect);
-    on<AutoConnectCallServiceEvent>((event, emit) async => await _autoConnectSocket());
+    on<AutoConnectCallServiceEvent>(
+      (event, emit) async => await _autoConnectSocket(),
+    );
     on<StartOutgoingCallEvent>(_onStartOutgoingCall);
     on<IncomingCallDetectedEvent>(_onIncomingCallDetected);
     on<AcceptCallEvent>(_onAcceptCall);
@@ -105,16 +107,20 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       if (state == RTCPeerConnectionState.RTCPeerConnectionStateClosed) {
         _peerDisconnectTimer?.cancel();
         add(const RemoteCallEndedEvent(reason: 'Peer disconnected'));
-      } else if (state == RTCPeerConnectionState.RTCPeerConnectionStateDisconnected ||
+      } else if (state ==
+              RTCPeerConnectionState.RTCPeerConnectionStateDisconnected ||
           state == RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
         _peerDisconnectTimer?.cancel();
         _peerDisconnectTimer = Timer(const Duration(seconds: 3), () {
           if (this.state is CallConnectedState) {
-            debugPrint('⚠️ [CallBloc] Peer disconnected for >3s, ending call session');
+            debugPrint(
+              '⚠️ [CallBloc] Peer disconnected for >3s, ending call session',
+            );
             add(const RemoteCallEndedEvent(reason: 'Call connection lost'));
           }
         });
-      } else if (state == RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
+      } else if (state ==
+          RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
         _peerDisconnectTimer?.cancel();
       }
     };
@@ -124,16 +130,20 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       if (state == RTCIceConnectionState.RTCIceConnectionStateClosed) {
         _peerDisconnectTimer?.cancel();
         add(const RemoteCallEndedEvent(reason: 'ICE connection closed'));
-      } else if (state == RTCIceConnectionState.RTCIceConnectionStateDisconnected ||
+      } else if (state ==
+              RTCIceConnectionState.RTCIceConnectionStateDisconnected ||
           state == RTCIceConnectionState.RTCIceConnectionStateFailed) {
         _peerDisconnectTimer?.cancel();
         _peerDisconnectTimer = Timer(const Duration(seconds: 3), () {
           if (this.state is CallConnectedState) {
-            debugPrint('⚠️ [CallBloc] ICE disconnected for >3s, ending call session');
+            debugPrint(
+              '⚠️ [CallBloc] ICE disconnected for >3s, ending call session',
+            );
             add(const RemoteCallEndedEvent(reason: 'Call connection lost'));
           }
         });
-      } else if (state == RTCIceConnectionState.RTCIceConnectionStateConnected) {
+      } else if (state ==
+          RTCIceConnectionState.RTCIceConnectionStateConnected) {
         _peerDisconnectTimer?.cancel();
       }
     };
@@ -543,6 +553,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       );
       await callKitService.endCall(_currentCallId!);
     }
+    await callKitService.endAllCalls();
     await _cleanupCall();
     emit(const CallEndedState(reason: 'Call ended'));
   }
@@ -554,6 +565,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     if (_currentCallId != null) {
       await callKitService.endCall(_currentCallId!);
     }
+    await callKitService.endAllCalls();
     await _cleanupCall();
     emit(CallEndedState(reason: event.reason));
   }

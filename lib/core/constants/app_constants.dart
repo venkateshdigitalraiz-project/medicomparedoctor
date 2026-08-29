@@ -18,6 +18,8 @@ class AppConstants {
   static const String loginEndpoint = '/doctor/auth/login';
   static const String verifyOtpEndpoint = '/doctor/auth/verify-otp';
   static const String dashboardEndpoint = '/doctor/dashboard';
+  static const String todayAppointmentsEndpoint =
+      '/doctor/dashboard/todayappointments-list';
   static const String scheduleEndpoint = '/doctor/dashboard/schedule';
   static const String patientsEndpoint = '/doctor/dashboard/patient-list';
   static const String profileEndpoint = '/doctor/profile';

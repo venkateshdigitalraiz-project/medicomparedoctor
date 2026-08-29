@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:equatable/equatable.dart';
 
 abstract class AppointmentEvent extends Equatable {
@@ -7,22 +8,37 @@ abstract class AppointmentEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Fired when the screen first loads to fetch the appointment list.
-class LoadAppointments extends AppointmentEvent {
-  const LoadAppointments();
+class LoadTodayAppointments extends AppointmentEvent {
+  final Completer<void>? completer;
+
+  const LoadTodayAppointments({this.completer});
+
+  @override
+  List<Object?> get props => [completer];
 }
 
-/// Fired whenever the search text changes.
-class SearchAppointments extends AppointmentEvent {
+class LoadMoreTodayAppointments extends AppointmentEvent {
+  const LoadMoreTodayAppointments();
+}
+
+class SearchTodayAppointments extends AppointmentEvent {
   final String query;
 
-  const SearchAppointments(this.query);
+  const SearchTodayAppointments(this.query);
 
   @override
   List<Object?> get props => [query];
 }
 
-/// Fired when the calendar icon is tapped (placeholder for a date filter).
+class FilterTodayAppointmentsByStatus extends AppointmentEvent {
+  final String? status;
+
+  const FilterTodayAppointmentsByStatus(this.status);
+
+  @override
+  List<Object?> get props => [status];
+}
+
 class FilterByDate extends AppointmentEvent {
   final String? date;
 

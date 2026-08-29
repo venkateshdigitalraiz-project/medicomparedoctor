@@ -53,7 +53,7 @@ class OtpRemoteDataSourceImpl implements OtpRemoteDataSource {
     final body = {
       'phone': phoneVal,
       'otp': otpVal,
-      if (fcmToken != null && fcmToken.isNotEmpty) 'fcmToken': fcmToken,
+      if (fcmToken != null && fcmToken.isNotEmpty) 'appfcmToken': fcmToken,
     };
 
     developer.log('=== API REQUEST START (VERIFY OTP) ===', name: 'OtpRemoteDataSource');

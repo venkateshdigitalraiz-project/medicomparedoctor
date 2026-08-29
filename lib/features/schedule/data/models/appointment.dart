@@ -78,7 +78,7 @@ class Appointment extends Equatable {
     return Appointment(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       patientName: json['patientName']?.toString() ?? json['name']?.toString() ?? 'Unknown',
-      avatarUrl: json['avatarUrl']?.toString() ?? json['profileImage']?.toString() ?? 'https://i.pravatar.cc/150',
+      avatarUrl: json['avatarUrl']?.toString() ?? json['profileImage']?.toString() ?? '',
       time: json['preferredTime']?.toString() ?? json['time']?.toString() ?? '',
       mode: mode,
       status: status,

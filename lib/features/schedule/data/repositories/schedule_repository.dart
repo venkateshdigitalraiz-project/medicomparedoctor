@@ -24,13 +24,40 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
     required int page,
     required int limit,
     String? date,
+    String? month,
+    String? loadingType,
   }) async {
     final token = await SessionManager.getToken();
-    var urlStr =
-        '$baseUrl${AppConstants.scheduleEndpoint}?page=$page&limit=$limit';
+
+    final now = DateTime.now();
+    String computedMonth = month ?? '${now.year}-${now.month.toString().padLeft(2, '0')}';
+    String? dayOnly;
+
     if (date != null && date.isNotEmpty) {
-      urlStr += '&date=$date';
+      if (date.contains('-')) {
+        final parts = date.split('-');
+        if (parts.length == 3) {
+          computedMonth = '${parts[0]}-${parts[1]}';
+          dayOnly = int.tryParse(parts[2])?.toString() ?? parts[2];
+        } else {
+          dayOnly = date;
+        }
+      } else {
+        dayOnly = date;
+      }
     }
+
+    final computedLoadingType =
+        loadingType ?? (page == 1 ? 'initial' : 'pagination');
+
+    var urlStr =
+        '$baseUrl${AppConstants.scheduleEndpoint}?month=$computedMonth';
+
+    if (dayOnly != null && dayOnly.isNotEmpty) {
+      urlStr += '&date=$dayOnly';
+    }
+
+    urlStr += '&loadingType=$computedLoadingType&page=$page&limit=$limit';
 
     developer.log('=== SCHEDULE API REQUEST ===', name: 'ScheduleRepository');
     developer.log('URL: $urlStr', name: 'ScheduleRepository');

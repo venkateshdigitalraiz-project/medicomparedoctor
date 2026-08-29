@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../bloc/call_state.dart';
+import 'call_timer_text.dart';
 
 class CallMinimizedBubble extends StatefulWidget {
   final CallConnectedState state;
@@ -139,7 +140,7 @@ class _CallMinimizedBubbleState extends State<CallMinimizedBubble>
                       ),
                       const SizedBox(height: 2),
 
-                      // Call Status
+                      // Call Status with Live Timer
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -152,11 +153,12 @@ class _CallMinimizedBubbleState extends State<CallMinimizedBubble>
                             ),
                           ),
                           const SizedBox(width: 4),
-                          const Text(
-                            'Tap to expand',
-                            style: TextStyle(
-                              color: Colors.white70,
+                          CallTimerText(
+                            connectedAt: widget.state.connectedAt,
+                            style: const TextStyle(
+                              color: Colors.white,
                               fontSize: 10,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],

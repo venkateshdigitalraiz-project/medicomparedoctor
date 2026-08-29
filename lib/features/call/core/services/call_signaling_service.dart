@@ -57,10 +57,7 @@ class CallSignalingService {
           .enableAutoConnect()
           .enableReconnection()
           .setReconnectionDelay(2000)
-          .setAuth({
-            if (token != null) 'token': token,
-            'userId': userId,
-          })
+          .setAuth({if (token != null) 'token': token, 'userId': userId})
           .setExtraHeaders({
             if (token != null) 'Authorization': 'Bearer $token',
           })

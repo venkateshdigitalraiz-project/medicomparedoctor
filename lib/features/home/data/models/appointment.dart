@@ -53,7 +53,7 @@ class Appointment extends Equatable {
           '',
       avatarUrl: json['avatarUrl']?.toString() ??
           json['profileImage']?.toString() ??
-          'https://i.pravatar.cc/150',
+          '',
       status: status,
       type: type,
     );

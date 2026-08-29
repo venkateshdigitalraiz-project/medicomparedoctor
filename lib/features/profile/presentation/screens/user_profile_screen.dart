@@ -37,11 +37,11 @@ class _UserProfileView extends StatelessWidget {
           children: [
             // Always visible header/app bar
             Padding(
-              padding: const EdgeInsets.only(right: 8, top: 8),
+              padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const SizedBox(width: 40),
+                  const SizedBox(width: 48),
                   const Text(
                     'Profile',
                     style: TextStyle(
@@ -50,68 +50,24 @@ class _UserProfileView extends StatelessWidget {
                       color: Colors.black87,
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          InkWell(
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                RouteNames.editProfile,
-                              );
-                            },
-                            child: Container(
-                              width: 42,
-                              height: 42,
-                              alignment: Alignment.center,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFEFF6FF),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.edit,
-                                size: 18,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Edit',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
+                      CircleIconButton(
+                        icon: Icons.logout,
+                        onTap: () {
+                          LogoutHandler.logout(context);
+                        },
                       ),
-                      const SizedBox(width: 12),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircleIconButton(
-                            icon: Icons.logout,
-                            onTap: () {
-                              LogoutHandler.logout(context);
-                            },
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Logout',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Logout',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontFamily: "Poppins",
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
                       ),
                     ],
                   ),
@@ -192,11 +148,13 @@ class _UserProfileView extends StatelessWidget {
                                   isExpanded: loaded.isExpanded(
                                     UserProfileSection.personalInformation,
                                   ),
-                                  onTap: () => bloc.add(
-                                    const UserProfileSectionToggled(
-                                      UserProfileSection.personalInformation,
-                                    ),
-                                  ),
+                                  onTap:
+                                      () => bloc.add(
+                                        const UserProfileSectionToggled(
+                                          UserProfileSection
+                                              .personalInformation,
+                                        ),
+                                      ),
                                   child: Padding(
                                     padding: const EdgeInsets.only(bottom: 6),
                                     child: Column(
@@ -248,12 +206,14 @@ class _UserProfileView extends StatelessWidget {
                                   isExpanded: loaded.isExpanded(
                                     UserProfileSection.professionalInformation,
                                   ),
-                                  onTap: () => bloc.add(
-                                    const UserProfileSectionToggled(
-                                      UserProfileSection
-                                          .professionalInformation,
-                                    ),
-                                  ),
+                                  onTap:
+                                      () => bloc.add(
+                                        const UserProfileSectionToggled(
+                                          UserProfileSection
+                                              .professionalInformation,
+                                        ),
+                                      ),
+                                  showDivider: false,
                                   child: Padding(
                                     padding: const EdgeInsets.only(bottom: 6),
                                     child: Text(
@@ -262,85 +222,6 @@ class _UserProfileView extends StatelessWidget {
                                         fontSize: 14,
                                         fontFamily: "Poppins",
                                         fontWeight: FontWeight.w600,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                // Working Hours
-                                UserSectionTile(
-                                  leadingIcon: Icons.access_time_rounded,
-                                  title: 'Working Hours',
-                                  isExpanded: loaded.isExpanded(
-                                    UserProfileSection.workingHours,
-                                  ),
-                                  onTap: () => bloc.add(
-                                    const UserProfileSectionToggled(
-                                      UserProfileSection.workingHours,
-                                    ),
-                                  ),
-                                  trailingChip: profile.isAvailableNow
-                                      ? _buildAvailableChip()
-                                      : null,
-                                  child: const Padding(
-                                    padding: EdgeInsets.only(bottom: 6),
-                                    child: Text(
-                                      'Mon - Fri: 9:00 AM - 5:00 PM',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                                // // ---- Clinical Information (peek, matches cropped design) ----
-                                UserSectionTile(
-                                  leadingIcon: Icons.local_hospital_outlined,
-                                  title: 'Clinical Information',
-                                  isExpanded: loaded.isExpanded(
-                                    UserProfileSection.clinicalInformation,
-                                  ),
-                                  onTap: () => Navigator.pushNamed(
-                                    context,
-                                    RouteNames.clinicInfo,
-                                  ),
-                                  // bloc.add(
-                                  //   const UserProfileSectionToggled(
-                                  //     UserProfileSection.clinicalInformation,
-                                  //   ),
-                                  // ),
-                                  showDivider: false,
-                                  child: const Padding(
-                                    padding: EdgeInsets.only(bottom: 6),
-                                    child: Text(
-                                      'City Heart Hospital, Room 204',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                // // ---- Clinical Information (peek, matches cropped design) ----
-                                UserSectionTile(
-                                  leadingIcon: Icons.edit_document,
-                                  title: 'Documents',
-                                  isExpanded: loaded.isExpanded(
-                                    UserProfileSection.document,
-                                  ),
-                                  onTap: () => Navigator.pushNamed(
-                                    context,
-                                    RouteNames.document,
-                                  ),
-                                  showDivider: false,
-                                  child: const Padding(
-                                    padding: EdgeInsets.only(bottom: 6),
-                                    child: Text(
-                                      'Set All Documents',
-                                      style: TextStyle(
-                                        fontSize: 13,
                                         color: Colors.black54,
                                       ),
                                     ),
@@ -390,9 +271,10 @@ class _UserProfileView extends StatelessWidget {
   // ignore: strict_top_level_inference
   Widget _buildStatsRow(profile) {
     return Row(
-      children: profile.stats
-          .map<Widget>((s) => Expanded(child: UserStatCard(stat: s)))
-          .toList(),
+      children:
+          profile.stats
+              .map<Widget>((s) => Expanded(child: UserStatCard(stat: s)))
+              .toList(),
     );
   }
 
@@ -428,14 +310,14 @@ class _UserProfileView extends StatelessWidget {
                 child: ClipOval(
                   child:
                       (profile.avatarUrl.startsWith('http://') ||
-                          profile.avatarUrl.startsWith('https://'))
-                      ? Image.network(
-                          profile.avatarUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) =>
-                              const Icon(Icons.person, size: 60),
-                        )
-                      : const Icon(Icons.person, size: 60),
+                              profile.avatarUrl.startsWith('https://'))
+                          ? Image.network(
+                            profile.avatarUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder:
+                                (_, _, _) => const Icon(Icons.person, size: 60),
+                          )
+                          : const Icon(Icons.person, size: 60),
                 ),
               ),
             ],
@@ -465,29 +347,6 @@ class _UserProfileView extends StatelessWidget {
                 ),
               ],
             ],
-          ),
-          const SizedBox(height: 4),
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: profile.specialty,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                TextSpan(
-                  text: '  •  ID: ${profile.id}',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),

@@ -2,6 +2,7 @@ import 'dart:developer' as developer;
 
 import 'dart:ui';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:medicompare/features/notification/data/repositories/notification_repository.dart';
 
@@ -148,11 +149,23 @@ class NotificationService {
 
   void _listenToForegroundMessages() {
     FirebaseMessaging.onMessage.listen(
-      (RemoteMessage message) {
+      (RemoteMessage message) async {
         developer.log(
           'Foreground message received: ${message.messageId}',
           name: 'NotificationService',
         );
+
+        final type = message.data['type'];
+        if (type == 'CALL_ENDED' || type == 'CALL_CANCEL') {
+          final callId = message.data['callId']?.toString();
+          if (callId != null && callId.isNotEmpty) {
+            await FlutterCallkitIncoming.endCall(callId);
+          } else {
+            await FlutterCallkitIncoming.endAllCalls();
+          }
+          return;
+        }
+
         _showLocalNotification(message);
       },
       onError: (Object error) {

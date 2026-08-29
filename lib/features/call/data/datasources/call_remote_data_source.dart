@@ -6,6 +6,8 @@ import '../models/pending_call_model.dart';
 
 abstract class CallRemoteDataSource {
   Future<PendingCallModel> getPendingCallOffer(String callId);
+  Future<void> rejectCall({required String callId, String reason});
+  Future<void> endCall({required String callId, String? targetUserId});
 }
 
 class CallRemoteDataSourceImpl implements CallRemoteDataSource {
@@ -40,6 +42,39 @@ class CallRemoteDataSourceImpl implements CallRemoteDataSource {
       throw ServerException(msg);
     } catch (e) {
       throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> rejectCall({
+    required String callId,
+    String reason = 'Declined',
+  }) async {
+    try {
+      await dio.post(
+        '${AppConstants.baseUrl}/calls/reject',
+        data: {'callId': callId, 'reason': reason},
+      );
+    } catch (e) {
+      // Non-fatal if socket already handled
+    }
+  }
+
+  @override
+  Future<void> endCall({
+    required String callId,
+    String? targetUserId,
+  }) async {
+    try {
+      await dio.post(
+        '${AppConstants.baseUrl}/calls/end',
+        data: {
+          'callId': callId,
+          if (targetUserId != null) 'targetUserId': targetUserId,
+        },
+      );
+    } catch (e) {
+      // Non-fatal if socket already handled
     }
   }
 }

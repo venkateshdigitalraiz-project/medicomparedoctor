@@ -171,7 +171,7 @@ class _AppointmentSearchState extends State<AppointmentSearch> {
               child: ListView.separated(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 itemCount: _filteredAppointments.length,
-                separatorBuilder: (_, __) => const Divider(
+                separatorBuilder: (context, index) => const Divider(
                   height: 1,
                   indent: 16,
                   endIndent: 16,

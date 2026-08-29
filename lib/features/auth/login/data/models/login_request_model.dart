@@ -13,7 +13,7 @@ class LoginRequestModel {
     return {
       'loginType': loginType,
       'phone': phone,
-      if (fcmToken != null) 'fcmToken': fcmToken,
+      if (fcmToken != null) 'appfcmToken': fcmToken,
     };
   }
 }

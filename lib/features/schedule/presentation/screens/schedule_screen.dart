@@ -87,10 +87,10 @@ class _ScheduleViewState extends State<_ScheduleView> {
           children: [
             // App bar
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 28, 0),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Row(
                 children: [
-                  const SizedBox(width: 40),
+                  const SizedBox(width: 48),
                   const Expanded(
                     child: Center(
                       child: Text(
@@ -104,16 +104,6 @@ class _ScheduleViewState extends State<_ScheduleView> {
                       ),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, RouteNames.sechduleSetting);
-                    },
-                    child: const Icon(
-                      Icons.settings,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -148,7 +138,12 @@ class _ScheduleViewState extends State<_ScheduleView> {
                     return;
                   }
                   final completer = Completer<void>();
-                  sBloc.add(RefreshSchedule(completer: completer));
+                  sBloc.add(
+                    RefreshSchedule(
+                      completer: completer,
+                      date: sBloc.state.selectedDateString,
+                    ),
+                  );
                   await completer.future;
                 },
                 child: BlocConsumer<ScheduleBloc, ScheduleState>(
