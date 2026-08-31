@@ -29,6 +29,7 @@ class Appointment extends Equatable {
   final int age;
   final String phone;
   final String city;
+  final String notes;
 
   const Appointment({
     required this.id,
@@ -41,6 +42,7 @@ class Appointment extends Equatable {
     required this.age,
     required this.phone,
     required this.city,
+    this.notes = '',
   });
 
   factory Appointment.fromJson(Map<String, dynamic> json) {
@@ -86,6 +88,7 @@ class Appointment extends Equatable {
       age: ageVal,
       phone: json['phone']?.toString() ?? '',
       city: json['city']?.toString() ?? '',
+      notes: json['notes']?.toString() ?? json['clinicalNotes']?.toString() ?? '',
     );
   }
 
@@ -93,7 +96,7 @@ class Appointment extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, patientName, avatarUrl, time, mode, status, meetingLink, age, phone, city];
+      [id, patientName, avatarUrl, time, mode, status, meetingLink, age, phone, city, notes];
 }
 
 class ScheduleStats extends Equatable {

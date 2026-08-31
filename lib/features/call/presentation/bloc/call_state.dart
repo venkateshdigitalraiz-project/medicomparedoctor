@@ -18,6 +18,7 @@ class CallOutgoingState extends CallState {
   final String targetUserName;
   final String? targetUserAvatar;
   final CallType callType;
+  final String? appointmentId;
 
   const CallOutgoingState({
     required this.callId,
@@ -25,6 +26,7 @@ class CallOutgoingState extends CallState {
     required this.targetUserName,
     this.targetUserAvatar,
     required this.callType,
+    this.appointmentId,
   });
 
   @override
@@ -34,6 +36,7 @@ class CallOutgoingState extends CallState {
     targetUserName,
     targetUserAvatar,
     callType,
+    appointmentId,
   ];
 }
 
@@ -43,6 +46,7 @@ class CallIncomingState extends CallState {
   final String callerName;
   final String? callerAvatar;
   final CallType callType;
+  final String? appointmentId;
 
   const CallIncomingState({
     required this.callId,
@@ -50,6 +54,7 @@ class CallIncomingState extends CallState {
     required this.callerName,
     this.callerAvatar,
     required this.callType,
+    this.appointmentId,
   });
 
   @override
@@ -59,6 +64,7 @@ class CallIncomingState extends CallState {
     callerName,
     callerAvatar,
     callType,
+    appointmentId,
   ];
 }
 
@@ -72,6 +78,7 @@ class CallConnectedState extends CallState {
   final bool isSpeakerOn;
   final bool isFrontCamera;
   final DateTime connectedAt;
+  final String? appointmentId;
 
   CallConnectedState({
     required this.callId,
@@ -83,6 +90,7 @@ class CallConnectedState extends CallState {
     this.isSpeakerOn = false,
     this.isFrontCamera = true,
     DateTime? connectedAt,
+    this.appointmentId,
   }) : connectedAt = connectedAt ?? DateTime.now();
 
   CallConnectedState copyWith({
@@ -95,6 +103,7 @@ class CallConnectedState extends CallState {
     bool? isSpeakerOn,
     bool? isFrontCamera,
     DateTime? connectedAt,
+    String? appointmentId,
   }) {
     return CallConnectedState(
       callId: callId ?? this.callId,
@@ -106,6 +115,7 @@ class CallConnectedState extends CallState {
       isSpeakerOn: isSpeakerOn ?? this.isSpeakerOn,
       isFrontCamera: isFrontCamera ?? this.isFrontCamera,
       connectedAt: connectedAt ?? this.connectedAt,
+      appointmentId: appointmentId ?? this.appointmentId,
     );
   }
 
@@ -120,6 +130,7 @@ class CallConnectedState extends CallState {
     isSpeakerOn,
     isFrontCamera,
     connectedAt,
+    appointmentId,
   ];
 }
 

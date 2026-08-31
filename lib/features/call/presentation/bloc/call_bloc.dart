@@ -327,6 +327,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
               targetUserName: event.targetUserName,
               targetUserAvatar: event.targetUserAvatar,
               callType: event.callType,
+              appointmentId: event.appointmentId,
             ),
           );
         },
@@ -448,6 +449,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
               peerName: callerName,
               peerAvatar: callerAvatar,
               callType: callType,
+              appointmentId: response['appointmentId']?.toString(),
             ),
           );
         },
@@ -490,6 +492,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
             peerName: outgoing.targetUserName,
             peerAvatar: outgoing.targetUserAvatar,
             callType: outgoing.callType,
+            appointmentId: outgoing.appointmentId,
           ),
         );
       }

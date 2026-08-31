@@ -14,6 +14,7 @@ class TodayAppointmentModel extends TodayAppointmentEntity {
     required super.preferredTime,
     required super.status,
     required super.avatarUrl,
+    super.notes = '',
   });
 
   factory TodayAppointmentModel.fromJson(Map<String, dynamic> json) {
@@ -48,6 +49,9 @@ class TodayAppointmentModel extends TodayAppointmentEntity {
       avatarUrl: json['avatarUrl']?.toString() ??
           json['profileImage']?.toString() ??
           '',
+      notes: json['notes']?.toString() ??
+          json['clinicalNotes']?.toString() ??
+          '',
     );
   }
 
@@ -65,6 +69,7 @@ class TodayAppointmentModel extends TodayAppointmentEntity {
       'preferredTime': preferredTime,
       'status': status,
       'avatarUrl': avatarUrl,
+      'notes': notes,
     };
   }
 }

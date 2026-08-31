@@ -6,14 +6,14 @@ class AppConstants {
   static const String baseUrl =
       isProduction
           ? 'https://api.medicompares.com/api/v1'
-          // : 'http://192.168.0.161:9001/api/v1';
-          : 'https://api.medicompares.com/api/v1';
+          : 'http://192.168.0.161:9001/api/v1';
+  //   : 'https://api.medicompares.com/api/v1';
 
   static const String socketUrl =
       isProduction
           ? 'https://api.medicompares.com'
-          // : 'http://192.168.0.161:9001';
-          : 'https://api.medicompares.com';
+          : 'http://192.168.0.161:9001';
+  //   : 'https://api.medicompares.com';
   // API Endpoints
   static const String loginEndpoint = '/doctor/auth/login';
   static const String verifyOtpEndpoint = '/doctor/auth/verify-otp';

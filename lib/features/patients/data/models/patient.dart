@@ -11,6 +11,7 @@ class Patient {
   final String lastVisit;
   final String avatarUrl;
   final PatientStatus status;
+  final String notes;
 
   const Patient({
     required this.id,
@@ -23,6 +24,7 @@ class Patient {
     required this.lastVisit,
     required this.avatarUrl,
     required this.status,
+    this.notes = '',
   });
 
   factory Patient.fromJson(Map<String, dynamic> json) {
@@ -85,6 +87,7 @@ class Patient {
           json['image']?.toString() ??
           'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
       status: statusValue,
+      notes: json['notes']?.toString() ?? json['clinicalNotes']?.toString() ?? '',
     );
   }
 
@@ -100,6 +103,7 @@ class Patient {
       'lastVisit': lastVisit,
       'image': avatarUrl,
       'status': status.name,
+      'notes': notes,
     };
   }
 }

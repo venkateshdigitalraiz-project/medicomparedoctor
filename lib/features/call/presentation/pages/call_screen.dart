@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import 'package:medicompare/core/routes/router_name.dart';
+import 'package:medicompare/features/appointment_notes/presentation/widgets/appointment_notes_bottom_sheet.dart';
 import '../../core/services/webrtc_service.dart';
 import '../../domain/entities/call_entity.dart';
 import '../bloc/call_bloc.dart';
@@ -459,6 +460,60 @@ class _CallScreenState extends State<CallScreen>
                               ),
                             ),
                           ],
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            final apptId =
+                                state.appointmentId ?? state.callId;
+                            showAppointmentNotesBottomSheet(
+                              context,
+                              appointmentId: apptId,
+                              patientName: state.peerName,
+                              subtitle: 'Active Call',
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF6C4CF1).withValues(alpha: 0.85),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 6,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Icon(
+                                  Icons.edit_note_rounded,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Notes',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),

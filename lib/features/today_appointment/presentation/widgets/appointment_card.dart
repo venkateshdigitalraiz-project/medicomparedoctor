@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medicompare/core/routes/router_name.dart';
 import 'package:medicompare/core/theme/app_theme.dart';
+import 'package:medicompare/features/appointment_notes/presentation/widgets/appointment_notes_bottom_sheet.dart';
 import 'package:medicompare/features/call/domain/entities/call_entity.dart';
 import 'package:medicompare/features/call/presentation/bloc/call_bloc.dart';
 import 'package:medicompare/features/call/presentation/bloc/call_event.dart';
@@ -45,12 +46,23 @@ class AppointmentCard extends StatelessWidget {
             targetUserAvatar: avatar,
             callerName: 'Doctor',
             callType: callType,
+            appointmentId: appointment.id,
           ),
         );
 
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const CallScreen()),
+    );
+  }
+
+  void _openNotes(BuildContext context) {
+    showAppointmentNotesBottomSheet(
+      context,
+      appointmentId: appointment.id,
+      patientName: appointment.displayName,
+      existingNotes: appointment.notes,
+      subtitle: appointment.formattedTime,
     );
   }
 
@@ -218,93 +230,208 @@ class AppointmentCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                        // Status badge + 3-dot popup menu
+                        // Status badge + 3-dot popup menu + Notes button
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             _StatusBadge(status: appointment.status),
-                            const SizedBox(height: 8),
-                            PopupMenuButton<String>(
-                              color: Colors.white,
-                              elevation: 8,
-                              offset: const Offset(-10, 25),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              onSelected: (value) {
-                                switch (value) {
-                                  case "details":
-                                    Navigator.pushNamed(
-                                      context,
-                                      RouteNames.todayApartmentdtls,
-                                      arguments: appointment.id,
-                                    );
-                                    break;
-                                  case "audio":
-                                    _startCall(context, CallType.audio);
-                                    break;
-                                  case "video":
-                                    _startCall(context, CallType.video);
-                                    break;
-                                }
-                              },
-                              itemBuilder: (context) => [
-                                const PopupMenuItem(
-                                  value: "details",
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.visibility_outlined,
-                                        size: 18,
-                                        color: Color(0xFF6C4DF6),
+                            const SizedBox(height: 6),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                InkWell(
+                                  onTap: () => _openNotes(context),
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 3,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF6C4DF6).withValues(alpha: 0.08),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: const Color(0xFF6C4DF6).withValues(alpha: 0.2),
                                       ),
-                                      SizedBox(width: 10),
-                                      Text("View Details"),
-                                    ],
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: const [
+                                        Icon(
+                                          Icons.edit_note_rounded,
+                                          size: 13,
+                                          color: Color(0xFF6C4DF6),
+                                        ),
+                                        SizedBox(width: 3),
+                                        Text(
+                                          'Notes',
+                                          style: TextStyle(
+                                            fontSize: 9,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: "Poppins",
+                                            color: Color(0xFF6C4DF6),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                                const PopupMenuItem(
-                                  value: "audio",
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.phone_outlined,
-                                        size: 18,
-                                        color: Color(0xFF16A34A),
-                                      ),
-                                      SizedBox(width: 10),
-                                      Text("Voice Call"),
-                                    ],
+                                const SizedBox(width: 4),
+                                PopupMenuButton<String>(
+                                  color: Colors.white,
+                                  elevation: 8,
+                                  offset: const Offset(-10, 25),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                ),
-                                const PopupMenuItem(
-                                  value: "video",
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.videocam_outlined,
-                                        size: 18,
-                                        color: Color(0xFF2563EB),
+                                  onSelected: (value) {
+                                    switch (value) {
+                                      case "notes":
+                                        _openNotes(context);
+                                        break;
+                                      case "details":
+                                        Navigator.pushNamed(
+                                          context,
+                                          RouteNames.todayApartmentdtls,
+                                          arguments: appointment.id,
+                                        );
+                                        break;
+                                      case "audio":
+                                        _startCall(context, CallType.audio);
+                                        break;
+                                      case "video":
+                                        _startCall(context, CallType.video);
+                                        break;
+                                    }
+                                  },
+                                  itemBuilder: (context) => [
+                                    const PopupMenuItem(
+                                      value: "notes",
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.edit_note_rounded,
+                                            size: 18,
+                                            color: Color(0xFF6C4DF6),
+                                          ),
+                                          SizedBox(width: 10),
+                                          Text("Doctor Notes"),
+                                        ],
                                       ),
-                                      SizedBox(width: 10),
-                                      Text("Video Call"),
-                                    ],
+                                    ),
+                                    const PopupMenuItem(
+                                      value: "details",
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.visibility_outlined,
+                                            size: 18,
+                                            color: Color(0xFF6C4DF6),
+                                          ),
+                                          SizedBox(width: 10),
+                                          Text("View Details"),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: "audio",
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.phone_outlined,
+                                            size: 18,
+                                            color: Color(0xFF16A34A),
+                                          ),
+                                          SizedBox(width: 10),
+                                          Text("Voice Call"),
+                                        ],
+                                      ),
+                                    ),
+                                    const PopupMenuItem(
+                                      value: "video",
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.videocam_outlined,
+                                            size: 18,
+                                            color: Color(0xFF2563EB),
+                                          ),
+                                          SizedBox(width: 10),
+                                          Text("Video Call"),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(4),
+                                    child: Icon(
+                                      Icons.more_vert_rounded,
+                                      size: 18,
+                                      color: Color(0xFF8A8A9C),
+                                    ),
                                   ),
                                 ),
                               ],
-                              child: const Padding(
-                                padding: EdgeInsets.all(4),
-                                child: Icon(
-                                  Icons.more_vert_rounded,
-                                  size: 20,
-                                  color: Color(0xFF8A8A9C),
-                                ),
-                              ),
                             ),
                           ],
                         ),
                       ],
                     ),
+                    if (appointment.notes.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      InkWell(
+                        onTap: () => _openNotes(context),
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF5F3FF),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFFDDD6FE)),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(top: 2),
+                                child: Icon(
+                                  Icons.description_outlined,
+                                  size: 13,
+                                  color: Color(0xFF6C4DF6),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  appointment.notes,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF4C1D95),
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Padding(
+                                padding: EdgeInsets.only(top: 2),
+                                child: Icon(
+                                  Icons.edit_outlined,
+                                  size: 12,
+                                  color: Color(0xFF6C4DF6),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                     if (appointment.message.isNotEmpty) ...[
                       const SizedBox(height: 10),
                       Container(

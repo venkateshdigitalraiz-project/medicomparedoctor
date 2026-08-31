@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medicompare/features/appointment_notes/presentation/widgets/appointment_notes_bottom_sheet.dart';
 import '../bloc/call_state.dart';
 import 'call_timer_text.dart';
 
@@ -76,7 +77,7 @@ class _CallMinimizedBubbleState extends State<CallMinimizedBubble>
                 child: Container(
                   width: 145,
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
+                    horizontal: 8,
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
@@ -119,10 +120,10 @@ class _CallMinimizedBubbleState extends State<CallMinimizedBubble>
                         child:
                             widget.state.peerAvatar == null
                                 ? const Icon(
-                                  Icons.person,
-                                  color: Colors.white,
-                                  size: 24,
-                                )
+                                    Icons.person,
+                                    color: Colors.white,
+                                    size: 24,
+                                  )
                                 : null,
                       ),
                       const SizedBox(height: 6),
@@ -165,38 +166,88 @@ class _CallMinimizedBubbleState extends State<CallMinimizedBubble>
                       ),
                       const SizedBox(height: 8),
 
-                      // Hang up mini button
-                      GestureDetector(
-                        onTap: widget.onHangUp,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFF3B30),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.call_end_rounded,
-                                color: Colors.white,
-                                size: 14,
+                      // Buttons Row: Notes & End
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Notes button
+                          GestureDetector(
+                            onTap: () {
+                              final apptId =
+                                  widget.state.appointmentId ??
+                                  widget.state.callId;
+                              showAppointmentNotesBottomSheet(
+                                context,
+                                appointmentId: apptId,
+                                patientName: widget.state.peerName,
+                                subtitle: 'Active Call',
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 5,
                               ),
-                              SizedBox(width: 4),
-                              Text(
-                                'End',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.25),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            ],
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.edit_note_rounded,
+                                    color: Colors.white,
+                                    size: 14,
+                                  ),
+                                  SizedBox(width: 2),
+                                  Text(
+                                    'Notes',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 5),
+                          // Hang up mini button
+                          GestureDetector(
+                            onTap: widget.onHangUp,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFF3B30),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.call_end_rounded,
+                                    color: Colors.white,
+                                    size: 13,
+                                  ),
+                                  SizedBox(width: 2),
+                                  Text(
+                                    'End',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

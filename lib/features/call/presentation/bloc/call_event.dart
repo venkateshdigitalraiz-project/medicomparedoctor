@@ -39,6 +39,7 @@ class StartOutgoingCallEvent extends CallEvent {
   final String? callerAvatar;
   final CallType callType;
   final String targetUserType;
+  final String? appointmentId;
 
   const StartOutgoingCallEvent({
     required this.targetUserId,
@@ -48,6 +49,7 @@ class StartOutgoingCallEvent extends CallEvent {
     this.callerAvatar,
     required this.callType,
     this.targetUserType = 'user',
+    this.appointmentId,
   });
 
   @override
@@ -59,6 +61,7 @@ class StartOutgoingCallEvent extends CallEvent {
     callerAvatar,
     callType,
     targetUserType,
+    appointmentId,
   ];
 }
 

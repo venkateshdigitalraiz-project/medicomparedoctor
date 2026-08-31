@@ -14,6 +14,7 @@ class TodayAppointmentEntity extends Equatable {
   final String preferredTime;
   final String status;
   final String avatarUrl;
+  final String notes;
 
   const TodayAppointmentEntity({
     required this.id,
@@ -28,6 +29,7 @@ class TodayAppointmentEntity extends Equatable {
     required this.preferredTime,
     required this.status,
     required this.avatarUrl,
+    this.notes = '',
   });
 
   String get displayName {
@@ -81,5 +83,6 @@ class TodayAppointmentEntity extends Equatable {
         preferredTime,
         status,
         avatarUrl,
+        notes,
       ];
 }

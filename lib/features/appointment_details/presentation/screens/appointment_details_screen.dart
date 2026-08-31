@@ -5,6 +5,7 @@ import 'package:medicompare/features/appointment_details/presentation/bloc/appoi
 import 'package:medicompare/features/appointment_details/presentation/bloc/appointment_event.dart';
 import 'package:medicompare/features/appointment_details/presentation/bloc/appointment_state.dart';
 import 'package:medicompare/features/appointment_details/presentation/widgets/appointment_widgets.dart';
+import 'package:medicompare/features/appointment_notes/presentation/widgets/appointment_notes_bottom_sheet.dart';
 import 'package:medicompare/core/routes/router_name.dart';
 
 class AppointmentDetailsScreen extends StatelessWidget {
@@ -203,9 +204,46 @@ class _AppointmentDetailsView extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 18),
-              Text(
-                'Clinical Notes',
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Clinical Notes',
+                    style: TextStyle(
+                      color: Colors.grey.shade700,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      showAppointmentNotesBottomSheet(
+                        context,
+                        appointmentId: appointment.id,
+                        patientName: appointment.patientName,
+                        subtitle: appointment.patientId,
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.edit_note_rounded, size: 16, color: Color(0xFF7C3AED)),
+                          SizedBox(width: 4),
+                          Text(
+                            'Add / Edit Note',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF7C3AED),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               ...appointment.clinicalNotes.map(

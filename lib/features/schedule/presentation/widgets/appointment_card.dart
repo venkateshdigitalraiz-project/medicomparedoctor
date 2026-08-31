@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:medicompare/common/common_add/appcolor.dart';
+import 'package:medicompare/features/appointment_notes/presentation/widgets/appointment_notes_bottom_sheet.dart';
 import 'package:medicompare/features/call/domain/entities/call_entity.dart';
 import 'package:medicompare/features/call/presentation/bloc/call_bloc.dart';
 import 'package:medicompare/features/call/presentation/bloc/call_event.dart';
@@ -77,12 +78,23 @@ class AppointmentCard extends StatelessWidget {
         targetUserAvatar: avatar,
         callerName: 'Doctor',
         callType: callType,
+        appointmentId: appointment.id,
       ),
     );
 
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const CallScreen()),
+    );
+  }
+
+  void _openNotes(BuildContext context) {
+    showAppointmentNotesBottomSheet(
+      context,
+      appointmentId: appointment.id,
+      patientName: appointment.patientName,
+      existingNotes: appointment.notes,
+      subtitle: appointment.time.isNotEmpty ? formatTime(appointment.time).replaceAll('\n', ' ') : null,
     );
   }
 
@@ -236,7 +248,9 @@ class AppointmentCard extends StatelessWidget {
                                     ),
                                     elevation: 6,
                                     onSelected: (value) {
-                                      if (value == 'audio') {
+                                      if (value == 'notes') {
+                                        _openNotes(context);
+                                      } else if (value == 'audio') {
                                         _startCall(context, CallType.audio);
                                       } else if (value == 'video') {
                                         _startCall(context, CallType.video);
@@ -244,6 +258,37 @@ class AppointmentCard extends StatelessWidget {
                                     },
                                     itemBuilder:
                                         (context) => [
+                                          PopupMenuItem<String>(
+                                            value: 'notes',
+                                            child: Row(
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.all(8),
+                                                  decoration: BoxDecoration(
+                                                    color: const Color(
+                                                      0xFF6C4CF1,
+                                                    ).withValues(alpha: 0.1),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.edit_note_rounded,
+                                                    size: 18,
+                                                    color: Color(0xFF6C4CF1),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                const Text(
+                                                  'Doctor Notes',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontFamily: 'Poppins',
+                                                    color: Color(0xFF1F2333),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                           PopupMenuItem<String>(
                                             value: 'audio',
                                             child: Row(

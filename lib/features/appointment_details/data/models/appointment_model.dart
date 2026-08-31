@@ -11,6 +11,7 @@ class TimelineEvent {
 }
 
 class AppointmentModel {
+  final String id;
   final String patientName;
   final String patientId;
   final String avatarUrl;
@@ -26,6 +27,7 @@ class AppointmentModel {
   final List<TimelineEvent> timeline;
 
   const AppointmentModel({
+    this.id = '',
     required this.patientName,
     required this.patientId,
     required this.avatarUrl,

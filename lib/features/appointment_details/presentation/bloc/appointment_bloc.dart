@@ -42,7 +42,8 @@ class AppointmentBloc extends Bloc<AppointmentEvent, AppointmentState> {
   }
 
   AppointmentModel _fetchMockAppointment(String appointmentId) {
-    return const AppointmentModel(
+    return AppointmentModel(
+      id: appointmentId,
       patientName: 'Emily Chen',
       patientId: 'MC-789019',
       avatarUrl: 'https://i.pravatar.cc/150?img=12',
